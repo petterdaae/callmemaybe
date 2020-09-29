@@ -7,6 +7,35 @@ import (
 type ProgramInput = []rune
 type Tokenizer = func(ProgramInput, int) (string, int, error)
 
+type lexItemKind int
+const (
+	number lexItemKind = iota
+	operator
+	parentheses
+)
+
+type lexer struct {
+	program string
+	currentIndex int
+}
+
+type lexItem struct {
+	kind lexItemKind
+	value string
+}
+
+func lexNumber(lexer *lexer) error {
+	return nil
+}
+
+func lexOperator(lexer *lexer) error {
+	return nil
+}
+
+func lexParentheses(lexer *lexer) error {
+	return nil
+}
+
 func Character(char rune) Tokenizer {
 	return func(program ProgramInput, index int) (string, int, error) {
 		if index >= len(program) {
