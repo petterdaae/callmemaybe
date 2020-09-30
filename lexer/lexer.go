@@ -29,6 +29,16 @@ const (
 	Ignore // Whitespace, comments, etc...
 )
 
+func (lexer *Lexer) AddLexItem(kind LexItemKind, value []rune) {
+	if kind != Ignore {
+		item := LexItem{
+			kind:  kind,
+			value: value,
+		}
+		lexer.lexItems = append(lexer.lexItems, item)
+	}
+}
+
 func New(program string) Lexer {
 	return Lexer{
 		program:      []rune(program),
@@ -106,11 +116,7 @@ func LexOneCharacter(char rune, kind LexItemKind) LexFunc {
 			return fmt.Errorf("can't lex at end of input")
 		}
 		if lexer.program[lexer.currentIndex] == char {
-			item := LexItem{
-				kind:  kind,
-				value: []rune{char},
-			}
-			lexer.lexItems = append(lexer.lexItems, item)
+			lexer.AddLexItem(kind, []rune{char})
 			lexer.currentIndex++
 			return nil
 		}
@@ -131,11 +137,7 @@ func LexNumber(lexer *Lexer) error {
 	if len(result) == 0 {
 		return fmt.Errorf("did not find a number to lex")
 	}
-	item := LexItem{
-		kind:  Number,
-		value: result,
-	}
-	lexer.lexItems = append(lexer.lexItems, item)
+	lexer.AddLexItem(Number, result)
 	lexer.currentIndex += len(result)
 	return nil
 }

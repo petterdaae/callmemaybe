@@ -146,13 +146,6 @@ func TestLexParenthesesTrailingSpace(t *testing.T) {
 func TestLexWhiteSpaceSimple(t *testing.T) {
 	lexer := New(" \t\n")
 	LexWhiteSpace(&lexer)
-	expected := expectedLexItems(
-		[]LexItemKind{Ignore, Ignore, Ignore},
-		[]string{" ", "\t", "\n"},
-	)
-	if !reflect.DeepEqual(lexer.lexItems, expected) {
-		t.Error()
-	}
 	if lexer.currentIndex != 3 {
 		t.Error()
 	}
@@ -161,13 +154,6 @@ func TestLexWhiteSpaceSimple(t *testing.T) {
 func TestLexWhiteSpaceTrailingNumber(t *testing.T) {
 	lexer := New("   1")
 	LexWhiteSpace(&lexer)
-	expected := expectedLexItems(
-		[]LexItemKind{Ignore, Ignore, Ignore},
-		[]string{" ", " ", " "},
-	)
-	if !reflect.DeepEqual(lexer.lexItems, expected) {
-		t.Error()
-	}
 	if lexer.currentIndex != 3 {
 		t.Error()
 	}
