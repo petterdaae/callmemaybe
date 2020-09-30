@@ -10,7 +10,7 @@ func expectedLexItems(kinds []LexItemKind, values []string) []LexItem {
 	for i := 0; i < len(kinds) && i < len(values); i++ {
 		item := LexItem{
 			Kind:  kinds[i],
-			Value: []rune(values[i]),
+			value: []rune(values[i]),
 		}
 		result = append(result, item)
 	}

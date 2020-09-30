@@ -17,7 +17,7 @@ type lexerState struct {
 
 type LexItem struct {
 	Kind  LexItemKind
-	Value []rune
+	value []rune
 }
 
 type lexFunc = func(*lexerState) error
@@ -29,11 +29,19 @@ const (
 	Ignore // Whitespace, comments, etc...
 )
 
+func (item LexItem) Equals(value string) bool {
+	return string(item.value) == value
+}
+
+func (item LexItem) Value() string {
+	return string(item.value)
+}
+
 func (lexer *lexerState) addLexItem(kind LexItemKind, value []rune) {
 	if kind != Ignore {
 		item := LexItem{
 			Kind:  kind,
-			Value: value,
+			value: value,
 		}
 		lexer.lexItems = append(lexer.lexItems, item)
 	}

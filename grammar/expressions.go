@@ -1,35 +1,43 @@
 package grammar
 
-type Expression interface{
+type Exp interface{
 	Evaluate() int
 }
 
 type ExpPlus struct {
-	Left  Expression
-	Right Expression
+	Left  Exp
+	Right Exp
 }
 
 type ExpMultiply struct {
-	Left  Expression
-	Right Expression
+	Left  Exp
+	Right Exp
 }
 
 type ExpParentheses struct {
-	Inside Expression
+	Inside Exp
 }
 
-func (exp *ExpPlus) Evaluate() int {
+type ExpNum struct {
+	Value int
+}
+
+func (exp ExpPlus) Evaluate() int {
 	left := exp.Left.Evaluate()
 	right := exp.Right.Evaluate()
 	return left + right
 }
 
-func (exp *ExpMultiply) Evaluate() int {
+func (exp ExpMultiply) Evaluate() int {
 	left := exp.Left.Evaluate()
 	right := exp.Right.Evaluate()
 	return left * right
 }
 
-func (exp *ExpParentheses) Evaluate() int {
+func (exp ExpParentheses) Evaluate() int {
 	return exp.Inside.Evaluate()
+}
+
+func (exp ExpNum) Evaluate() int {
+	return exp.Value
 }
