@@ -19,6 +19,8 @@ type LexItem struct {
 	value []rune
 }
 
+type LexFunc = func(*Lexer) error
+
 const (
 	Number LexItemKind = iota
 	Operator
@@ -37,7 +39,9 @@ func New(program string) Lexer {
 func Lex(program string) ([]LexItem, error) {
 	lexer := New(program)
 	for {
-		err := TryOne(&lexer)
+		lexers := []func(*Lexer) error{LexNumber, LexOperator, LexParentheses, LexWhiteSpace}
+		tryOne := OneOf(lexers)
+		err := tryOne(&lexer)
 		if err != nil {
 			if lexer.currentIndex < len(program) {
 				return nil, fmt.Errorf("lexer failed at index %d: %w", lexer.currentIndex, err)
@@ -48,15 +52,36 @@ func Lex(program string) ([]LexItem, error) {
 	return lexer.lexItems, nil
 }
 
-func TryOne(lexer *Lexer) error {
-	all := []func(*Lexer) error{LexNumber, LexOperator, LexParentheses, LexWhiteSpace}
-	for _, lex := range all {
-		err := lex(lexer)
-		if err != nil {
-			return nil
+func OneOf(lexers []LexFunc) LexFunc {
+	return func(lexer *Lexer) error {
+		for _, lex := range lexers {
+			err := lex(lexer)
+			if err != nil {
+				return nil
+			}
 		}
+		return fmt.Errorf("all lexers failed")
 	}
-	return fmt.Errorf("all lexers failed")
+}
+
+func LexOneOfCharacters(chars []rune, kind LexItemKind) LexFunc {
+	return func(lexer *Lexer) error {
+		if lexer.currentIndex >= len(lexer.program) {
+			return fmt.Errorf("can't lex at end of input")
+		}
+		for _, char := range chars {
+			if lexer.program[lexer.currentIndex] == char {
+				item := LexItem{
+					kind: kind,
+					value: []rune{char},
+				}
+				lexer.lexItems = append(lexer.lexItems, item)
+				lexer.currentIndex++
+				return nil
+			}
+		}
+		return fmt.Errorf("did not find a character to lex at current index")
+	}
 }
 
 func LexNumber(lexer *Lexer) error {
@@ -82,27 +107,14 @@ func LexNumber(lexer *Lexer) error {
 }
 
 func LexOperator(lexer *Lexer) error {
-	if lexer.currentIndex >= len(lexer.program) {
-		return fmt.Errorf("can't lex at end of input")
-	}
-
-	for _, operator := range lexer.operators {
-		if lexer.program[lexer.currentIndex] == operator {
-			item := LexItem{
-				kind: Operator,
-				value: []rune{operator},
-			}
-			lexer.lexItems = append(lexer.lexItems, item)
-			lexer.currentIndex++
-			return nil
-		}
-	}
-
-	return fmt.Errorf("did not find an operator to lex at current index")
+	lex := LexOneOfCharacters(lexer.operators, Operator)
+	return lex(lexer)
 }
 
 func LexParentheses(lexer *Lexer) error {
-	return nil
+	parentheses := []rune{'(', ')'}
+	lex := LexOneOfCharacters(parentheses, Parentheses)
+	return lex(lexer)
 }
 
 func LexWhiteSpace(lexer *Lexer) error {

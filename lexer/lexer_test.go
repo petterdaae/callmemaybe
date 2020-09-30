@@ -102,3 +102,42 @@ func TestLexOperatorTrailingSpace(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestLexParenthesesSimple(t *testing.T) {
+	lexer := New(")")
+	LexParentheses(&lexer)
+	expected := expectedLexItems(
+		[]LexItemKind{Parentheses},
+		[]string{")"},
+	)
+	if !reflect.DeepEqual(lexer.lexItems, expected) {
+		t.Error()
+	}
+	if lexer.currentIndex != 1 {
+		t.Error()
+	}
+}
+
+func TestLexParenthesesFailsOnEmpty(t *testing.T) {
+	lexer := New("")
+	err := LexParentheses(&lexer)
+	if err == nil {
+		t.Error()
+	}
+}
+
+
+func TestLexParenthesesTrailingSpace(t *testing.T) {
+	lexer := New("(   ")
+	LexParentheses(&lexer)
+	expected := expectedLexItems(
+		[]LexItemKind{Parentheses},
+		[]string{"("},
+	)
+	if !reflect.DeepEqual(lexer.lexItems, expected) {
+		t.Error()
+	}
+	if lexer.currentIndex != 1 {
+		t.Error()
+	}
+}
