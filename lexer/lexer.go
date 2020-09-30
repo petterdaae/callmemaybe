@@ -11,6 +11,7 @@ type Lexer struct {
 	program      []rune
 	currentIndex int
 	lexItems     []LexItem
+	operators    []rune
 }
 
 type LexItem struct {
@@ -26,14 +27,15 @@ const (
 
 func New(program string) Lexer {
 	return Lexer{
-		program: []rune(program),
+		program:      []rune(program),
 		currentIndex: 0,
-		lexItems: []LexItem{},
+		lexItems:     []LexItem{},
+		operators:    []rune{'+', '*'},
 	}
 }
 
 func Lex(program string) ([]LexItem, error) {
-	lexer :=  New(program)
+	lexer := New(program)
 	for {
 		err := TryOne(&lexer)
 		if err != nil {
@@ -71,7 +73,7 @@ func LexNumber(lexer *Lexer) error {
 		return fmt.Errorf("did not find a number to lex")
 	}
 	item := LexItem{
-		kind: Number,
+		kind:  Number,
 		value: result,
 	}
 	lexer.lexItems = append(lexer.lexItems, item)
@@ -80,7 +82,23 @@ func LexNumber(lexer *Lexer) error {
 }
 
 func LexOperator(lexer *Lexer) error {
-	return nil
+	if lexer.currentIndex >= len(lexer.program) {
+		return fmt.Errorf("can't lex at end of input")
+	}
+
+	for _, operator := range lexer.operators {
+		if lexer.program[lexer.currentIndex] == operator {
+			item := LexItem{
+				kind: Operator,
+				value: []rune{operator},
+			}
+			lexer.lexItems = append(lexer.lexItems, item)
+			lexer.currentIndex++
+			return nil
+		}
+	}
+
+	return fmt.Errorf("did not find an operator to lex at current index")
 }
 
 func LexParentheses(lexer *Lexer) error {

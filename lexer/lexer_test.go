@@ -63,3 +63,42 @@ func TestLexNumberFailsOnEmpty(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestLexOperatorSimple(t *testing.T) {
+	lexer := New("+")
+	LexOperator(&lexer)
+	expected := expectedLexItems(
+		[]LexItemKind{Operator},
+		[]string{"+"},
+	)
+	if !reflect.DeepEqual(lexer.lexItems, expected) {
+		t.Error()
+	}
+	if lexer.currentIndex != 1 {
+		t.Error()
+	}
+}
+
+func TestLexOperatorFailsOnEmpty(t *testing.T) {
+	lexer := New("")
+	err := LexOperator(&lexer)
+	if err == nil {
+		t.Error()
+	}
+}
+
+
+func TestLexOperatorTrailingSpace(t *testing.T) {
+	lexer := New("*   ")
+	LexOperator(&lexer)
+	expected := expectedLexItems(
+		[]LexItemKind{Operator},
+		[]string{"*"},
+	)
+	if !reflect.DeepEqual(lexer.lexItems, expected) {
+		t.Error()
+	}
+	if lexer.currentIndex != 1 {
+		t.Error()
+	}
+}
