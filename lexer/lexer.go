@@ -7,7 +7,7 @@ import (
 
 type LexItemKind int
 
-type Lexer struct {
+type lexerState struct {
 	program      []rune
 	currentIndex int
 	lexItems     []LexItem
@@ -16,11 +16,11 @@ type Lexer struct {
 }
 
 type LexItem struct {
-	kind  LexItemKind
-	value []rune
+	Kind  LexItemKind
+	Value []rune
 }
 
-type LexFunc = func(*Lexer) error
+type lexFunc = func(*lexerState) error
 
 const (
 	Number LexItemKind = iota
@@ -29,18 +29,18 @@ const (
 	Ignore // Whitespace, comments, etc...
 )
 
-func (lexer *Lexer) AddLexItem(kind LexItemKind, value []rune) {
+func (lexer *lexerState) addLexItem(kind LexItemKind, value []rune) {
 	if kind != Ignore {
 		item := LexItem{
-			kind:  kind,
-			value: value,
+			Kind:  kind,
+			Value: value,
 		}
 		lexer.lexItems = append(lexer.lexItems, item)
 	}
 }
 
-func New(program string) Lexer {
-	return Lexer{
+func new(program string) lexerState {
+	return lexerState{
 		program:      []rune(program),
 		currentIndex: 0,
 		lexItems:     []LexItem{},
@@ -50,26 +50,22 @@ func New(program string) Lexer {
 }
 
 func Lex(program string) ([]LexItem, error) {
-	lexer := New(program)
-	for {
-		lexers := []func(*Lexer) error{LexNumber, LexOperator, LexParentheses, LexWhiteSpace}
-		tryOne := OneOf(lexers)
-		err := tryOne(&lexer)
-		if err != nil {
-			if lexer.currentIndex < len(program) {
-				return nil, fmt.Errorf("lexer failed at index %d: %w", lexer.currentIndex, err)
-			}
-			break
-		}
+	lexer := new(program)
+	lexers := []lexFunc{lexNumber, lexOperator, lexParentheses, lexWhiteSpace}
+	tryOne := oneOf(lexers)
+	lex := oneOrMany(tryOne)
+	err := lex(&lexer)
+	if err != nil {
+		return nil, fmt.Errorf("lexer failed: %w", err)
 	}
 	return lexer.lexItems, nil
 }
 
-func OneOf(lexers []LexFunc) LexFunc {
-	return func(lexer *Lexer) error {
+func oneOf(lexers []lexFunc) lexFunc {
+	return func(lexer *lexerState) error {
 		for _, lex := range lexers {
 			err := lex(lexer)
-			if err != nil {
+			if err == nil {
 				return nil
 			}
 		}
@@ -77,8 +73,8 @@ func OneOf(lexers []LexFunc) LexFunc {
 	}
 }
 
-func OneOrMany(lex LexFunc) LexFunc {
-	return func(lexer *Lexer) error {
+func oneOrMany(lex lexFunc) lexFunc {
+	return func(lexer *lexerState) error {
 		count := 0
 		for {
 			err := lex(lexer)
@@ -94,13 +90,13 @@ func OneOrMany(lex LexFunc) LexFunc {
 	}
 }
 
-func LexOneOfCharacters(chars []rune, kind LexItemKind) LexFunc {
-	return func(lexer *Lexer) error {
+func lexOneOfCharacters(chars []rune, kind LexItemKind) lexFunc {
+	return func(lexer *lexerState) error {
 		if lexer.currentIndex >= len(lexer.program) {
 			return fmt.Errorf("can't lex at end of input")
 		}
 		for _, char := range chars {
-			lex := LexOneCharacter(char, kind)
+			lex := lexOneCharacter(char, kind)
 			err := lex(lexer)
 			if err == nil {
 				return nil
@@ -110,13 +106,13 @@ func LexOneOfCharacters(chars []rune, kind LexItemKind) LexFunc {
 	}
 }
 
-func LexOneCharacter(char rune, kind LexItemKind) LexFunc {
-	return func(lexer *Lexer) error {
+func lexOneCharacter(char rune, kind LexItemKind) lexFunc {
+	return func(lexer *lexerState) error {
 		if lexer.currentIndex >= len(lexer.program) {
 			return fmt.Errorf("can't lex at end of input")
 		}
 		if lexer.program[lexer.currentIndex] == char {
-			lexer.AddLexItem(kind, []rune{char})
+			lexer.addLexItem(kind, []rune{char})
 			lexer.currentIndex++
 			return nil
 		}
@@ -124,7 +120,7 @@ func LexOneCharacter(char rune, kind LexItemKind) LexFunc {
 	}
 }
 
-func LexNumber(lexer *Lexer) error {
+func lexNumber(lexer *lexerState) error {
 	var result []rune
 	for i := lexer.currentIndex; i < len(lexer.program); i++ {
 		rune := lexer.program[i]
@@ -137,24 +133,24 @@ func LexNumber(lexer *Lexer) error {
 	if len(result) == 0 {
 		return fmt.Errorf("did not find a number to lex")
 	}
-	lexer.AddLexItem(Number, result)
+	lexer.addLexItem(Number, result)
 	lexer.currentIndex += len(result)
 	return nil
 }
 
-func LexOperator(lexer *Lexer) error {
-	lex := LexOneOfCharacters(lexer.operators, Operator)
+func lexOperator(lexer *lexerState) error {
+	lex := lexOneOfCharacters(lexer.operators, Operator)
 	return lex(lexer)
 }
 
-func LexParentheses(lexer *Lexer) error {
+func lexParentheses(lexer *lexerState) error {
 	parentheses := []rune{'(', ')'}
-	lex := LexOneOfCharacters(parentheses, Parentheses)
+	lex := lexOneOfCharacters(parentheses, Parentheses)
 	return lex(lexer)
 }
 
-func LexWhiteSpace(lexer *Lexer) error {
-	lexOne := LexOneOfCharacters(lexer.whitespace, Ignore)
-	lexAll := OneOrMany(lexOne)
+func lexWhiteSpace(lexer *lexerState) error {
+	lexOne := lexOneOfCharacters(lexer.whitespace, Ignore)
+	lexAll := oneOrMany(lexOne)
 	return lexAll(lexer)
 }

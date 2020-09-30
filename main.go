@@ -1,5 +1,9 @@
 package main
 
+import (
+	"lang/lexer"
+)
+
 func main() {
-	println("Hello world!")
+	lexer.Lex("1 + 2 + 3 + 4")
 }

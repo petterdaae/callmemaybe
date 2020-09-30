@@ -9,8 +9,8 @@ func expectedLexItems(kinds []LexItemKind, values []string) []LexItem {
 	var result []LexItem
 	for i := 0; i < len(kinds) && i < len(values); i++ {
 		item := LexItem{
-			kind:  kinds[i],
-			value: []rune(values[i]),
+			Kind:  kinds[i],
+			Value: []rune(values[i]),
 		}
 		result = append(result, item)
 	}
@@ -18,8 +18,8 @@ func expectedLexItems(kinds []LexItemKind, values []string) []LexItem {
 }
 
 func TestLexNumberSimple(t *testing.T) {
-	lexer := New("123")
-	LexNumber(&lexer)
+	lexer := new("123")
+	lexNumber(&lexer)
 	expected := expectedLexItems(
 		[]LexItemKind{Number},
 		[]string{"123"},
@@ -33,8 +33,8 @@ func TestLexNumberSimple(t *testing.T) {
 }
 
 func TestLexNumberTrailingSpace(t *testing.T) {
-	lexer := New("123   ")
-	LexNumber(&lexer)
+	lexer := new("123   ")
+	lexNumber(&lexer)
 	expected := expectedLexItems(
 		[]LexItemKind{Number},
 		[]string{"123"},
@@ -49,24 +49,24 @@ func TestLexNumberTrailingSpace(t *testing.T) {
 
 
 func TestLexNumberFails(t *testing.T) {
-	lexer := New(" 123")
-	err := LexNumber(&lexer)
+	lexer := new(" 123")
+	err := lexNumber(&lexer)
 	if err == nil {
 		t.Error()
 	}
 }
 
 func TestLexNumberFailsOnEmpty(t *testing.T) {
-	lexer := New("")
-	err := LexNumber(&lexer)
+	lexer := new("")
+	err := lexNumber(&lexer)
 	if err == nil {
 		t.Error()
 	}
 }
 
 func TestLexOperatorSimple(t *testing.T) {
-	lexer := New("+")
-	LexOperator(&lexer)
+	lexer := new("+")
+	lexOperator(&lexer)
 	expected := expectedLexItems(
 		[]LexItemKind{Operator},
 		[]string{"+"},
@@ -80,8 +80,8 @@ func TestLexOperatorSimple(t *testing.T) {
 }
 
 func TestLexOperatorFailsOnEmpty(t *testing.T) {
-	lexer := New("")
-	err := LexOperator(&lexer)
+	lexer := new("")
+	err := lexOperator(&lexer)
 	if err == nil {
 		t.Error()
 	}
@@ -89,8 +89,8 @@ func TestLexOperatorFailsOnEmpty(t *testing.T) {
 
 
 func TestLexOperatorTrailingSpace(t *testing.T) {
-	lexer := New("*   ")
-	LexOperator(&lexer)
+	lexer := new("*   ")
+	lexOperator(&lexer)
 	expected := expectedLexItems(
 		[]LexItemKind{Operator},
 		[]string{"*"},
@@ -104,8 +104,8 @@ func TestLexOperatorTrailingSpace(t *testing.T) {
 }
 
 func TestLexParenthesesSimple(t *testing.T) {
-	lexer := New(")")
-	LexParentheses(&lexer)
+	lexer := new(")")
+	lexParentheses(&lexer)
 	expected := expectedLexItems(
 		[]LexItemKind{Parentheses},
 		[]string{")"},
@@ -119,8 +119,8 @@ func TestLexParenthesesSimple(t *testing.T) {
 }
 
 func TestLexParenthesesFailsOnEmpty(t *testing.T) {
-	lexer := New("")
-	err := LexParentheses(&lexer)
+	lexer := new("")
+	err := lexParentheses(&lexer)
 	if err == nil {
 		t.Error()
 	}
@@ -128,8 +128,8 @@ func TestLexParenthesesFailsOnEmpty(t *testing.T) {
 
 
 func TestLexParenthesesTrailingSpace(t *testing.T) {
-	lexer := New("(   ")
-	LexParentheses(&lexer)
+	lexer := new("(   ")
+	lexParentheses(&lexer)
 	expected := expectedLexItems(
 		[]LexItemKind{Parentheses},
 		[]string{"("},
@@ -144,16 +144,16 @@ func TestLexParenthesesTrailingSpace(t *testing.T) {
 
 
 func TestLexWhiteSpaceSimple(t *testing.T) {
-	lexer := New(" \t\n")
-	LexWhiteSpace(&lexer)
+	lexer := new(" \t\n")
+	lexWhiteSpace(&lexer)
 	if lexer.currentIndex != 3 {
 		t.Error()
 	}
 }
 
 func TestLexWhiteSpaceTrailingNumber(t *testing.T) {
-	lexer := New("   1")
-	LexWhiteSpace(&lexer)
+	lexer := new("   1")
+	lexWhiteSpace(&lexer)
 	if lexer.currentIndex != 3 {
 		t.Error()
 	}
@@ -161,17 +161,50 @@ func TestLexWhiteSpaceTrailingNumber(t *testing.T) {
 
 
 func TestLexWhiteSpaceFails(t *testing.T) {
-	lexer := New("123 ")
-	err := LexWhiteSpace(&lexer)
+	lexer := new("123 ")
+	err := lexWhiteSpace(&lexer)
 	if err == nil {
 		t.Error()
 	}
 }
 
 func TestLexWhiteSpaceFailsOnEmpty(t *testing.T) {
-	lexer := New("")
-	err := LexWhiteSpace(&lexer)
+	lexer := new("")
+	err := lexWhiteSpace(&lexer)
 	if err == nil {
+		t.Error()
+	}
+}
+
+func TestLexCase1(t *testing.T) {
+	result, _ := Lex("123 123 ( *")
+	expected := expectedLexItems(
+		[]LexItemKind{Number, Number, Parentheses, Operator},
+		[]string{"123", "123", "(", "*"},
+	)
+	if !reflect.DeepEqual(result, expected) {
+		t.Error()
+	}
+}
+
+func TestLexCase2(t *testing.T) {
+	result, _ := Lex("  \n\t 1234*12+(123\t*2)  \n")
+	expected := expectedLexItems(
+		[]LexItemKind{Number, Operator, Number, Operator, Parentheses, Number, Operator, Number, Parentheses},
+		[]string{"1234", "*", "12", "+", "(", "123", "*", "2", ")"},
+	)
+	if !reflect.DeepEqual(result, expected) {
+		t.Error()
+	}
+}
+
+func TestLexCase3(t *testing.T) {
+	result, _ := Lex("1+(2*3)+4")
+	expected := expectedLexItems(
+		[]LexItemKind{Number, Operator, Parentheses, Number, Operator, Number, Parentheses, Operator, Number},
+		[]string{"1", "+", "(", "2", "*", "3", ")", "+", "4"},
+	)
+	if !reflect.DeepEqual(result, expected) {
 		t.Error()
 	}
 }
