@@ -12,6 +12,7 @@ type Lexer struct {
 	currentIndex int
 	lexItems     []LexItem
 	operators    []rune
+	whitespace   []rune
 }
 
 type LexItem struct {
@@ -25,6 +26,7 @@ const (
 	Number LexItemKind = iota
 	Operator
 	Parentheses
+	Ignore // Whitespace, comments, etc...
 )
 
 func New(program string) Lexer {
@@ -33,6 +35,7 @@ func New(program string) Lexer {
 		currentIndex: 0,
 		lexItems:     []LexItem{},
 		operators:    []rune{'+', '*'},
+		whitespace:   []rune{' ', '\n', '\t'},
 	}
 }
 
@@ -64,23 +67,54 @@ func OneOf(lexers []LexFunc) LexFunc {
 	}
 }
 
+func OneOrMany(lex LexFunc) LexFunc {
+	return func(lexer *Lexer) error {
+		count := 0
+		for {
+			err := lex(lexer)
+			if err != nil {
+				break
+			}
+			count++
+		}
+		if count == 0 {
+			return fmt.Errorf("lexer did not run one or many times")
+		}
+		return nil
+	}
+}
+
 func LexOneOfCharacters(chars []rune, kind LexItemKind) LexFunc {
 	return func(lexer *Lexer) error {
 		if lexer.currentIndex >= len(lexer.program) {
 			return fmt.Errorf("can't lex at end of input")
 		}
 		for _, char := range chars {
-			if lexer.program[lexer.currentIndex] == char {
-				item := LexItem{
-					kind: kind,
-					value: []rune{char},
-				}
-				lexer.lexItems = append(lexer.lexItems, item)
-				lexer.currentIndex++
+			lex := LexOneCharacter(char, kind)
+			err := lex(lexer)
+			if err == nil {
 				return nil
 			}
 		}
 		return fmt.Errorf("did not find a character to lex at current index")
+	}
+}
+
+func LexOneCharacter(char rune, kind LexItemKind) LexFunc {
+	return func(lexer *Lexer) error {
+		if lexer.currentIndex >= len(lexer.program) {
+			return fmt.Errorf("can't lex at end of input")
+		}
+		if lexer.program[lexer.currentIndex] == char {
+			item := LexItem{
+				kind:  kind,
+				value: []rune{char},
+			}
+			lexer.lexItems = append(lexer.lexItems, item)
+			lexer.currentIndex++
+			return nil
+		}
+		return fmt.Errorf("failed to lex character")
 	}
 }
 
@@ -118,5 +152,7 @@ func LexParentheses(lexer *Lexer) error {
 }
 
 func LexWhiteSpace(lexer *Lexer) error {
-	return nil
+	lexOne := LexOneOfCharacters(lexer.whitespace, Ignore)
+	lexAll := OneOrMany(lexOne)
+	return lexAll(lexer)
 }

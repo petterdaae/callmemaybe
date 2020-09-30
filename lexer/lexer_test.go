@@ -141,3 +141,51 @@ func TestLexParenthesesTrailingSpace(t *testing.T) {
 		t.Error()
 	}
 }
+
+
+func TestLexWhiteSpaceSimple(t *testing.T) {
+	lexer := New(" \t\n")
+	LexWhiteSpace(&lexer)
+	expected := expectedLexItems(
+		[]LexItemKind{Ignore, Ignore, Ignore},
+		[]string{" ", "\t", "\n"},
+	)
+	if !reflect.DeepEqual(lexer.lexItems, expected) {
+		t.Error()
+	}
+	if lexer.currentIndex != 3 {
+		t.Error()
+	}
+}
+
+func TestLexWhiteSpaceTrailingNumber(t *testing.T) {
+	lexer := New("   1")
+	LexWhiteSpace(&lexer)
+	expected := expectedLexItems(
+		[]LexItemKind{Ignore, Ignore, Ignore},
+		[]string{" ", " ", " "},
+	)
+	if !reflect.DeepEqual(lexer.lexItems, expected) {
+		t.Error()
+	}
+	if lexer.currentIndex != 3 {
+		t.Error()
+	}
+}
+
+
+func TestLexWhiteSpaceFails(t *testing.T) {
+	lexer := New("123 ")
+	err := LexWhiteSpace(&lexer)
+	if err == nil {
+		t.Error()
+	}
+}
+
+func TestLexWhiteSpaceFailsOnEmpty(t *testing.T) {
+	lexer := New("")
+	err := LexWhiteSpace(&lexer)
+	if err == nil {
+		t.Error()
+	}
+}
