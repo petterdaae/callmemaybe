@@ -1,11 +1,11 @@
-package lexer
+package tokenizer
 
 import (
 	"reflect"
 	"testing"
 )
 
-func expectedLexItems(kinds []LexItemKind, values []string) []LexItem {
+func expectedLexItems(kinds []Token, values []string) []LexItem {
 	var result []LexItem
 	for i := 0; i < len(kinds) && i < len(values); i++ {
 		item := LexItem{
@@ -21,7 +21,7 @@ func TestLexNumberSimple(t *testing.T) {
 	lexer := new("123")
 	lexNumber(&lexer)
 	expected := expectedLexItems(
-		[]LexItemKind{Number},
+		[]Token{Number},
 		[]string{"123"},
 	)
 	if !reflect.DeepEqual(lexer.lexItems, expected) {
@@ -36,7 +36,7 @@ func TestLexNumberTrailingSpace(t *testing.T) {
 	lexer := new("123   ")
 	lexNumber(&lexer)
 	expected := expectedLexItems(
-		[]LexItemKind{Number},
+		[]Token{Number},
 		[]string{"123"},
 	)
 	if !reflect.DeepEqual(lexer.lexItems, expected) {
@@ -68,7 +68,7 @@ func TestLexOperatorSimple(t *testing.T) {
 	lexer := new("+")
 	lexOperator(&lexer)
 	expected := expectedLexItems(
-		[]LexItemKind{Operator},
+		[]Token{Operator},
 		[]string{"+"},
 	)
 	if !reflect.DeepEqual(lexer.lexItems, expected) {
@@ -92,7 +92,7 @@ func TestLexOperatorTrailingSpace(t *testing.T) {
 	lexer := new("*   ")
 	lexOperator(&lexer)
 	expected := expectedLexItems(
-		[]LexItemKind{Operator},
+		[]Token{Operator},
 		[]string{"*"},
 	)
 	if !reflect.DeepEqual(lexer.lexItems, expected) {
@@ -107,7 +107,7 @@ func TestLexParenthesesSimple(t *testing.T) {
 	lexer := new(")")
 	lexParentheses(&lexer)
 	expected := expectedLexItems(
-		[]LexItemKind{Parentheses},
+		[]Token{Parentheses},
 		[]string{")"},
 	)
 	if !reflect.DeepEqual(lexer.lexItems, expected) {
@@ -131,7 +131,7 @@ func TestLexParenthesesTrailingSpace(t *testing.T) {
 	lexer := new("(   ")
 	lexParentheses(&lexer)
 	expected := expectedLexItems(
-		[]LexItemKind{Parentheses},
+		[]Token{Parentheses},
 		[]string{"("},
 	)
 	if !reflect.DeepEqual(lexer.lexItems, expected) {
@@ -179,7 +179,7 @@ func TestLexWhiteSpaceFailsOnEmpty(t *testing.T) {
 func TestLexCase1(t *testing.T) {
 	result, _ := Lex("123 123 ( *")
 	expected := expectedLexItems(
-		[]LexItemKind{Number, Number, Parentheses, Operator},
+		[]Token{Number, Number, Parentheses, Operator},
 		[]string{"123", "123", "(", "*"},
 	)
 	if !reflect.DeepEqual(result, expected) {
@@ -190,7 +190,7 @@ func TestLexCase1(t *testing.T) {
 func TestLexCase2(t *testing.T) {
 	result, _ := Lex("  \n\t 1234*12+(123\t*2)  \n")
 	expected := expectedLexItems(
-		[]LexItemKind{Number, Operator, Number, Operator, Parentheses, Number, Operator, Number, Parentheses},
+		[]Token{Number, Operator, Number, Operator, Parentheses, Number, Operator, Number, Parentheses},
 		[]string{"1234", "*", "12", "+", "(", "123", "*", "2", ")"},
 	)
 	if !reflect.DeepEqual(result, expected) {
@@ -201,7 +201,7 @@ func TestLexCase2(t *testing.T) {
 func TestLexCase3(t *testing.T) {
 	result, _ := Lex("1+(2*3)+4")
 	expected := expectedLexItems(
-		[]LexItemKind{Number, Operator, Parentheses, Number, Operator, Number, Parentheses, Operator, Number},
+		[]Token{Number, Operator, Parentheses, Number, Operator, Number, Parentheses, Operator, Number},
 		[]string{"1", "+", "(", "2", "*", "3", ")", "+", "4"},
 	)
 	if !reflect.DeepEqual(result, expected) {

@@ -1,66 +1,93 @@
 package parser
 
 import (
-	"fmt"
 	"lang/grammar"
-	"lang/lexer"
+	"lang/tokenizer"
 	"strconv"
 )
 
-type parserState struct {
-	program           []lexer.LexItem
-	currentIndex      int
-	currentExpression grammar.Exp
+type Parser struct {
+	tokenizer tokenizer.Tokenizer
+	buffer    struct {
+		kind  tokenizer.Token
+		token string
+		full  bool
+	}
 }
 
-func Parse(program []lexer.LexItem) (grammar.Exp, error) {
-	state := parserState{
-		program: program,
-		currentIndex: 0,
-		currentExpression: nil,
+func (parser *Parser) read() (tokenizer.Token, string) {
+	if parser.buffer.full {
+		parser.buffer.full = false
+		return parser.buffer.kind, parser.buffer.token
 	}
 
-	for {
-		if state.currentIndex >= len(state.program) {
-			return state.currentExpression, nil // empty program or end of program
+	kind, token := parser.tokenizer.NextToken()
+	parser.buffer.kind = kind
+	parser.buffer.token = token
+
+	return kind, token
+}
+
+func (parser *Parser) unread() {
+	parser.buffer.full = true
+}
+
+func (parser *Parser) readIgnoreWhiteSpace() (tokenizer.Token, string) {
+	kind, token := parser.read()
+	if kind == tokenizer.Whitespace {
+		kind, token = parser.read()
+	}
+	return kind, token
+}
+
+func (parser *Parser) Parse() grammar.Exp {
+	kind, _ := parser.readIgnoreWhiteSpace()
+
+	switch kind {
+	case tokenizer.ParenthesesStart:
+		parser.unread()
+		return parser.ParseParentheses()
+	case tokenizer.Number:
+		parser.unread()
+		return parser.ParseExpressionStartingWithNumber()
+	}
+
+	println("Error")
+
+	return nil
+}
+
+func (parser *Parser) ParseParentheses() grammar.Exp {
+	parser.readIgnoreWhiteSpace()
+	expr := parser.Parse()
+	endKind, _ := parser.readIgnoreWhiteSpace()
+	if endKind != tokenizer.ParenthesesEnd {
+		println("Error: missing closing parentheses")
+	}
+
+	temp := grammar.ExpParentheses{Inside: expr}
+
+	nextKind, _ := parser.readIgnoreWhiteSpace()
+
+	if nextKind == tokenizer.Plus || nextKind == tokenizer.Multiply {
+		nextExpr := parser.Parse()
+		return grammar.ExpPlus{Left: temp, Right: nextExpr}
+	}
+
+	return temp
+}
+
+func (parser *Parser) ParseExpressionStartingWithNumber() grammar.Exp {
+	_, firstNumber := parser.readIgnoreWhiteSpace()
+	firstValue, _ := strconv.Atoi(firstNumber)
+	nextKind, _ := parser.readIgnoreWhiteSpace()
+	if nextKind == tokenizer.Plus || nextKind == tokenizer.Multiply {
+		nextExpression := parser.Parse()
+		return grammar.ExpPlus{
+			Right: grammar.ExpNum{Value: firstValue},
+			Left: nextExpression,
 		}
-		exp, _ := next(&state)
-		state.currentExpression = exp
 	}
-	return state.currentExpression, nil
-}
-
-func next(state *parserState) (grammar.Exp, error) {
-	current := state.program[state.currentIndex]
-
-	if current.Kind == lexer.Number {
-		exp, err := parseExpNum(state)
-		state.currentIndex++
-		return exp, err
-	}
-
-	switch current.Value() {
-	case "(":
-		state.currentIndex++
-		exp, _ := next(state)
-		return grammar.ExpParentheses{Inside: exp}, nil
-	case "+":
-		state.currentIndex++
-		exp, _ := next(state)
-		return grammar.ExpPlus{Left: state.currentExpression, Right: exp}, nil
-	case "*":
-		state.currentIndex++
-		exp, _ := next(state)
-		return grammar.ExpMultiply{Left: state.currentExpression, Right: exp}, nil
-	case ")":
-		state.currentIndex++
-	}
-
-	return state.currentExpression, fmt.Errorf("invalid next lex item")
-}
-
-func parseExpNum(state *parserState) (grammar.ExpNum, error) {
-	item := state.program[state.currentIndex]
-	value, err := strconv.Atoi(item.Value())
-	return grammar.ExpNum{Value: value}, err
+	parser.unread()
+	return grammar.ExpNum{Value: firstValue}
 }

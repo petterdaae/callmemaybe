@@ -1,9 +1,9 @@
 package main
 
 import (
-	"lang/lexer"
+	"lang/tokenizer"
 )
 
 func main() {
-	lexer.Lex("1 + 2 + 3 + 4")
+	tokenizer.Lex("1 + 2 + 3 + 4")
 }
