@@ -23,6 +23,15 @@ func New(reader io.Reader) *Parser {
 	}
 }
 
+func (parser *Parser) Parse() (grammar.Exp, error) {
+	expr, err := parser.parse()
+	nextKind, _ := parser.readIgnoreWhiteSpace()
+	if nextKind != tokenizer.EOF {
+		return nil, fmt.Errorf("failed to parse the entire program")
+	}
+	return expr, err
+}
+
 func (parser *Parser) read() (tokenizer.Token, string) {
 	if parser.buffer.full {
 		parser.buffer.full = false
@@ -46,7 +55,7 @@ func (parser *Parser) readIgnoreWhiteSpace() (tokenizer.Token, string) {
 	return kind, token
 }
 
-func (parser *Parser) Parse() (grammar.Exp, error) {
+func (parser *Parser) parse() (grammar.Exp, error) {
 	kind, token := parser.readIgnoreWhiteSpace()
 
 	switch kind {
@@ -66,7 +75,7 @@ func (parser *Parser) ParseExpressionStartingWithParentheses() (grammar.Exp, err
 	parser.readIgnoreWhiteSpace()
 
 	// Read expression inside parentheses
-	expr, err := parser.Parse()
+	expr, err := parser.parse()
 	if err != nil {
 		return nil, fmt.Errorf("error while parsing expression inside parentheses: %w", err)
 	}
@@ -83,12 +92,12 @@ func (parser *Parser) ParseExpressionStartingWithParentheses() (grammar.Exp, err
 	nextKind, _ := parser.readIgnoreWhiteSpace()
 
 	if nextKind == tokenizer.Plus {
-		nextExpr, err := parser.Parse()
+		nextExpr, err := parser.parse()
 		return grammar.ExpPlus{Left: parenthesesExpression, Right: nextExpr}, err
 	}
 
 	if nextKind == tokenizer.Multiply {
-		nextExpr, err := parser.Parse()
+		nextExpr, err := parser.parse()
 		return grammar.ExpMultiply{Left: parenthesesExpression, Right: nextExpr}, err
 	}
 
@@ -102,13 +111,13 @@ func (parser *Parser) ParseExpressionStartingWithNumber() (grammar.Exp, error) {
 	firstValue, _ := strconv.Atoi(firstNumber)
 	nextKind, _ := parser.readIgnoreWhiteSpace()
 	if nextKind == tokenizer.Plus {
-		nextExpression, err := parser.Parse()
+		nextExpression, err := parser.parse()
 		return grammar.ExpPlus{
 			Left: grammar.ExpNum{Value: firstValue},
 			Right: nextExpression,
 		}, err
 	} else if nextKind == tokenizer.Multiply {
-		nextExpression, err := parser.Parse()
+		nextExpression, err := parser.parse()
 		return grammar.ExpMultiply{
 			Left: grammar.ExpNum{Value: firstValue},
 			Right: nextExpression,

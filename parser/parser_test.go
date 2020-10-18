@@ -74,3 +74,36 @@ func TestBinaryExpressionWithTrailingParentheses(t *testing.T) {
 	}
 	parseExpected(t, str, expected)
 }
+
+func TestEmptyProgram(t *testing.T) {
+	parser := New(strings.NewReader(""))
+	_, err := parser.Parse()
+	if err == nil {
+		t.Error()
+	}
+}
+
+func TestMissingClosingParentheses(t *testing.T) {
+	parser := New(strings.NewReader("(1 + 2"))
+	_, err := parser.Parse()
+	if err == nil {
+		t.Error()
+	}
+}
+
+func TestEmptyParentheses(t *testing.T) {
+	parser := New(strings.NewReader("()"))
+	_, err := parser.Parse()
+	if err == nil {
+		t.Error()
+	}
+}
+
+func TestParenthesesWithNoOperator(t *testing.T) {
+	parser := New(strings.NewReader("(1)(2)"))
+	expr, err := parser.Parse()
+	if err == nil {
+		println(expr)
+		t.Error()
+	}
+}
