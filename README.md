@@ -3,17 +3,16 @@ Project to learn concepts from *INF225 (Program Translation)* that will hopefull
 
 ### The current grammar that I am trying to implement
 ```
-<exp> ::= <exp> + <exp>
-<exp> ::= <exp> * <exp>
-<exp> ::= "(" <exp> ")">
-<exp> ::= <num>
-<exp> ::= "let" <identifier> "=" <exp> "in" <exp>
+<exp> := <val> { <bop> <val> }
+<val> := "(" <exp> ")"
+<val> := <num>
+<bop> ::= "+" | "*"
 <num> ::= simple integers
-<exp> ::= <identifier>
-<identifier> ::= sequence of letters
 ```
 
-Operators are currently right associative.
+* `{ _ }` means zero or more
 
 ### Resources
 The structure of the tokenizer and parser is inspired by this blog post: https://blog.gopheracademy.com/advent-2014/parsers-lexers/.
+
+This site was very helpful when constructing the grammar: http://www.engr.mun.ca/~theo/Misc/exp_parsing.htm.
