@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"io"
 	"lang/grammar"
 	"lang/tokenizer"
@@ -27,11 +28,9 @@ func (parser *Parser) read() (tokenizer.Token, string) {
 		parser.buffer.full = false
 		return parser.buffer.kind, parser.buffer.token
 	}
-
 	kind, token := parser.tokenizer.NextToken()
 	parser.buffer.kind = kind
 	parser.buffer.token = token
-
 	return kind, token
 }
 
@@ -47,60 +46,74 @@ func (parser *Parser) readIgnoreWhiteSpace() (tokenizer.Token, string) {
 	return kind, token
 }
 
-func (parser *Parser) Parse() grammar.Exp {
-	kind, _ := parser.readIgnoreWhiteSpace()
+func (parser *Parser) Parse() (grammar.Exp, error) {
+	kind, token := parser.readIgnoreWhiteSpace()
 
 	switch kind {
 	case tokenizer.ParenthesesStart:
 		parser.unread()
-		return parser.ParseParentheses()
+		return parser.ParseExpressionStartingWithParentheses()
 	case tokenizer.Number:
 		parser.unread()
 		return parser.ParseExpressionStartingWithNumber()
 	}
 
-	println("Error")
-
-	return nil
+	return nil, fmt.Errorf("unexpected token, expected parantheses or number: (%d, %s)", kind, token)
 }
 
-func (parser *Parser) ParseParentheses() grammar.Exp {
+func (parser *Parser) ParseExpressionStartingWithParentheses() (grammar.Exp, error) {
+	// Read open parentheses
 	parser.readIgnoreWhiteSpace()
-	expr := parser.Parse()
+
+	// Read expression inside parentheses
+	expr, err := parser.Parse()
+	if err != nil {
+		return nil, fmt.Errorf("error while parsing expression inside parentheses: %w", err)
+	}
+
+	// Read closing parentheses
 	endKind, _ := parser.readIgnoreWhiteSpace()
 	if endKind != tokenizer.ParenthesesEnd {
-		println("Error: missing closing parentheses")
+		return nil, fmt.Errorf("closing parentheses missing")
 	}
 
-	temp := grammar.ExpParentheses{Inside: expr}
+	parenthesesExpression := grammar.ExpParentheses{Inside: expr}
 
+	// Check if the expression is the first part of a binary operation
 	nextKind, _ := parser.readIgnoreWhiteSpace()
 
-	if nextKind == tokenizer.Plus || nextKind == tokenizer.Multiply {
-		nextExpr := parser.Parse()
-		return grammar.ExpPlus{Left: temp, Right: nextExpr}
+	if nextKind == tokenizer.Plus {
+		nextExpr, err := parser.Parse()
+		return grammar.ExpPlus{Left: parenthesesExpression, Right: nextExpr}, err
 	}
 
-	return temp
+	if nextKind == tokenizer.Multiply {
+		nextExpr, err := parser.Parse()
+		return grammar.ExpMultiply{Left: parenthesesExpression, Right: nextExpr}, err
+	}
+
+	parser.unread()
+
+	return parenthesesExpression, err
 }
 
-func (parser *Parser) ParseExpressionStartingWithNumber() grammar.Exp {
+func (parser *Parser) ParseExpressionStartingWithNumber() (grammar.Exp, error) {
 	_, firstNumber := parser.readIgnoreWhiteSpace()
 	firstValue, _ := strconv.Atoi(firstNumber)
 	nextKind, _ := parser.readIgnoreWhiteSpace()
 	if nextKind == tokenizer.Plus {
-		nextExpression := parser.Parse()
+		nextExpression, err := parser.Parse()
 		return grammar.ExpPlus{
 			Left: grammar.ExpNum{Value: firstValue},
 			Right: nextExpression,
-		}
+		}, err
 	} else if nextKind == tokenizer.Multiply {
-		nextExpression := parser.Parse()
+		nextExpression, err := parser.Parse()
 		return grammar.ExpMultiply{
 			Left: grammar.ExpNum{Value: firstValue},
 			Right: nextExpression,
-		}
+		}, err
 	}
 	parser.unread()
-	return grammar.ExpNum{Value: firstValue}
+	return grammar.ExpNum{Value: firstValue}, nil
 }

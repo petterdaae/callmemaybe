@@ -10,7 +10,12 @@ import (
 func parseExpected(t *testing.T, program string, expected grammar.Exp) {
 	reader := strings.NewReader(program)
 	parser := New(reader)
-	actual := parser.Parse()
+	actual, err := parser.Parse()
+
+	if err != nil {
+		t.Error()
+	}
+
 	if !reflect.DeepEqual(actual, expected) {
 		t.Error()
 	}
