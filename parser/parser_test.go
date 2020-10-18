@@ -1,38 +1,41 @@
 package parser
 
 import (
-	"lang/tokenizer"
+	"lang/grammar"
+	"reflect"
+	"strings"
 	"testing"
 )
 
-func testProgramEvaluatesTo(text string, result int, t *testing.T) {
-	program, _ := tokenizer.Lex(text)
-	exp, _ := Parse(program)
-	if exp.Evaluate() != result {
+func parseExpected(t *testing.T, program string, expected grammar.Exp) {
+	reader := strings.NewReader(program)
+	parser := New(reader)
+	actual := parser.Parse()
+	if !reflect.DeepEqual(actual, expected) {
 		t.Error()
 	}
 }
 
-func TestParserCase1(t *testing.T) {
-	testProgramEvaluatesTo("1 + 2", 3, t)
+func TestSimplePlus(t *testing.T) {
+	str := "1 + 2"
+	expected := grammar.ExpPlus{Left: grammar.ExpNum{Value: 1}, Right: grammar.ExpNum{Value: 2}}
+	parseExpected(t, str, expected)
 }
 
-func TestParserCase2(t *testing.T) {
-	testProgramEvaluatesTo("(1 + 2)", 3, t)
+func TestSimpleMultiply(t *testing.T) {
+	str := "1 * 2"
+	expected := grammar.ExpMultiply{Left: grammar.ExpNum{Value: 1}, Right: grammar.ExpNum{Value: 2}}
+	parseExpected(t, str, expected)
 }
 
-func TestParserCase3(t *testing.T) {
-	testProgramEvaluatesTo("1 + 2 + 3", 6, t)
+func TestSimpleParentheses(t *testing.T) {
+	str := "( 1 )"
+	expected := grammar.ExpParentheses{Inside: grammar.ExpNum{Value: 1}}
+	parseExpected(t, str, expected)
 }
 
-func TestParserCase4(t *testing.T) {
-	testProgramEvaluatesTo("(((1*2)))", 2, t)
-}
-
-func TestParserCase5(t *testing.T) {
-	testProgramEvaluatesTo("(1+2)+(3+3+3)+(1*2*3*4)", 36, t)
-}
-
-func TestParserCase6(t *testing.T) {
-	testProgramEvaluatesTo("(1+2)+(3+4)", 10, t)
+func TestParenthesesInPlusExpression(t *testing.T) {
+	str := "( 1 + 2 ) + 3"
+	expected := grammar.ExpPlus{Left: grammar.ExpParentheses{grammar.ExpPlus{Left: grammar.ExpNum{1}, Right: grammar.ExpNum{Value: 2}}}, Right: grammar.ExpNum{Value: 3}}
+	parseExpected(t, str, expected)
 }

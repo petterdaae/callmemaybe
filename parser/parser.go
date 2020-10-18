@@ -1,17 +1,24 @@
 package parser
 
 import (
+	"io"
 	"lang/grammar"
 	"lang/tokenizer"
 	"strconv"
 )
 
 type Parser struct {
-	tokenizer tokenizer.Tokenizer
+	tokenizer *tokenizer.Tokenizer
 	buffer    struct {
 		kind  tokenizer.Token
 		token string
 		full  bool
+	}
+}
+
+func New(reader io.Reader) *Parser {
+	return &Parser{
+		tokenizer: tokenizer.New(reader),
 	}
 }
 
@@ -81,11 +88,17 @@ func (parser *Parser) ParseExpressionStartingWithNumber() grammar.Exp {
 	_, firstNumber := parser.readIgnoreWhiteSpace()
 	firstValue, _ := strconv.Atoi(firstNumber)
 	nextKind, _ := parser.readIgnoreWhiteSpace()
-	if nextKind == tokenizer.Plus || nextKind == tokenizer.Multiply {
+	if nextKind == tokenizer.Plus {
 		nextExpression := parser.Parse()
 		return grammar.ExpPlus{
-			Right: grammar.ExpNum{Value: firstValue},
-			Left: nextExpression,
+			Left: grammar.ExpNum{Value: firstValue},
+			Right: nextExpression,
+		}
+	} else if nextKind == tokenizer.Multiply {
+		nextExpression := parser.Parse()
+		return grammar.ExpMultiply{
+			Left: grammar.ExpNum{Value: firstValue},
+			Right: nextExpression,
 		}
 	}
 	parser.unread()

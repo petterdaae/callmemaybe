@@ -5,6 +5,7 @@ package tokenizer
 import (
 	"bufio"
 	"bytes"
+	"io"
 	"unicode"
 )
 
@@ -25,6 +26,12 @@ type Token int
 
 type Tokenizer struct {
 	reader *bufio.Reader
+}
+
+func New(reader io.Reader) *Tokenizer {
+	return &Tokenizer{
+		reader: bufio.NewReader(reader),
+	}
 }
 
 func (tokenizer *Tokenizer) read() rune {
