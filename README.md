@@ -9,3 +9,6 @@ Project to learn concepts from *INF225 (Program Translation)* that will hopefull
 <exp> ::= <num>
 <num> ::= simple integers
 ```
+
+### Resources
+The structure of the tokenizer and parser is inspired by this blog post: https://blog.gopheracademy.com/advent-2014/parsers-lexers/.

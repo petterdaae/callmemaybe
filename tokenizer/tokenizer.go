@@ -1,7 +1,5 @@
 package tokenizer
 
-// Heavily inspired by https://blog.gopheracademy.com/advent-2014/parsers-lexers/
-
 import (
 	"bufio"
 	"bytes"
