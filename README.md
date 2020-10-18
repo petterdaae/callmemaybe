@@ -7,7 +7,10 @@ Project to learn concepts from *INF225 (Program Translation)* that will hopefull
 <exp> ::= <exp> * <exp>
 <exp> ::= "(" <exp> ")">
 <exp> ::= <num>
+<exp> ::= "let" <identifier> "=" <exp> "in" <exp>
 <num> ::= simple integers
+<exp> ::= <identifier>
+<identifier> ::= sequence of letters
 ```
 
 Operators are currently right associative.
