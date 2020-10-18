@@ -10,9 +10,9 @@ Project to learn concepts from *INF225 (Program Translation)* that will hopefull
 <num> ::= simple integers
 ```
 
-* `{ _ }` means zero or more
+- `{ _ }` means zero or more
+- Operators are left-associative
 
 ### Resources
-The structure of the tokenizer and parser is inspired by this blog post: https://blog.gopheracademy.com/advent-2014/parsers-lexers/.
-
-This site was very helpful when constructing the grammar: http://www.engr.mun.ca/~theo/Misc/exp_parsing.htm.
+- The structure of the tokenizer and parser is inspired by this blog post: https://blog.gopheracademy.com/advent-2014/parsers-lexers/.
+- This site was very helpful when constructing the grammar: http://www.engr.mun.ca/~theo/Misc/exp_parsing.htm.

@@ -107,3 +107,15 @@ func TestParenthesesWithNoOperator(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestSimpleLeftAssociativity(t *testing.T) {
+	parser := New(strings.NewReader("(1 + 4) * 2 + 3 * 5"))
+	expr, err := parser.Parse()
+	if err != nil {
+		t.Error()
+	}
+	val := expr.Evaluate()
+	if val != 65 {
+		t.Error()
+	}
+}

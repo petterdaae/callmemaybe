@@ -24,7 +24,7 @@ func New(reader io.Reader) *Parser {
 }
 
 func (parser *Parser) Parse() (grammar.Exp, error) {
-	expr, err := parser.parse()
+	expr, err := parser.parseExp()
 	nextKind, _ := parser.readIgnoreWhiteSpace()
 	if nextKind != tokenizer.EOF {
 		return nil, fmt.Errorf("failed to parse the entire program")
@@ -55,74 +55,61 @@ func (parser *Parser) readIgnoreWhiteSpace() (tokenizer.Token, string) {
 	return kind, token
 }
 
-func (parser *Parser) parse() (grammar.Exp, error) {
-	kind, token := parser.readIgnoreWhiteSpace()
-
-	switch kind {
-	case tokenizer.ParenthesesStart:
-		parser.unread()
-		return parser.ParseExpressionStartingWithParentheses()
-	case tokenizer.Number:
-		parser.unread()
-		return parser.ParseExpressionStartingWithNumber()
-	}
-
-	return nil, fmt.Errorf("unexpected token, expected parantheses or number: (%d, %s)", kind, token)
-}
-
-func (parser *Parser) ParseExpressionStartingWithParentheses() (grammar.Exp, error) {
-	// Read open parentheses
-	parser.readIgnoreWhiteSpace()
-
-	// Read expression inside parentheses
-	expr, err := parser.parse()
+func (parser *Parser) parseExp() (grammar.Exp, error) {
+	left, err := parser.parseVal()
 	if err != nil {
-		return nil, fmt.Errorf("error while parsing expression inside parentheses: %w", err)
+		return nil, fmt.Errorf("failed to parse first val in exp: %w", err)
 	}
-
-	// Read closing parentheses
-	endKind, _ := parser.readIgnoreWhiteSpace()
-	if endKind != tokenizer.ParenthesesEnd {
-		return nil, fmt.Errorf("closing parentheses missing")
+	for {
+		nextKind, _ := parser.readIgnoreWhiteSpace()
+		if nextKind == tokenizer.Plus {
+			right, err := parser.parseVal()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse right side of plus exp: %w", err)
+			}
+			left = grammar.ExpPlus{
+				Left:  left,
+				Right: right,
+			}
+			continue
+		}
+		if nextKind == tokenizer.Multiply {
+			right, err := parser.parseVal()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse right side of multiply exp: %w", err)
+			}
+			left = grammar.ExpMultiply{
+				Left:  left,
+				Right: right,
+			}
+			continue
+		}
+		parser.unread()
+		break
 	}
-
-	parenthesesExpression := grammar.ExpParentheses{Inside: expr}
-
-	// Check if the expression is the first part of a binary operation
-	nextKind, _ := parser.readIgnoreWhiteSpace()
-
-	if nextKind == tokenizer.Plus {
-		nextExpr, err := parser.parse()
-		return grammar.ExpPlus{Left: parenthesesExpression, Right: nextExpr}, err
-	}
-
-	if nextKind == tokenizer.Multiply {
-		nextExpr, err := parser.parse()
-		return grammar.ExpMultiply{Left: parenthesesExpression, Right: nextExpr}, err
-	}
-
-	parser.unread()
-
-	return parenthesesExpression, err
+	return left, nil
 }
 
-func (parser *Parser) ParseExpressionStartingWithNumber() (grammar.Exp, error) {
-	_, firstNumber := parser.readIgnoreWhiteSpace()
-	firstValue, _ := strconv.Atoi(firstNumber)
-	nextKind, _ := parser.readIgnoreWhiteSpace()
-	if nextKind == tokenizer.Plus {
-		nextExpression, err := parser.parse()
-		return grammar.ExpPlus{
-			Left: grammar.ExpNum{Value: firstValue},
-			Right: nextExpression,
-		}, err
-	} else if nextKind == tokenizer.Multiply {
-		nextExpression, err := parser.parse()
-		return grammar.ExpMultiply{
-			Left: grammar.ExpNum{Value: firstValue},
-			Right: nextExpression,
-		}, err
+func (parser *Parser) parseVal() (grammar.Exp, error) {
+	nextKind, nextToken := parser.readIgnoreWhiteSpace()
+	if nextKind == tokenizer.Number {
+		value, _ := strconv.Atoi(nextToken)
+		return grammar.ExpNum{
+			Value: value,
+		}, nil
 	}
-	parser.unread()
-	return grammar.ExpNum{Value: firstValue}, nil
+	if nextKind == tokenizer.ParenthesesStart {
+		inside, err := parser.parseExp()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse exp in parentheses: %w", err)
+		}
+		nextKind, _ = parser.readIgnoreWhiteSpace()
+		if nextKind != tokenizer.ParenthesesEnd {
+			return nil, fmt.Errorf("missing closing parentheses")
+		}
+		return grammar.ExpParentheses{
+			Inside: inside,
+		}, nil
+	}
+	return nil, fmt.Errorf("unexpected token while parsing val")
 }
