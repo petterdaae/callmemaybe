@@ -11,9 +11,13 @@ const (
 	Number Token = iota
 	Plus
 	Multiply
+	Assign
 	ParenthesesStart
 	ParenthesesEnd
 	Whitespace
+	Let
+	In
+	Identifier
 	EOF
 	Error
 )
@@ -57,6 +61,11 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return tokenizer.number()
 	}
 
+	if unicode.IsLetter(character) {
+		tokenizer.unread()
+		return tokenizer.identifier()
+	}
+
 	switch character {
 	case eof:
 		return EOF, ""
@@ -68,6 +77,8 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return ParenthesesStart, string(character)
 	case ')':
 		return ParenthesesEnd, string(character)
+	case '=':
+		return Assign, string(character)
 	}
 	
 	return Error, ""
@@ -102,4 +113,30 @@ func (tokenizer *Tokenizer) number() (Token, string) {
 		buffer.WriteRune(character)
 	}
 	return Number, buffer.String()
+}
+
+func (tokenizer *Tokenizer) identifier() (Token, string) {
+	var buffer bytes.Buffer
+	buffer.WriteRune(tokenizer.read())
+
+	for {
+		character := tokenizer.read()
+		if !unicode.IsLetter(character) {
+			tokenizer.unread()
+			break
+		}
+		buffer.WriteRune(character)
+	}
+
+	word := buffer.String()
+
+	if word == "let" {
+		return Let, word
+	}
+
+	if word == "in" {
+		return In, word
+	}
+
+	return Identifier, word
 }
