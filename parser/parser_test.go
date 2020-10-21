@@ -113,7 +113,7 @@ func TestSimpleLeftAssociativity(t *testing.T) {
 	if err != nil {
 		t.Error()
 	}
-	val := expr.Evaluate()
+	val, _ := expr.Evaluate(grammar.Context{})
 	if val != 65 {
 		t.Error()
 	}

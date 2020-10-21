@@ -149,5 +149,11 @@ func (parser *Parser) parseLet() (grammar.Exp, error) {
 		return nil, fmt.Errorf("failed to parse last expression in let expression")
 	}
 
-	return nil, nil
+	let := grammar.ExpLet{
+		Identifier: identifier,
+		IdentifierExp: exprIdent,
+		Inside: expr,
+	}
+
+	return let, nil
 }
