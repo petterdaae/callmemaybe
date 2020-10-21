@@ -3,8 +3,8 @@ Project to learn concepts from *INF225 (Program Translation)* that will hopefull
 
 ### The current grammar that I am trying to implement
 ```
-<seq>        := { <op> }
-<op>         := <assign> | <prinln>
+<seq>        := { <stmt> }
+<stmt>         := <assign> | <prinln>
 <assign>     := <identifier> "=" <exp>
 <println>    := "println" <exp>
 
