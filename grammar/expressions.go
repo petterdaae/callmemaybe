@@ -1,7 +1,11 @@
 package grammar
 
 type Exp interface{
-	Evaluate() int
+	Evaluate(ctx Context) (int, error)
+}
+
+type ExpWithParent struct {
+	Parent Exp
 }
 
 type ExpPlus struct {
@@ -20,4 +24,14 @@ type ExpParentheses struct {
 
 type ExpNum struct {
 	Value int
+}
+
+type ExpLet struct {
+	Identifier string
+	IdentifierExp Exp
+	Inside Exp
+}
+
+type ExpIdentifier struct {
+	Name string
 }
