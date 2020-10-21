@@ -3,11 +3,13 @@ Project to learn concepts from *INF225 (Program Translation)* that will hopefull
 
 ### The current grammar that I am trying to implement
 ```
+<seq>        := { <op> }
+<op>         := <assign> | <prinln>
+<assign>     := <identifier> "=" <exp>
+<println>    := "println" <exp>
+
 <exp>        := <val> { <bop> <val> }
-<val>        := "(" <exp> ")"
-<val>        := <num>
-<val>        := <let>
-<val>        := <identifier>
+<val>        := "(" <exp> ")" | <num> | <let> | <identifier>
 <bop>        := "+" | "*"
 <num>        := simple integers
 <let>        := "let" <identifier> "=" <exp> "in" <exp>
