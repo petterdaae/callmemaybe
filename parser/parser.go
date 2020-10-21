@@ -111,5 +111,43 @@ func (parser *Parser) parseVal() (grammar.Exp, error) {
 			Inside: inside,
 		}, nil
 	}
+	if nextKind == tokenizer.Let {
+		parser.unread()
+		return parser.parseLet()
+	}
 	return nil, fmt.Errorf("unexpected token while parsing val")
+}
+
+func (parser *Parser) parseLet() (grammar.Exp, error) {
+	letKind, _ := parser.readIgnoreWhiteSpace()
+	if letKind != tokenizer.Let {
+		return nil, fmt.Errorf("expected let to come first when parsing let expression")
+	}
+
+	identKind, identifier := parser.readIgnoreWhiteSpace()
+	if identKind != tokenizer.Identifier {
+		return nil, fmt.Errorf("expected identifier after let in let expression")
+	}
+
+	assign, _ := parser.readIgnoreWhiteSpace()
+	if assign != tokenizer.Assign {
+		return nil, fmt.Errorf("expexted = after identifier in let expression")
+	}
+
+	exprIdent, err := parser.parseExp()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse first expression in let expression")
+	}
+
+	in, _ := parser.readIgnoreWhiteSpace()
+	if in != tokenizer.In {
+		return nil, fmt.Errorf("expected keyword in after first expression in let expression")
+	}
+
+	expr, err := parser.parseExp()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse last expression in let expression")
+	}
+
+	return nil, nil
 }

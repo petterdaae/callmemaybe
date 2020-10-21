@@ -6,6 +6,7 @@ Project to learn concepts from *INF225 (Program Translation)* that will hopefull
 <exp>        := <val> { <bop> <val> }
 <val>        := "(" <exp> ")"
 <val>        := <num>
+<val>        := <let>
 <bop>        := "+" | "*"
 <num>        := simple integers
 <let>        := "let" <identifier> "=" <exp> "in" <exp>
