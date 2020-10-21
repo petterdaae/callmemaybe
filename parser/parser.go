@@ -23,13 +23,13 @@ func New(reader io.Reader) *Parser {
 	}
 }
 
-func (parser *Parser) Parse() (grammar.Exp, error) {
-	expr, err := parser.parseExp()
+func (parser *Parser) Parse() (grammar.Stmt, error) {
+	stmt, err := parser.parseSeq()
 	nextKind, _ := parser.readIgnoreWhiteSpace()
 	if nextKind != tokenizer.EOF {
 		return nil, fmt.Errorf("failed to parse the entire program")
 	}
-	return expr, err
+	return stmt, err
 }
 
 func (parser *Parser) read() (tokenizer.Token, string) {
@@ -161,4 +161,60 @@ func (parser *Parser) parseLet() (grammar.Exp, error) {
 	}
 
 	return let, nil
+}
+
+func (parser *Parser) parseAssign() (grammar.Stmt, error) {
+	kind, identifier := parser.readIgnoreWhiteSpace()
+	if kind != tokenizer.Identifier {
+		return nil, fmt.Errorf("failed to parse identifier at start of assign statement")
+	}
+	kind, token := parser.readIgnoreWhiteSpace()
+	if kind != tokenizer.Assign {
+		return nil, fmt.Errorf("expected assign operator in assign stmt but got: %s", token)
+	}
+	expr, err := parser.parseExp()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse expression in assign stmt: %w", err)
+	}
+	return grammar.StmtAssign{Identifier: identifier, Expression: expr}, nil
+}
+
+func (parser *Parser) parsePrintln() (grammar.Stmt, error) {
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != tokenizer.PrintLn {
+		return nil, fmt.Errorf("expected println keyword at start of println stmt")
+	}
+	expr, err := parser.parseExp()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse expression in print stmt: %w", err)
+	}
+	return grammar.StmtPrintln{Expression: expr}, nil
+}
+
+func (parser *Parser) parseSeq() (grammar.Stmt, error) {
+	var statements []grammar.Stmt
+	for {
+		nextKind, _ := parser.readIgnoreWhiteSpace()
+		if nextKind == tokenizer.Identifier {
+			parser.unread()
+			statement, err := parser.parseAssign()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse assign expression: %w", err)
+			}
+			statements = append(statements, statement)
+			continue
+		}
+		if nextKind == tokenizer.PrintLn {
+			parser.unread()
+			statement, err := parser.parsePrintln()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse println expression: %w", err)
+			}
+			statements = append(statements, statement)
+			continue
+		}
+		parser.unread()
+		break
+	}
+	return grammar.StmtSeq{Statements: statements}, nil
 }

@@ -10,7 +10,7 @@ import (
 func parseExpected(t *testing.T, program string, expected grammar.Exp) {
 	reader := strings.NewReader(program)
 	parser := New(reader)
-	actual, err := parser.Parse()
+	actual, err := parser.parseExp()
 
 	if err != nil {
 		t.Error()
@@ -23,7 +23,7 @@ func parseExpected(t *testing.T, program string, expected grammar.Exp) {
 
 func testSuccessfulParser(t *testing.T, program string, expected int) {
 	parser := New(strings.NewReader(program))
-	exp, err := parser.Parse()
+	exp, err := parser.parseExp()
 	if err != nil {
 		t.Error()
 	}
@@ -35,7 +35,7 @@ func testSuccessfulParser(t *testing.T, program string, expected int) {
 
 func testFailingParser(t *testing.T, program string) {
 	parser := New(strings.NewReader(program))
-	exp, parseErr := parser.Parse()
+	exp, parseErr := parser.parseExp()
 	if parseErr != nil {
 		return
 	}
@@ -102,7 +102,7 @@ func TestBinaryExpressionWithTrailingParentheses(t *testing.T) {
 
 func TestEmptyProgram(t *testing.T) {
 	parser := New(strings.NewReader(""))
-	_, err := parser.Parse()
+	_, err := parser.parseExp()
 	if err == nil {
 		t.Error()
 	}
@@ -110,7 +110,7 @@ func TestEmptyProgram(t *testing.T) {
 
 func TestMissingClosingParentheses(t *testing.T) {
 	parser := New(strings.NewReader("(1 + 2"))
-	_, err := parser.Parse()
+	_, err := parser.parseExp()
 	if err == nil {
 		t.Error()
 	}
@@ -118,15 +118,7 @@ func TestMissingClosingParentheses(t *testing.T) {
 
 func TestEmptyParentheses(t *testing.T) {
 	parser := New(strings.NewReader("()"))
-	_, err := parser.Parse()
-	if err == nil {
-		t.Error()
-	}
-}
-
-func TestParenthesesWithNoOperator(t *testing.T) {
-	parser := New(strings.NewReader("(1)(2)"))
-	_, err := parser.Parse()
+	_, err := parser.parseExp()
 	if err == nil {
 		t.Error()
 	}
@@ -134,7 +126,7 @@ func TestParenthesesWithNoOperator(t *testing.T) {
 
 func TestSimpleLeftAssociativity(t *testing.T) {
 	parser := New(strings.NewReader("(1 + 4) * 2 + 3 * 5"))
-	expr, err := parser.Parse()
+	expr, err := parser.parseExp()
 	if err != nil {
 		t.Error()
 	}

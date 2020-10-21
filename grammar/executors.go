@@ -2,7 +2,7 @@ package grammar
 
 import "fmt"
 
-func (stmt *StmtSeq) Execute(ctx Context) (Context, error) {
+func (stmt StmtSeq) Execute(ctx Context) (Context, error) {
 	var err error
 	currentCtx := ctx
 	for i := range stmt.Statements {
@@ -15,7 +15,7 @@ func (stmt *StmtSeq) Execute(ctx Context) (Context, error) {
 	return currentCtx, nil
 }
 
-func (stmt *StmtAssign) Execute(ctx Context) (Context, error) {
+func (stmt StmtAssign) Execute(ctx Context) (Context, error) {
 	val, err := stmt.Expression.Evaluate(ctx)
 	if err != nil {
 		return NewContext(), fmt.Errorf("failed to evaluate expression in assign statement: %w", err)
@@ -24,7 +24,7 @@ func (stmt *StmtAssign) Execute(ctx Context) (Context, error) {
 	return newContext, nil
 }
 
-func (stmt *StmtPrintln) Execute(ctx Context) (Context, error) {
+func (stmt StmtPrintln) Execute(ctx Context) (Context, error) {
 	val, err := stmt.Expression.Evaluate(ctx)
 	if err != nil {
 		return NewContext(), fmt.Errorf("failed to evaluate expression in println statement: %w", err)

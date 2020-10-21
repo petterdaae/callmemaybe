@@ -3,18 +3,16 @@ package main
 import (
 	"lang/grammar"
 	"lang/parser"
-	"strconv"
 	"strings"
 )
 
 func main() {
-	program := "(1 + 4) * 2 + 3 * 5"
+	program := "println 1 println 1 + 1 println 3 * 1"
 	parser := parser.New(strings.NewReader(program))
 	ast, err := parser.Parse()
 	if err != nil {
 		println("Parser failed: " + err.Error())
 		return
 	}
-	value, _ := ast.Evaluate(grammar.NewContext())
-	println("Result => " + strconv.Itoa(value))
+	ast.Execute(grammar.NewContext())
 }
