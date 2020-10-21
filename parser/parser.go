@@ -115,6 +115,11 @@ func (parser *Parser) parseVal() (grammar.Exp, error) {
 		parser.unread()
 		return parser.parseLet()
 	}
+	if nextKind == tokenizer.Identifier {
+		return grammar.ExpIdentifier{
+			Name: nextToken,
+		}, nil
+	}
 	return nil, fmt.Errorf("unexpected token while parsing val")
 }
 
