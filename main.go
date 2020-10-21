@@ -1,6 +1,7 @@
 package main
 
 import (
+	"lang/grammar"
 	"lang/parser"
 	"strconv"
 	"strings"
@@ -14,6 +15,6 @@ func main() {
 		println("Parser failed: " + err.Error())
 		return
 	}
-	value := ast.Evaluate()
+	value, _ := ast.Evaluate(grammar.Context{})
 	println("Result => " + strconv.Itoa(value))
 }
