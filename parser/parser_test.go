@@ -21,6 +21,31 @@ func parseExpected(t *testing.T, program string, expected grammar.Exp) {
 	}
 }
 
+func testSuccessfulParser(t *testing.T, program string, expected int) {
+	parser := New(strings.NewReader(program))
+	exp, err := parser.Parse()
+	if err != nil {
+		t.Error()
+	}
+	val, err := exp.Evaluate(grammar.NewContext())
+	if val != expected || err != nil {
+		t.Error()
+	}
+}
+
+func testFailingParser(t *testing.T, program string) {
+	parser := New(strings.NewReader(program))
+	exp, parseErr := parser.Parse()
+	if parseErr != nil {
+		return
+	}
+	_, evalErr := exp.Evaluate(grammar.NewContext())
+	if evalErr != nil {
+		return
+	}
+	t.Error()
+}
+
 func TestSimplePlus(t *testing.T) {
 	str := "1 + 2"
 	expected := grammar.ExpPlus{
@@ -113,8 +138,31 @@ func TestSimpleLeftAssociativity(t *testing.T) {
 	if err != nil {
 		t.Error()
 	}
-	val, _ := expr.Evaluate(grammar.Context{})
+	val, _ := expr.Evaluate(grammar.NewContext())
 	if val != 65 {
 		t.Error()
 	}
+}
+
+func TestSimpleLet(t *testing.T) {
+	testSuccessfulParser(t, "let a = 2 in a", 2)
+}
+
+func TestNestedLet(t *testing.T) {
+	testSuccessfulParser(t, "let a = 2 in let a = 3 in 3", 3)
+}
+
+func TestVariousLet(t *testing.T) {
+	testSuccessfulParser(t, "let a = 5 in 2 + a", 7)
+	testSuccessfulParser(t, "7 * (let b = 2 in b + 5)", 49)
+	testSuccessfulParser(t, "(let a = 2 in let b = a + 3 in b + 2)", 7)
+	testSuccessfulParser(t, "(let a = 1 + 2 + 3 in a + 4) + 5", 15)
+	testSuccessfulParser(t, "let foo = (let bar = 3 in bar * 2) in foo", 6)
+}
+
+func TestVariousFailingLet(t *testing.T) {
+	testFailingParser(t, "let a")
+	testFailingParser(t, "let x = 5 in y")
+	testFailingParser(t, "let x = 5 in")
+	testFailingParser(t, "let x3 = 5 in x3")
 }

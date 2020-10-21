@@ -15,6 +15,6 @@ func main() {
 		println("Parser failed: " + err.Error())
 		return
 	}
-	value, _ := ast.Evaluate(grammar.Context{})
+	value, _ := ast.Evaluate(grammar.NewContext())
 	println("Result => " + strconv.Itoa(value))
 }

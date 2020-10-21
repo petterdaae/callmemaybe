@@ -6,6 +6,13 @@ type Context struct {
 	values map[string]int
 }
 
+func NewContext() Context {
+	values := make(map[string]int)
+	return Context{
+		values: values,
+	}
+}
+
 func (context *Context) Get(key string) (int, error) {
 	value, ok := context.values[key]
 	if ok {
@@ -15,7 +22,7 @@ func (context *Context) Get(key string) (int, error) {
 }
 
 func (context *Context) CopyWith(key string, value int) Context {
-	var copy map[string]int
+	copy := make(map[string]int)
 	for oldKey, oldVal := range context.values {
 		copy[oldKey] = oldVal
 	}
