@@ -17,6 +17,7 @@ const (
 	Whitespace
 	Let
 	In
+	PrintLn
 	Identifier
 	EOF
 	Error
@@ -136,6 +137,10 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 
 	if word == "in" {
 		return In, word
+	}
+
+	if word == "println" {
+		return PrintLn, word
 	}
 
 	return Identifier, word

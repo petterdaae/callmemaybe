@@ -26,3 +26,11 @@ func TestLet(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestPrintln(t *testing.T) {
+	tokenizer := New(strings.NewReader("println 1"))
+	first, _ := tokenizer.NextToken()
+	if first != PrintLn {
+		t.Error()
+	}
+}
