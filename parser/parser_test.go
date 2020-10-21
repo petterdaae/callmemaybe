@@ -101,9 +101,8 @@ func TestEmptyParentheses(t *testing.T) {
 
 func TestParenthesesWithNoOperator(t *testing.T) {
 	parser := New(strings.NewReader("(1)(2)"))
-	expr, err := parser.Parse()
+	_, err := parser.Parse()
 	if err == nil {
-		println(expr)
 		t.Error()
 	}
 }

@@ -3,11 +3,13 @@ Project to learn concepts from *INF225 (Program Translation)* that will hopefull
 
 ### The current grammar that I am trying to implement
 ```
-<exp> := <val> { <bop> <val> }
-<val> := "(" <exp> ")"
-<val> := <num>
-<bop> ::= "+" | "*"
-<num> ::= simple integers
+<exp>        := <val> { <bop> <val> }
+<val>        := "(" <exp> ")"
+<val>        := <num>
+<bop>        := "+" | "*"
+<num>        := simple integers
+<let>        := "let" <identifier> "=" <exp> "in" <exp>
+<identifier> := simple words, only letters
 ```
 
 - `{ _ }` means zero or more
