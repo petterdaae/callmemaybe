@@ -55,7 +55,7 @@ func (parser *Parser) readIgnoreWhiteSpace() (tokenizer.Token, string) {
 	return kind, token
 }
 
-func (parser *Parser) parseExp() (grammar.Exp, error) {
+func (parser *Parser) ParseExp() (grammar.Exp, error) {
 	left, err := parser.parseVal()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse first val in exp: %w", err)
@@ -99,7 +99,7 @@ func (parser *Parser) parseVal() (grammar.Exp, error) {
 		}, nil
 	}
 	if nextKind == tokenizer.ParenthesesStart {
-		inside, err := parser.parseExp()
+		inside, err := parser.ParseExp()
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse exp in parentheses: %w", err)
 		}
@@ -139,7 +139,7 @@ func (parser *Parser) parseLet() (grammar.Exp, error) {
 		return nil, fmt.Errorf("expexted = after identifier in let expression")
 	}
 
-	exprIdent, err := parser.parseExp()
+	exprIdent, err := parser.ParseExp()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse first expression in let expression")
 	}
@@ -149,7 +149,7 @@ func (parser *Parser) parseLet() (grammar.Exp, error) {
 		return nil, fmt.Errorf("expected keyword in after first expression in let expression")
 	}
 
-	expr, err := parser.parseExp()
+	expr, err := parser.ParseExp()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse last expression in let expression")
 	}
@@ -172,7 +172,7 @@ func (parser *Parser) parseAssign() (grammar.Stmt, error) {
 	if kind != tokenizer.Assign {
 		return nil, fmt.Errorf("expected assign operator in assign stmt but got: %s", token)
 	}
-	expr, err := parser.parseExp()
+	expr, err := parser.ParseExp()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse expression in assign stmt: %w", err)
 	}
@@ -184,7 +184,7 @@ func (parser *Parser) parsePrintln() (grammar.Stmt, error) {
 	if kind != tokenizer.PrintLn {
 		return nil, fmt.Errorf("expected println keyword at start of println stmt")
 	}
-	expr, err := parser.parseExp()
+	expr, err := parser.ParseExp()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse expression in print stmt: %w", err)
 	}

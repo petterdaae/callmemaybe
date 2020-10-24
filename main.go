@@ -7,12 +7,22 @@ import (
 )
 
 func main() {
-	program := "println 1 println 1 + 1 println 3 * 1"
+	program := "let a = 1 in let b = 2 in a + b * 3"
 	parser := parser.New(strings.NewReader(program))
-	ast, err := parser.Parse()
+	exp, err := parser.ParseExp()
 	if err != nil {
 		println("Parser failed: " + err.Error())
 		return
 	}
-	ast.Execute(grammar.NewContext())
+
+	out := grammar.AssemblyOutput{
+		Operations: []string{},
+		StackSize: 0,
+		Identifiers: make(map[string]int),
+	}
+	exp.Generate(&out)
+
+	for i := range out.Operations {
+		println(out.Operations[i])
+	}
 }

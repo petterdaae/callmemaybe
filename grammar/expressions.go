@@ -2,10 +2,7 @@ package grammar
 
 type Exp interface{
 	Evaluate(ctx Context) (int, error)
-}
-
-type ExpWithParent struct {
-	Parent Exp
+	Generate(output *AssemblyOutput) error
 }
 
 type ExpPlus struct {
