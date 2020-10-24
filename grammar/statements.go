@@ -2,6 +2,7 @@ package grammar
 
 type Stmt interface {
 	Execute(ctx Context) (Context, error)
+	Generate(output *AssemblyOutput) error
 }
 
 type StmtSeq struct {

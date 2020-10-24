@@ -19,6 +19,20 @@ type AssemblyOutput struct {
 	Identifiers map[string]int
 }
 
+func (output *AssemblyOutput) Start() {
+	output.Operations = append(output.Operations, "extern printf")
+	output.Operations = append(output.Operations, "global main")
+	output.Operations = append(output.Operations, "section .data")
+	output.Operations = append(output.Operations, "format: db '%x', 10, 0")
+	output.Operations = append(output.Operations, "section .text")
+	output.Operations = append(output.Operations, "main:")
+}
+
+func (output *AssemblyOutput) End() {
+	output.Operations = append(output.Operations, "mov rax, 60")
+	output.Operations = append(output.Operations, "syscall")
+}
+
 func (output *AssemblyOutput) move(destination string, source string) {
 	line := fmt.Sprintf("mov %s, %s", destination, source)
 	output.Operations = append(output.Operations, line)
@@ -44,6 +58,13 @@ func (output *AssemblyOutput) pop(destination string) {
 	line := fmt.Sprintf("pop %s", destination)
 	output.StackSize--
 	output.Operations = append(output.Operations, line)
+}
+
+func (output *AssemblyOutput) println(value string) {
+	output.Operations = append(output.Operations, fmt.Sprintf("mov rdi, format"))
+	output.Operations = append(output.Operations, fmt.Sprintf("mov rsi, %s", value))
+	output.Operations = append(output.Operations, fmt.Sprintf("xor rax, rax"))
+	output.Operations = append(output.Operations, fmt.Sprintf("call printf"))
 }
 
 func (exp ExpPlus) Generate(output *AssemblyOutput) error {
@@ -116,5 +137,34 @@ func (exp ExpIdentifier) Generate(output *AssemblyOutput) error {
 	}
 	identifierAddr := fmt.Sprintf("[%s+%d]", rsp, diff)
 	output.move(rax, identifierAddr)
+	return nil
+}
+
+func (stmt StmtSeq) Generate(output *AssemblyOutput) error {
+	for i := range stmt.Statements {
+		err := stmt.Statements[i].Generate(output)
+		if err != nil {
+			return fmt.Errorf("failed to generate code for statement in sequence: %w", err)
+		}
+	}
+	return nil
+}
+
+func (stmt StmtAssign) Generate(output *AssemblyOutput) error {
+	err := stmt.Expression.Generate(output)
+	if err != nil {
+		return fmt.Errorf("failed to generate code for expression in assign statement: %w", err)
+	}
+	output.push(rax)
+	output.Identifiers[stmt.Identifier] = output.StackSize
+	return nil
+}
+
+func (stmt StmtPrintln) Generate(output *AssemblyOutput) error {
+	err := stmt.Expression.Generate(output)
+	if err != nil {
+		return fmt.Errorf("failed to generate code for expression in println: %w", err)
+	}
+	output.println(rax)
 	return nil
 }
