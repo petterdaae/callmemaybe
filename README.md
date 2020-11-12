@@ -1,5 +1,5 @@
 # lang
-A simple compiler implented.
+A simple compiler.
 
 ### The current grammar that I am trying to implement
 ```
