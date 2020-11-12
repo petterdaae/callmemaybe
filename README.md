@@ -1,5 +1,5 @@
 # lang
-Project to learn concepts from *INF225 (Program Translation)* that will hopefully result in some fun programming language.
+A simple compiler implented.
 
 ### The current grammar that I am trying to implement
 ```
