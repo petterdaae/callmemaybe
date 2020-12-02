@@ -4,13 +4,19 @@ import (
 	"github.com/alecthomas/kong"
 	"os"
 	"os/exec"
+	"lang/utils"
 )
 
 type Arguments struct {
 	Build Build `cmd:"build"`
+	Nasm Nasm `cmd:"nasm"`
 }
 
 type Build struct {
+	File string `arg:"" type:"path"`
+}
+
+type Nasm struct {
 	File string `arg:"" type:"path"`
 }
 
@@ -20,24 +26,25 @@ func (build *Build) Run() error {
 	nasmTemp := "out.nasm"
 	oTemp := "out.o"
 
-	content, err := ReadFile(build.File)
+	content, err := utils.ReadFile(build.File)
 	if err != nil {
 		return err
 	}
 
-	nasm, err := Compile(content)
+	println("    Compiling ...")
+	nasm, err := utils.Compile(content)
 	if err != nil {
+		println("❌ Failed to compile")
 		return nil
 	}
 
-
-	err = WriteFile(nasmTemp, nasm)
+	err = utils.WriteFile(nasmTemp, nasm)
 	if err != nil {
 		return err
 	}
 
 	println("    Assembling ...")
-	_, err = exec.Command("nasm", "-f", "elf64", nasmTemp,).CombinedOutput()
+	_, err = exec.Command("nasm", "-f", "elf64", nasmTemp).CombinedOutput()
 	if err != nil {
 		println("❌ Assembling failed")
 		return nil
@@ -53,9 +60,21 @@ func (build *Build) Run() error {
 	os.Remove(nasmTemp)
 	os.Remove(oTemp)
 
-	println()
-	println("🏆 Successful")
+	println("\n🏆 Successful")
 
+	return nil
+}
+
+func (args *Nasm) Run() error {
+	content, err := utils.ReadFile(args.File)
+	if err != nil {
+		return err
+	}
+	nasm, err := utils.Compile(content)
+	if err != nil {
+		return nil
+	}
+	println(nasm)
 	return nil
 }
 

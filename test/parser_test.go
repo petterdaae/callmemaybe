@@ -1,15 +1,15 @@
-package parser
+package test
 
 import (
-	"lang/grammar"
+	"lang/language"
 	"reflect"
 	"strings"
 	"testing"
 )
 
-func parseExpected(t *testing.T, program string, expected grammar.Exp) {
+func parseExpected(t *testing.T, program string, expected language.Exp) {
 	reader := strings.NewReader(program)
-	parser := New(reader)
+	parser := language.NewParser(reader)
 	actual, err := parser.ParseExp()
 
 	if err != nil {
@@ -22,24 +22,24 @@ func parseExpected(t *testing.T, program string, expected grammar.Exp) {
 }
 
 func testSuccessfulParser(t *testing.T, program string, expected int) {
-	parser := New(strings.NewReader(program))
+	parser := language.NewParser(strings.NewReader(program))
 	exp, err := parser.ParseExp()
 	if err != nil {
 		t.Error()
 	}
-	val, err := exp.Evaluate(grammar.NewContext())
+	val, err := exp.Evaluate(language.NewContext())
 	if val != expected || err != nil {
 		t.Error()
 	}
 }
 
 func testFailingParser(t *testing.T, program string) {
-	parser := New(strings.NewReader(program))
+	parser := language.NewParser(strings.NewReader(program))
 	exp, parseErr := parser.ParseExp()
 	if parseErr != nil {
 		return
 	}
-	_, evalErr := exp.Evaluate(grammar.NewContext())
+	_, evalErr := exp.Evaluate(language.NewContext())
 	if evalErr != nil {
 		return
 	}
@@ -48,52 +48,52 @@ func testFailingParser(t *testing.T, program string) {
 
 func TestSimplePlus(t *testing.T) {
 	str := "1 + 2"
-	expected := grammar.ExpPlus{
-		Left:  grammar.ExpNum{Value: 1},
-		Right: grammar.ExpNum{Value: 2},
+	expected := language.ExpPlus{
+		Left:  language.ExpNum{Value: 1},
+		Right: language.ExpNum{Value: 2},
 	}
 	parseExpected(t, str, expected)
 }
 
 func TestSimpleMultiply(t *testing.T) {
 	str := "1 * 2"
-	expected := grammar.ExpMultiply{
-		Left:  grammar.ExpNum{Value: 1},
-		Right: grammar.ExpNum{Value: 2},
+	expected := language.ExpMultiply{
+		Left:  language.ExpNum{Value: 1},
+		Right: language.ExpNum{Value: 2},
 	}
 	parseExpected(t, str, expected)
 }
 
 func TestSimpleParentheses(t *testing.T) {
 	str := "( 1 )"
-	expected := grammar.ExpParentheses{
-		Inside: grammar.ExpNum{Value: 1},
+	expected := language.ExpParentheses{
+		Inside: language.ExpNum{Value: 1},
 	}
 	parseExpected(t, str, expected)
 }
 
 func TestParenthesesInPlusExpression(t *testing.T) {
 	str := "( 1 + 2 ) + 3"
-	expected := grammar.ExpPlus{
-		Left: grammar.ExpParentheses{
-			Inside: grammar.ExpPlus{
-				Left:  grammar.ExpNum{1},
-				Right: grammar.ExpNum{Value: 2},
+	expected := language.ExpPlus{
+		Left: language.ExpParentheses{
+			Inside: language.ExpPlus{
+				Left:  language.ExpNum{1},
+				Right: language.ExpNum{Value: 2},
 			},
 		},
-		Right: grammar.ExpNum{Value: 3},
+		Right: language.ExpNum{Value: 3},
 	}
 	parseExpected(t, str, expected)
 }
 
 func TestBinaryExpressionWithTrailingParentheses(t *testing.T) {
 	str := "1 * ( 2 * 3)"
-	expected := grammar.ExpMultiply{
-		Left: grammar.ExpNum{Value: 1},
-		Right: grammar.ExpParentheses{
-			Inside: grammar.ExpMultiply{
-				Left:  grammar.ExpNum{Value: 2},
-				Right: grammar.ExpNum{Value: 3},
+	expected := language.ExpMultiply{
+		Left: language.ExpNum{Value: 1},
+		Right: language.ExpParentheses{
+			Inside: language.ExpMultiply{
+				Left:  language.ExpNum{Value: 2},
+				Right: language.ExpNum{Value: 3},
 			},
 		},
 	}
@@ -101,7 +101,7 @@ func TestBinaryExpressionWithTrailingParentheses(t *testing.T) {
 }
 
 func TestEmptyProgram(t *testing.T) {
-	parser := New(strings.NewReader(""))
+	parser := language.NewParser(strings.NewReader(""))
 	_, err := parser.ParseExp()
 	if err == nil {
 		t.Error()
@@ -109,7 +109,7 @@ func TestEmptyProgram(t *testing.T) {
 }
 
 func TestMissingClosingParentheses(t *testing.T) {
-	parser := New(strings.NewReader("(1 + 2"))
+	parser := language.NewParser(strings.NewReader("(1 + 2"))
 	_, err := parser.ParseExp()
 	if err == nil {
 		t.Error()
@@ -117,7 +117,7 @@ func TestMissingClosingParentheses(t *testing.T) {
 }
 
 func TestEmptyParentheses(t *testing.T) {
-	parser := New(strings.NewReader("()"))
+	parser := language.NewParser(strings.NewReader("()"))
 	_, err := parser.ParseExp()
 	if err == nil {
 		t.Error()
@@ -125,12 +125,12 @@ func TestEmptyParentheses(t *testing.T) {
 }
 
 func TestSimpleLeftAssociativity(t *testing.T) {
-	parser := New(strings.NewReader("(1 + 4) * 2 + 3 * 5"))
+	parser := language.NewParser(strings.NewReader("(1 + 4) * 2 + 3 * 5"))
 	expr, err := parser.ParseExp()
 	if err != nil {
 		t.Error()
 	}
-	val, _ := expr.Evaluate(grammar.NewContext())
+	val, _ := expr.Evaluate(language.NewContext())
 	if val != 65 {
 		t.Error()
 	}

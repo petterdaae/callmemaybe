@@ -1,4 +1,4 @@
-package grammar
+package language
 
 type Exp interface{
 	Evaluate(ctx Context) (int, error)

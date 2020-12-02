@@ -1,4 +1,4 @@
-package tokenizer
+package language
 
 import (
 	"bufio"
@@ -31,7 +31,7 @@ type Tokenizer struct {
 	reader *bufio.Reader
 }
 
-func New(reader io.Reader) *Tokenizer {
+func NewTokenizer(reader io.Reader) *Tokenizer {
 	return &Tokenizer{
 		reader: bufio.NewReader(reader),
 	}

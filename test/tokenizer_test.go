@@ -1,36 +1,37 @@
-package tokenizer
+package test
 
 import (
+	"lang/language"
 	"strings"
 	"testing"
 )
 
 func TestIdentifier(t *testing.T) {
-	tokenizer := New(strings.NewReader("foo=bar"))
+	tokenizer := language.NewTokenizer(strings.NewReader("foo=bar"))
 	first, _ := tokenizer.NextToken()
 	second, _ := tokenizer.NextToken()
 	third, _ := tokenizer.NextToken()
 
-	if first != Identifier || second != Assign || third != Identifier {
+	if first != language.Identifier || second != language.Assign || third != language.Identifier {
 		t.Error()
 	}
 }
 
 func TestLet(t *testing.T) {
-	tokenizer := New(strings.NewReader("let+in"))
+	tokenizer := language.NewTokenizer(strings.NewReader("let+in"))
 	first, _ := tokenizer.NextToken()
 	tokenizer.NextToken()
 	third, _ := tokenizer.NextToken()
 
-	if first != Let || third != In {
+	if first != language.Let || third != language.In {
 		t.Error()
 	}
 }
 
 func TestPrintln(t *testing.T) {
-	tokenizer := New(strings.NewReader("println 1"))
+	tokenizer := language.NewTokenizer(strings.NewReader("println 1"))
 	first, _ := tokenizer.NextToken()
-	if first != PrintLn {
+	if first != language.PrintLn {
 		t.Error()
 	}
 }

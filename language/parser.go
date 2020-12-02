@@ -1,38 +1,36 @@
-package parser
+package language
 
 import (
 	"fmt"
 	"io"
-	"lang/grammar"
-	"lang/tokenizer"
 	"strconv"
 )
 
 type Parser struct {
-	tokenizer *tokenizer.Tokenizer
+	tokenizer *Tokenizer
 	buffer    struct {
-		kind  tokenizer.Token
+		kind  Token
 		token string
 		full  bool
 	}
 }
 
-func New(reader io.Reader) *Parser {
+func NewParser(reader io.Reader) *Parser {
 	return &Parser{
-		tokenizer: tokenizer.New(reader),
+		tokenizer: NewTokenizer(reader),
 	}
 }
 
-func (parser *Parser) Parse() (grammar.Stmt, error) {
+func (parser *Parser) Parse() (Stmt, error) {
 	stmt, err := parser.parseSeq()
 	nextKind, _ := parser.readIgnoreWhiteSpace()
-	if nextKind != tokenizer.EOF {
+	if nextKind != EOF {
 		return nil, fmt.Errorf("failed to parse the entire program")
 	}
 	return stmt, err
 }
 
-func (parser *Parser) read() (tokenizer.Token, string) {
+func (parser *Parser) read() (Token, string) {
 	if parser.buffer.full {
 		parser.buffer.full = false
 		return parser.buffer.kind, parser.buffer.token
@@ -47,38 +45,38 @@ func (parser *Parser) unread() {
 	parser.buffer.full = true
 }
 
-func (parser *Parser) readIgnoreWhiteSpace() (tokenizer.Token, string) {
+func (parser *Parser) readIgnoreWhiteSpace() (Token, string) {
 	kind, token := parser.read()
-	if kind == tokenizer.Whitespace {
+	if kind == Whitespace {
 		kind, token = parser.read()
 	}
 	return kind, token
 }
 
-func (parser *Parser) ParseExp() (grammar.Exp, error) {
+func (parser *Parser) ParseExp() (Exp, error) {
 	left, err := parser.parseVal()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse first val in exp: %w", err)
 	}
 	for {
 		nextKind, _ := parser.readIgnoreWhiteSpace()
-		if nextKind == tokenizer.Plus {
+		if nextKind == Plus {
 			right, err := parser.parseVal()
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse right side of plus exp: %w", err)
 			}
-			left = grammar.ExpPlus{
+			left = ExpPlus{
 				Left:  left,
 				Right: right,
 			}
 			continue
 		}
-		if nextKind == tokenizer.Multiply {
+		if nextKind == Multiply {
 			right, err := parser.parseVal()
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse right side of multiply exp: %w", err)
 			}
-			left = grammar.ExpMultiply{
+			left = ExpMultiply{
 				Left:  left,
 				Right: right,
 			}
@@ -90,52 +88,52 @@ func (parser *Parser) ParseExp() (grammar.Exp, error) {
 	return left, nil
 }
 
-func (parser *Parser) parseVal() (grammar.Exp, error) {
+func (parser *Parser) parseVal() (Exp, error) {
 	nextKind, nextToken := parser.readIgnoreWhiteSpace()
-	if nextKind == tokenizer.Number {
+	if nextKind == Number {
 		value, _ := strconv.Atoi(nextToken)
-		return grammar.ExpNum{
+		return ExpNum{
 			Value: value,
 		}, nil
 	}
-	if nextKind == tokenizer.ParenthesesStart {
+	if nextKind == ParenthesesStart {
 		inside, err := parser.ParseExp()
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse exp in parentheses: %w", err)
 		}
 		nextKind, _ = parser.readIgnoreWhiteSpace()
-		if nextKind != tokenizer.ParenthesesEnd {
+		if nextKind != ParenthesesEnd {
 			return nil, fmt.Errorf("missing closing parentheses")
 		}
-		return grammar.ExpParentheses{
+		return ExpParentheses{
 			Inside: inside,
 		}, nil
 	}
-	if nextKind == tokenizer.Let {
+	if nextKind == Let {
 		parser.unread()
 		return parser.parseLet()
 	}
-	if nextKind == tokenizer.Identifier {
-		return grammar.ExpIdentifier{
+	if nextKind == Identifier {
+		return ExpIdentifier{
 			Name: nextToken,
 		}, nil
 	}
 	return nil, fmt.Errorf("unexpected token while parsing val")
 }
 
-func (parser *Parser) parseLet() (grammar.Exp, error) {
+func (parser *Parser) parseLet() (Exp, error) {
 	letKind, _ := parser.readIgnoreWhiteSpace()
-	if letKind != tokenizer.Let {
+	if letKind != Let {
 		return nil, fmt.Errorf("expected let to come first when parsing let expression")
 	}
 
 	identKind, identifier := parser.readIgnoreWhiteSpace()
-	if identKind != tokenizer.Identifier {
+	if identKind != Identifier {
 		return nil, fmt.Errorf("expected identifier after let in let expression")
 	}
 
 	assign, _ := parser.readIgnoreWhiteSpace()
-	if assign != tokenizer.Assign {
+	if assign != Assign {
 		return nil, fmt.Errorf("expexted = after identifier in let expression")
 	}
 
@@ -145,7 +143,7 @@ func (parser *Parser) parseLet() (grammar.Exp, error) {
 	}
 
 	in, _ := parser.readIgnoreWhiteSpace()
-	if in != tokenizer.In {
+	if in != In {
 		return nil, fmt.Errorf("expected keyword in after first expression in let expression")
 	}
 
@@ -154,7 +152,7 @@ func (parser *Parser) parseLet() (grammar.Exp, error) {
 		return nil, fmt.Errorf("failed to parse last expression in let expression")
 	}
 
-	let := grammar.ExpLet{
+	let := ExpLet{
 		Identifier: identifier,
 		IdentifierExp: exprIdent,
 		Inside: expr,
@@ -163,39 +161,39 @@ func (parser *Parser) parseLet() (grammar.Exp, error) {
 	return let, nil
 }
 
-func (parser *Parser) parseAssign() (grammar.Stmt, error) {
+func (parser *Parser) parseAssign() (Stmt, error) {
 	kind, identifier := parser.readIgnoreWhiteSpace()
-	if kind != tokenizer.Identifier {
+	if kind != Identifier {
 		return nil, fmt.Errorf("failed to parse identifier at start of assign statement")
 	}
 	kind, token := parser.readIgnoreWhiteSpace()
-	if kind != tokenizer.Assign {
+	if kind != Assign {
 		return nil, fmt.Errorf("expected assign operator in assign stmt but got: %s", token)
 	}
 	expr, err := parser.ParseExp()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse expression in assign stmt: %w", err)
 	}
-	return grammar.StmtAssign{Identifier: identifier, Expression: expr}, nil
+	return StmtAssign{Identifier: identifier, Expression: expr}, nil
 }
 
-func (parser *Parser) parsePrintln() (grammar.Stmt, error) {
+func (parser *Parser) parsePrintln() (Stmt, error) {
 	kind, _ := parser.readIgnoreWhiteSpace()
-	if kind != tokenizer.PrintLn {
+	if kind != PrintLn {
 		return nil, fmt.Errorf("expected println keyword at start of println stmt")
 	}
 	expr, err := parser.ParseExp()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse expression in print stmt: %w", err)
 	}
-	return grammar.StmtPrintln{Expression: expr}, nil
+	return StmtPrintln{Expression: expr}, nil
 }
 
-func (parser *Parser) parseSeq() (grammar.Stmt, error) {
-	var statements []grammar.Stmt
+func (parser *Parser) parseSeq() (Stmt, error) {
+	var statements []Stmt
 	for {
 		nextKind, _ := parser.readIgnoreWhiteSpace()
-		if nextKind == tokenizer.Identifier {
+		if nextKind == Identifier {
 			parser.unread()
 			statement, err := parser.parseAssign()
 			if err != nil {
@@ -204,7 +202,7 @@ func (parser *Parser) parseSeq() (grammar.Stmt, error) {
 			statements = append(statements, statement)
 			continue
 		}
-		if nextKind == tokenizer.PrintLn {
+		if nextKind == PrintLn {
 			parser.unread()
 			statement, err := parser.parsePrintln()
 			if err != nil {
@@ -216,5 +214,5 @@ func (parser *Parser) parseSeq() (grammar.Stmt, error) {
 		parser.unread()
 		break
 	}
-	return grammar.StmtSeq{Statements: statements}, nil
+	return StmtSeq{Statements: statements}, nil
 }

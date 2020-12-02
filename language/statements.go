@@ -1,4 +1,4 @@
-package grammar
+package language
 
 type Stmt interface {
 	Execute(ctx Context) (Context, error)

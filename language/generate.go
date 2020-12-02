@@ -1,4 +1,4 @@
-package grammar
+package language
 
 import (
 	"fmt"
@@ -23,14 +23,24 @@ func (output *AssemblyOutput) Start() {
 	output.Operations = append(output.Operations, "extern printf")
 	output.Operations = append(output.Operations, "global main")
 	output.Operations = append(output.Operations, "section .data")
-	output.Operations = append(output.Operations, "format: db '%x', 10, 0")
+	output.Operations = append(output.Operations, "format: db '%d', 10, 0")
 	output.Operations = append(output.Operations, "section .text")
 	output.Operations = append(output.Operations, "main:")
+	output.Operations = append(output.Operations, "push rbx")
 }
 
 func (output *AssemblyOutput) End() {
-	output.Operations = append(output.Operations, "mov rax, 60")
-	output.Operations = append(output.Operations, "syscall")
+	output.Operations = append(output.Operations, "pop rbx")
+
+	for i:=0; i<output.StackSize; i++ {
+
+		output.Operations = append(output.Operations, "pop rbx")
+	}
+
+
+
+	output.Operations = append(output.Operations, "mov rax, 0")
+	output.Operations = append(output.Operations, "ret")
 }
 
 func (output *AssemblyOutput) move(destination string, source string) {
@@ -107,7 +117,7 @@ func (exp ExpParentheses) Generate(output *AssemblyOutput) error {
 
 func (exp ExpNum) Generate(output *AssemblyOutput) error {
 	val := strconv.Itoa(exp.Value)
-	output.move(rax, fmt.Sprintf("0x%s", val))
+	output.move(rax, fmt.Sprintf("%s", val))
 	return nil
 }
 
