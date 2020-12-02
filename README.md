@@ -4,7 +4,7 @@ A simple compiler.
 ### The current grammar that I am trying to implement
 ```
 <seq>        := { <stmt> }
-<stmt>         := <assign> | <prinln>
+<stmt>       := <assign> | <prinln>
 <assign>     := <identifier> "=" <exp>
 <println>    := "println" <exp>
 
