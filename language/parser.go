@@ -191,6 +191,15 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 			statements = append(statements, statement)
 			continue
 		}
+		if nextKind == Call {
+			parser.unread()
+			statement, err := parser.parseCall()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse function call: %w", err)
+			}
+			statements = append(statements, statement)
+			continue
+		}
 		parser.unread()
 		break
 	}
@@ -198,8 +207,37 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 }
 
 func (parser *Parser) parseCall() (ExprStmt, error) {
-	// TODO : parse call
-	return StmtSeq{}, nil
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != Call {
+		return nil, fmt.Errorf("expected call keyword at start of function call")
+	}
+
+	kind, identifier := parser.readIgnoreWhiteSpace()
+	if kind != Identifier {
+		return nil, fmt.Errorf("expected identifier after keyword call in function call")
+	}
+
+	call := FunctionCall{}
+	call.Name = identifier
+
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind == With {
+		for {
+			expr, err := parser.ParseExp()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse expression in function call")
+			}
+			call.Arguments = append(call.Arguments, expr)
+			kind, _ = parser.readIgnoreWhiteSpace()
+			if kind != Comma {
+				break
+			}
+		}
+	} else {
+		parser.unread()
+	}
+
+	return call, nil
 }
 
 func (parser *Parser) parseFunction() (Exp, error) {

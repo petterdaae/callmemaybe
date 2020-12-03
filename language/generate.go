@@ -188,3 +188,8 @@ func (stmt ExpFunction) Generate(output *AssemblyOutput) error {
 	// TODO : implement
 	return nil
 }
+
+func (stmt FunctionCall) Generate(output *AssemblyOutput) error {
+	// TODO : implement
+	return nil
+}

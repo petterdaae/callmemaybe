@@ -167,3 +167,33 @@ func TestFunctionAssignWithType(t *testing.T) {
 	}
 	parseExpectedStmt(t, str, expected)
 }
+
+func TestSimpleFunctionCall(t *testing.T) {
+	str := "call func with 1, 2, 3"
+	expected := language.StmtSeq{
+		Statements: []language.Stmt{
+			language.FunctionCall{
+				Name: "func",
+				Arguments: []language.Exp{
+					language.ExpNum{Value: 1},
+					language.ExpNum{Value: 2},
+					language.ExpNum{Value: 3},
+				},
+			},
+		},
+	}
+	parseExpectedStmt(t, str, expected)
+}
+
+func TestSimpleFunctionCallWithoutArgs(t *testing.T) {
+	str := "call func"
+	expected := language.StmtSeq{
+		Statements: []language.Stmt{
+			language.FunctionCall{
+				Name: "func",
+				Arguments: nil,
+			},
+		},
+	}
+	parseExpectedStmt(t, str, expected)
+}
