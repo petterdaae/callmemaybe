@@ -12,7 +12,6 @@ A simple compiler.
 <val>        := "(" <exp> ")" | <num> | <let> | <identifier>
 <bop>        := "+" | "*"
 <num>        := simple integers
-<let>        := "let" <identifier> "=" <exp> "in" <exp>
 <identifier> := simple words, only letters
 ```
 

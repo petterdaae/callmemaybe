@@ -15,8 +15,6 @@ const (
 	ParenthesesStart
 	ParenthesesEnd
 	Whitespace
-	Let
-	In
 	PrintLn
 	Identifier
 	EOF
@@ -130,14 +128,6 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 	}
 
 	word := buffer.String()
-
-	if word == "let" {
-		return Let, word
-	}
-
-	if word == "in" {
-		return In, word
-	}
 
 	if word == "println" {
 		return PrintLn, word

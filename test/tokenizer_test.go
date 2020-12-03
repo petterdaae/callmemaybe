@@ -17,17 +17,6 @@ func TestIdentifier(t *testing.T) {
 	}
 }
 
-func TestLet(t *testing.T) {
-	tokenizer := language.NewTokenizer(strings.NewReader("let+in"))
-	first, _ := tokenizer.NextToken()
-	tokenizer.NextToken()
-	third, _ := tokenizer.NextToken()
-
-	if first != language.Let || third != language.In {
-		t.Error()
-	}
-}
-
 func TestPrintln(t *testing.T) {
 	tokenizer := language.NewTokenizer(strings.NewReader("println 1"))
 	first, _ := tokenizer.NextToken()

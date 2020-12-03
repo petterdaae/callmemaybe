@@ -1,7 +1,6 @@
 package language
 
 type Exp interface{
-	Evaluate(ctx Context) (int, error)
 	Generate(output *AssemblyOutput) error
 }
 

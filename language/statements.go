@@ -1,7 +1,6 @@
 package language
 
 type Stmt interface {
-	Execute(ctx Context) (Context, error)
 	Generate(output *AssemblyOutput) error
 }
 

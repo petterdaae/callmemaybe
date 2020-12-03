@@ -109,56 +109,12 @@ func (parser *Parser) parseVal() (Exp, error) {
 			Inside: inside,
 		}, nil
 	}
-	if nextKind == Let {
-		parser.unread()
-		return parser.parseLet()
-	}
 	if nextKind == Identifier {
 		return ExpIdentifier{
 			Name: nextToken,
 		}, nil
 	}
 	return nil, fmt.Errorf("unexpected token while parsing val")
-}
-
-func (parser *Parser) parseLet() (Exp, error) {
-	letKind, _ := parser.readIgnoreWhiteSpace()
-	if letKind != Let {
-		return nil, fmt.Errorf("expected let to come first when parsing let expression")
-	}
-
-	identKind, identifier := parser.readIgnoreWhiteSpace()
-	if identKind != Identifier {
-		return nil, fmt.Errorf("expected identifier after let in let expression")
-	}
-
-	assign, _ := parser.readIgnoreWhiteSpace()
-	if assign != Assign {
-		return nil, fmt.Errorf("expexted = after identifier in let expression")
-	}
-
-	exprIdent, err := parser.ParseExp()
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse first expression in let expression")
-	}
-
-	in, _ := parser.readIgnoreWhiteSpace()
-	if in != In {
-		return nil, fmt.Errorf("expected keyword in after first expression in let expression")
-	}
-
-	expr, err := parser.ParseExp()
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse last expression in let expression")
-	}
-
-	let := ExpLet{
-		Identifier: identifier,
-		IdentifierExp: exprIdent,
-		Inside: expr,
-	}
-
-	return let, nil
 }
 
 func (parser *Parser) parseAssign() (Stmt, error) {
