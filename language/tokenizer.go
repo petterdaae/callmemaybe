@@ -28,6 +28,7 @@ const (
 	TypeEmpty
 	Whitespace
 	PrintLn
+	Return
 	Identifier
 	EOF
 	Error
@@ -171,6 +172,8 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return TypeInt, word
 	case "empty":
 		return TypeEmpty, word
+	case "return":
+		return Return, word
 	}
 
 	return Identifier, word

@@ -178,3 +178,13 @@ func (stmt StmtPrintln) Generate(output *AssemblyOutput) error {
 	output.println(rax)
 	return nil
 }
+
+func (stmt StmtReturn) Generate(output *AssemblyOutput) error {
+	// TODO : implement
+	return nil
+}
+
+func (stmt ExpFunction) Generate(output *AssemblyOutput) error {
+	// TODO : implement
+	return nil
+}

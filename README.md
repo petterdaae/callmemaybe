@@ -4,9 +4,10 @@ A simple compiler.
 ### The current grammar that I am trying to implement
 ```
 <seq>         := { <stmt> }
-<stmt>        := <assign> | <prinln> | <call>
+<stmt>        := <assign> | <prinln> | <call> | <return>
 <assign>      := <identifier> "=" <exp>
 <println>     := "println" <exp>
+<return>      := "return" <exp>
 
 <expr>        := <calculation> | <function> | <call>
 <calculation> := <val> { <bop> <val> }
@@ -15,8 +16,8 @@ A simple compiler.
 <num>         := sequence of digits
 <identifier>  := simple words, only letters
 
-<function>    := <argList> "=>" [ <type> ] "{" <seq> [ <exp> ] "}"
-<argList>     := "<" ">" | <arg> | "<" { <arg> "," } <arg> ">"
+<function>    := <argList> "=>" [ <type> ] "{" <seq> "}"
+<argList>     := "<" ">" | "<" { <arg> "," } <arg> ">"
 <arg>         := <identifier> <type>
 
 <call>        := "call" <identifier> [ "with" { <expr> "," } <expr> ]

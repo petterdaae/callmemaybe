@@ -54,6 +54,21 @@ func (parser *Parser) readIgnoreWhiteSpace() (Token, string) {
 }
 
 func (parser *Parser) ParseExp() (Exp, error) {
+	nextKind, _ := parser.readIgnoreWhiteSpace()
+	parser.unread()
+
+	if nextKind == Call {
+		return parser.parseCall()
+	}
+
+	if nextKind == CurlyBracketStart {
+		return parser.parseFunction()
+	}
+
+	return parser.ParseCalculation()
+}
+
+func (parser *Parser) ParseCalculation() (Exp, error) {
 	left, err := parser.parseVal()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse first val in exp: %w", err)
@@ -167,8 +182,89 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 			statements = append(statements, statement)
 			continue
 		}
+		if nextKind == Return {
+			expr, err := parser.ParseExp()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse expression after return: %w", err)
+			}
+			statement := StmtReturn{Expression: expr}
+			statements = append(statements, statement)
+			continue
+		}
 		parser.unread()
 		break
 	}
 	return StmtSeq{Statements: statements}, nil
+}
+
+func (parser *Parser) parseCall() (ExprStmt, error) {
+	// TODO : parse call
+	return StmtSeq{}, nil
+}
+
+func (parser *Parser) parseFunction() (Exp, error) {
+	function := ExpFunction{}
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != CurlyBracketStart {
+		return nil, fmt.Errorf("expected < at start of function expression")
+	}
+
+	for {
+		kind, _ = parser.readIgnoreWhiteSpace()
+		if kind == CurlyBracketEnd {
+			break
+		}
+
+		kind, identifier := parser.readIgnoreWhiteSpace()
+		if kind != Identifier {
+			return nil, fmt.Errorf("expected identifier when parsing argument list, but got %s", identifier)
+		}
+
+		kind, typeName := parser.readIgnoreWhiteSpace()
+		if kind == TypeEmpty {
+			return nil, fmt.Errorf("only non-empty types allowed in function arguments")
+		}
+
+		if kind != TypeInt {
+			return nil, fmt.Errorf("expected non-empty type as argument type when parsing argument list")
+		}
+
+		kind, _ = parser.readIgnoreWhiteSpace()
+
+		function.Args = append(function.Args, Arg{Identifier: identifier, Type: typeName})
+
+		if kind == CurlyBracketEnd {
+			break
+		}
+
+		if kind == Comma {
+			continue
+		}
+
+		return nil, fmt.Errorf("expected comma or end of arguemnt list")
+	}
+
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != Arrow {
+		return nil, fmt.Errorf("expected arrow after argument list when parsing function")
+	}
+
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != CurlyBracketStart {
+		return nil, fmt.Errorf("expected opening curly bracket when parsing function")
+	}
+
+	seq, err := parser.parseSeq()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse statements in function: %w", err)
+	}
+
+	function.Body = seq
+
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != CurlyBracketEnd {
+		return nil, fmt.Errorf("expected closing curly bracker when parsing function")
+	}
+
+	return function, nil
 }

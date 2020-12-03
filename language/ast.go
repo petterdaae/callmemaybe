@@ -32,16 +32,42 @@ type ExpIdentifier struct {
 	Name string
 }
 
-type Function struct {
-	Args []struct {
-		Identifier string
-		Type       string
-	}
-	Seq StmtSeq
-	Result Exp
+type ExpFunction struct {
+	Args []Arg
+	Body Stmt
+}
+
+type Arg struct {
+	Identifier string
+	Type string
 }
 
 type FunctionCall struct {
 	Name string
 	Arguments []Exp
+}
+
+type Stmt interface {
+	Generate(output *AssemblyOutput) error
+}
+
+type StmtSeq struct {
+	Statements []Stmt
+}
+
+type StmtAssign struct {
+	Identifier string
+	Expression Exp
+}
+
+type StmtPrintln struct {
+	Expression Exp
+}
+
+type StmtReturn struct {
+	Expression Exp
+}
+
+type ExprStmt interface {
+	Generate(output *AssemblyOutput) error
 }
