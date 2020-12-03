@@ -3,19 +3,36 @@ A simple compiler.
 
 ### The current grammar that I am trying to implement
 ```
-<seq>        := { <stmt> }
-<stmt>       := <assign> | <prinln>
-<assign>     := <identifier> "=" <exp>
-<println>    := "println" <exp>
+<seq>         := { <stmt> }
+<stmt>        := <assign> | <prinln> | <call>
+<assign>      := <identifier> "=" <exp>
+<println>     := "println" <exp>
 
-<exp>        := <val> { <bop> <val> }
-<val>        := "(" <exp> ")" | <num> | <let> | <identifier>
-<bop>        := "+" | "*"
-<num>        := simple integers
-<identifier> := simple words, only letters
+<expr>        := <calculation> | <function> | <call>
+<exprList>    := { <expr> "," } <expr>
+<calculation> := <val> { <bop> <val> }
+<val>         := "(" <calulation> ")" | <num> | <identifier>
+<bop>         := "+" | "*"
+<num>         := sequence of digits
+<identifier>  := simple words, only letters
+
+<function>    := <argList> => [ <type> ] <block>
+<argList>     := "<" ">" | <arg> | "<" { <arg> "," } <arg> ">"
+<arg>         := <identifier> <type>
+<block>       := "{" <seq> [ <exp> ] "}"
+
+<call>        := "call" <identifier> [ "with" <exprList> ]
+
+<type>        := "int" | "empty"
+
+--------------------------------------------------------------
+
+Current terminals: letters, digits, "{", "}", "(", ")", "<", ">", "+", "*", ",", "call", "with"
 ```
 
 - `{ _ }` means zero or more
+- `[ _ ]` means zero or one
+- `|` means or  
 - Operators are left-associative
 
 ### Resources
