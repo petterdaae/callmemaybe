@@ -12,8 +12,20 @@ const (
 	Plus
 	Multiply
 	Assign
-	ParenthesesStart
-	ParenthesesEnd
+	RoundBracketStart
+	RoundBracketEnd
+	BoxBracketStart
+	BoxBracketEnd
+	CurlyBracketStart
+	CurlyBracketEnd
+	AngleBracketStart
+	AngleBracketEnd
+	Comma
+	Arrow
+	Call
+	With
+	TypeInt
+	TypeEmpty
 	Whitespace
 	PrintLn
 	Identifier
@@ -73,11 +85,30 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 	case '+':
 		return Plus, string(character)
 	case '(':
-		return ParenthesesStart, string(character)
+		return RoundBracketStart, string(character)
 	case ')':
-		return ParenthesesEnd, string(character)
+		return RoundBracketEnd, string(character)
 	case '=':
+		next := tokenizer.read()
+		if next == '>' {
+			return Arrow, "=>"
+		}
+		tokenizer.unread()
 		return Assign, string(character)
+	case '{':
+		return CurlyBracketStart, string(character)
+	case '}':
+		return CurlyBracketEnd, string(character)
+	case '[':
+		return BoxBracketStart, string(character)
+	case ']':
+		return BoxBracketEnd, string(character)
+	case '<':
+		return AngleBracketStart, string(character)
+	case '>':
+		return AngleBracketEnd, string(character)
+	case ',':
+		return Comma, string(character)
 	}
 	
 	return Error, ""
@@ -129,8 +160,17 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 
 	word := buffer.String()
 
-	if word == "println" {
+	switch word {
+	case "println":
 		return PrintLn, word
+	case "call":
+		return Call, word
+	case "with":
+		return With, word
+	case "int":
+		return TypeInt, word
+	case "empty":
+		return TypeEmpty, word
 	}
 
 	return Identifier, word

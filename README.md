@@ -16,7 +16,7 @@ A simple compiler.
 <num>         := sequence of digits
 <identifier>  := simple words, only letters
 
-<function>    := <argList> => [ <type> ] <block>
+<function>    := <argList> "=>" [ <type> ] <block>
 <argList>     := "<" ">" | <arg> | "<" { <arg> "," } <arg> ">"
 <arg>         := <identifier> <type>
 <block>       := "{" <seq> [ <exp> ] "}"
@@ -27,7 +27,8 @@ A simple compiler.
 
 --------------------------------------------------------------
 
-Current terminals: letters, digits, "{", "}", "(", ")", "<", ">", "+", "*", ",", "call", "with"
+Current terminals: letters, digits, "{", "}", "(", ")", "<", ">", "+", "*", ",", "=", 
+    "call", "with", "int", "empty", "println", "=>"
 ```
 
 - `{ _ }` means zero or more

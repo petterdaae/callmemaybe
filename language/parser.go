@@ -96,13 +96,13 @@ func (parser *Parser) parseVal() (Exp, error) {
 			Value: value,
 		}, nil
 	}
-	if nextKind == ParenthesesStart {
+	if nextKind == RoundBracketStart {
 		inside, err := parser.ParseExp()
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse exp in parentheses: %w", err)
 		}
 		nextKind, _ = parser.readIgnoreWhiteSpace()
-		if nextKind != ParenthesesEnd {
+		if nextKind != RoundBracketEnd {
 			return nil, fmt.Errorf("missing closing parentheses")
 		}
 		return ExpParentheses{
