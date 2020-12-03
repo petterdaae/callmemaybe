@@ -23,9 +23,9 @@ func NewParser(reader io.Reader) *Parser {
 
 func (parser *Parser) Parse() (Stmt, error) {
 	stmt, err := parser.parseSeq()
-	nextKind, _ := parser.readIgnoreWhiteSpace()
-	if nextKind != EOF {
-		return nil, fmt.Errorf("failed to parse the entire program")
+	nextKind, nextStr := parser.readIgnoreWhiteSpace()
+	if err == nil && nextKind != EOF {
+		return nil, fmt.Errorf("failed to parse the entire program: %s", nextStr)
 	}
 	return stmt, err
 }
@@ -61,7 +61,7 @@ func (parser *Parser) ParseExp() (Exp, error) {
 		return parser.parseCall()
 	}
 
-	if nextKind == CurlyBracketStart {
+	if nextKind == AngleBracketStart {
 		return parser.parseFunction()
 	}
 
@@ -205,17 +205,16 @@ func (parser *Parser) parseCall() (ExprStmt, error) {
 func (parser *Parser) parseFunction() (Exp, error) {
 	function := ExpFunction{}
 	kind, _ := parser.readIgnoreWhiteSpace()
-	if kind != CurlyBracketStart {
+	if kind != AngleBracketStart {
 		return nil, fmt.Errorf("expected < at start of function expression")
 	}
 
 	for {
-		kind, _ = parser.readIgnoreWhiteSpace()
-		if kind == CurlyBracketEnd {
+		kind, identifier := parser.readIgnoreWhiteSpace()
+		if kind == AngleBracketEnd {
 			break
 		}
 
-		kind, identifier := parser.readIgnoreWhiteSpace()
 		if kind != Identifier {
 			return nil, fmt.Errorf("expected identifier when parsing argument list, but got %s", identifier)
 		}
@@ -233,7 +232,7 @@ func (parser *Parser) parseFunction() (Exp, error) {
 
 		function.Args = append(function.Args, Arg{Identifier: identifier, Type: typeName})
 
-		if kind == CurlyBracketEnd {
+		if kind == AngleBracketEnd {
 			break
 		}
 

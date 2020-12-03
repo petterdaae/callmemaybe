@@ -21,6 +21,21 @@ func parseExpected(t *testing.T, program string, expected language.Exp) {
 	}
 }
 
+
+func parseExpectedStmt(t *testing.T, program string, expected language.Exp) {
+	reader := strings.NewReader(program)
+	parser := language.NewParser(reader)
+	actual, err := parser.Parse()
+
+	if err != nil {
+		t.Error()
+	}
+
+	if !reflect.DeepEqual(actual, expected) {
+		t.Error()
+	}
+}
+
 func TestSimplePlus(t *testing.T) {
 	str := "1 + 2"
 	expected := language.ExpPlus{
@@ -97,4 +112,30 @@ func TestEmptyParentheses(t *testing.T) {
 	if err == nil {
 		t.Error()
 	}
+}
+
+func TestFunctionAssign(t *testing.T) {
+	str := "f = <a int> => { return a }"
+	expected := language.StmtSeq{
+		Statements: []language.Stmt{
+			language.StmtAssign{
+				Identifier: "f",
+				Expression: language.ExpFunction{
+					Args: []language.Arg{
+						language.Arg{Identifier: "a", Type: "int"},
+					},
+					Body: language.StmtSeq{
+						Statements: []language.Stmt{
+							language.StmtReturn{
+								Expression: language.ExpIdentifier{
+									Name: "a",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	parseExpectedStmt(t, str, expected)
 }
