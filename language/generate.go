@@ -26,19 +26,14 @@ func (output *AssemblyOutput) Start() {
 	output.Operations = append(output.Operations, "format: db '%d', 10, 0")
 	output.Operations = append(output.Operations, "section .text")
 	output.Operations = append(output.Operations, "main:")
-	output.Operations = append(output.Operations, "push rbx")
+	output.Operations = append(output.Operations, "push rbx") // stack pointer might not be initialized without doing this?
 }
 
 func (output *AssemblyOutput) End() {
 	output.Operations = append(output.Operations, "pop rbx")
-
 	for i:=0; i<output.StackSize; i++ {
-
-		output.Operations = append(output.Operations, "pop rbx")
+		output.Operations = append(output.Operations, "pop rbx") // stack should be empty at end of program? (fixed segmentation fault)
 	}
-
-
-
 	output.Operations = append(output.Operations, "mov rax, 0")
 	output.Operations = append(output.Operations, "ret")
 }
