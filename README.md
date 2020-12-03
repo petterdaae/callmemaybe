@@ -9,19 +9,17 @@ A simple compiler.
 <println>     := "println" <exp>
 
 <expr>        := <calculation> | <function> | <call>
-<exprList>    := { <expr> "," } <expr>
 <calculation> := <val> { <bop> <val> }
 <val>         := "(" <calulation> ")" | <num> | <identifier>
 <bop>         := "+" | "*"
 <num>         := sequence of digits
 <identifier>  := simple words, only letters
 
-<function>    := <argList> "=>" [ <type> ] <block>
+<function>    := <argList> "=>" [ <type> ] "{" <seq> [ <exp> ] "}"
 <argList>     := "<" ">" | <arg> | "<" { <arg> "," } <arg> ">"
 <arg>         := <identifier> <type>
-<block>       := "{" <seq> [ <exp> ] "}"
 
-<call>        := "call" <identifier> [ "with" <exprList> ]
+<call>        := "call" <identifier> [ "with" { <expr> "," } <expr> ]
 
 <type>        := "int" | "empty"
 

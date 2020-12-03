@@ -1,6 +1,6 @@
 package language
 
-type Exp interface{
+type Exp interface {
 	Generate(output *AssemblyOutput) error
 }
 
@@ -23,11 +23,25 @@ type ExpNum struct {
 }
 
 type ExpLet struct {
-	Identifier string
+	Identifier    string
 	IdentifierExp Exp
-	Inside Exp
+	Inside        Exp
 }
 
 type ExpIdentifier struct {
 	Name string
+}
+
+type Function struct {
+	Args []struct {
+		Identifier string
+		Type       string
+	}
+	Seq StmtSeq
+	Result Exp
+}
+
+type FunctionCall struct {
+	Name string
+	Arguments []Exp
 }
