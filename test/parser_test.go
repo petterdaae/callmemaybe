@@ -133,6 +133,34 @@ func TestFunctionAssign(t *testing.T) {
 							},
 						},
 					},
+					ReturnType: "empty",
+				},
+			},
+		},
+	}
+	parseExpectedStmt(t, str, expected)
+}
+
+func TestFunctionAssignWithType(t *testing.T) {
+	str := "f = <a int> => int { return a }"
+	expected := language.StmtSeq{
+		Statements: []language.Stmt{
+			language.StmtAssign{
+				Identifier: "f",
+				Expression: language.ExpFunction{
+					Args: []language.Arg{
+						language.Arg{Identifier: "a", Type: "int"},
+					},
+					Body: language.StmtSeq{
+						Statements: []language.Stmt{
+							language.StmtReturn{
+								Expression: language.ExpIdentifier{
+									Name: "a",
+								},
+							},
+						},
+					},
+					ReturnType: "int",
 				},
 			},
 		},

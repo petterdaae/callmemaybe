@@ -35,6 +35,7 @@ type ExpIdentifier struct {
 type ExpFunction struct {
 	Args []Arg
 	Body Stmt
+	ReturnType string
 }
 
 type Arg struct {

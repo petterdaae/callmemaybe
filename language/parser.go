@@ -248,7 +248,14 @@ func (parser *Parser) parseFunction() (Exp, error) {
 		return nil, fmt.Errorf("expected arrow after argument list when parsing function")
 	}
 
-	kind, _ = parser.readIgnoreWhiteSpace()
+	kind, typeName := parser.readIgnoreWhiteSpace()
+	if kind == TypeInt {
+		function.ReturnType = typeName
+		kind, _ = parser.readIgnoreWhiteSpace()
+	} else {
+		function.ReturnType = "empty"
+	}
+
 	if kind != CurlyBracketStart {
 		return nil, fmt.Errorf("expected opening curly bracket when parsing function")
 	}
