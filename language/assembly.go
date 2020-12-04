@@ -10,20 +10,19 @@ const (
 	add = "add"
 )
 
-type ContextKind int
-
-const (
-	StackPointer ContextKind = iota
-	ProcedureName
-	Invalid
-)
-
 type AssemblyGenerator struct {
 	contexts             []Context
 	procedureStack       []AssemblyProcedure
 	stackSize            int
 	procedureNameCounter int
+	anonymousProcedures  []AssemblyProcedure
 	Operations           []string
+	allProcedures        []AssemblyProcedure
+}
+
+type AssemblyProcedure struct {
+	name string
+	operations []string
 }
 
 type Context struct {
@@ -46,26 +45,37 @@ func NewAssemblyGenerator() AssemblyGenerator {
 	}
 }
 
+func (gen *AssemblyGenerator) pushAnonymousProcedure(proc AssemblyProcedure) {
+	gen.anonymousProcedures = append(gen.anonymousProcedures, proc)
+}
+
+func (gen *AssemblyGenerator) popAnonymousProcedure() AssemblyProcedure {
+	n := len(gen.anonymousProcedures)
+	temp := gen.anonymousProcedures[n-1]
+	gen.anonymousProcedures = gen.anonymousProcedures[:n-1]
+	return temp
+}
+
 func (gen *AssemblyGenerator) peekContext() Context {
 	n := len(gen.contexts)
 	return gen.contexts[n - 1]
 }
 
-func (gen *AssemblyGenerator) get(field string) (ContextKind, string, error) {
+func (gen *AssemblyGenerator) get(field string) (ExpKind, string, error) {
 	context := gen.peekContext()
 	stack, ok := context.fields[field]
 	if ok {
 		diff := (gen.stackSize - stack) * 8
 		if diff < 0 {
-			return Invalid, "", fmt.Errorf("the stack reference was negative: %d", diff)
+			return InvalidExpKind, "", fmt.Errorf("the stack reference was negative: %d", diff)
 		}
-		return StackPointer, fmt.Sprintf("[%s+%d]", rsp, diff), nil
+		return StackExp, fmt.Sprintf("[%s+%d]", rsp, diff), nil
 	}
 	proc, ok := context.procedures[field]
 	if ok {
-		return ProcedureName, proc, nil
+		return ProcExp, proc, nil
 	}
-	return Invalid, "", fmt.Errorf("field not available in current context: %s", field)
+	return InvalidExpKind, "", fmt.Errorf("field not available in current context: %s", field)
 }
 
 func (gen *AssemblyGenerator) pushToStack(field string) {
@@ -73,10 +83,13 @@ func (gen *AssemblyGenerator) pushToStack(field string) {
 }
 
 func (gen *AssemblyGenerator) pushContext() {
-	// TODO : copy context to stack
 	fieldsCopy := make(map[string]int)
+	size := len(gen.peekContext().fields)
 	for k, v := range gen.peekContext().fields {
-		fieldsCopy[k] = v
+		_, address, _ := gen.get(k)
+		gen.move(rax, address)
+		gen.push(rax)
+		fieldsCopy[k] = v + size
 	}
 	proceduresCopy := make(map[string]string)
 	for k, v := range gen.peekContext().procedures {
@@ -88,6 +101,11 @@ func (gen *AssemblyGenerator) pushContext() {
 func (gen *AssemblyGenerator) popContext() {
 	n := len(gen.contexts)
 	gen.contexts = gen.contexts[:n-1]
+}
+
+func (gen *AssemblyGenerator) nameLastAnonymousProc(name string) {
+	proc := gen.popAnonymousProcedure()
+	gen.peekContext().procedures[name] = proc.name
 }
 
 func (gen *AssemblyGenerator) pushProcedure() {
@@ -105,12 +123,9 @@ func (gen *AssemblyGenerator) peekProcedure() AssemblyProcedure {
 
 func (gen *AssemblyGenerator) popProcedure() {
 	n := len(gen.procedureStack)
+	gen.anonymousProcedures = append(gen.anonymousProcedures, gen.procedureStack[n-1])
 	gen.procedureStack = gen.procedureStack[:n-1]
-}
-
-type AssemblyProcedure struct {
-	name string
-	operations []string
+	gen.allProcedures = append(gen.allProcedures, gen.procedureStack[n-1])
 }
 
 func (gen *AssemblyGenerator) Start() {

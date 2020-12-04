@@ -17,7 +17,7 @@ func (exp ExpPlus) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	}
 	gen.pop(rbx)
 	gen.add(rax, rbx)
-	return InvalidExpKind, nil
+	return StackExp, nil
 }
 
 func (exp ExpMultiply) Generate(gen *AssemblyGenerator) (ExpKind, error) {
@@ -32,7 +32,7 @@ func (exp ExpMultiply) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	}
 	gen.pop(rbx)
 	gen.mult(rax, rbx)
-	return InvalidExpKind, nil
+	return StackExp, nil
 }
 
 func (exp ExpParentheses) Generate(gen *AssemblyGenerator) (ExpKind, error) {
@@ -40,33 +40,22 @@ func (exp ExpParentheses) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to generate code for inside of parentheses exp: %w", err)
 	}
-	return InvalidExpKind, nil
+	return StackExp, nil
 }
 
 func (exp ExpNum) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	val := strconv.Itoa(exp.Value)
 	gen.move(rax, fmt.Sprintf("%s", val))
-	return InvalidExpKind, nil
+	return StackExp, nil
 }
 
 func (exp ExpIdentifier) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	/*
-	identifierStackPos, ok := gen.Identifiers[exp.Name]
-	if !ok {
-		return fmt.Errorf("uknown identifier: %s", exp.Name)
-	}
-	diff := (gen.StackSize - identifierStackPos) * 8
-	if diff < 0 {
-		return fmt.Errorf("negative stack position for identifier: %s", exp.Name)
-	}
-	identifierAddr := fmt.Sprintf("[%s+%d]", rsp, diff)
-	*/
-	_, addr, err := gen.get(exp.Name)
+	kind, addr, err := gen.get(exp.Name)
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to evaluate identifer: %w", err)
 	}
 	gen.move(rax, addr)
-	return InvalidExpKind, nil
+	return kind, nil
 }
 
 func (stmt StmtSeq) Generate(gen *AssemblyGenerator) error {
@@ -80,12 +69,17 @@ func (stmt StmtSeq) Generate(gen *AssemblyGenerator) error {
 }
 
 func (stmt StmtAssign) Generate(gen *AssemblyGenerator) error {
-	_, err := stmt.Expression.Generate(gen)
+	kind, err := stmt.Expression.Generate(gen)
 	if err != nil {
 		return fmt.Errorf("failed to generate code for expression in assign statement: %w", err)
 	}
-	gen.push(rax)
-	gen.pushToStack(stmt.Identifier)
+	if kind == StackExp {
+		gen.push(rax)
+		gen.pushToStack(stmt.Identifier)
+	}
+	if kind == ProcExp {
+		gen.nameLastAnonymousProc(stmt.Identifier)
+	}
 	return nil
 }
 
@@ -103,9 +97,19 @@ func (stmt StmtReturn) Generate(gen *AssemblyGenerator) error {
 	return nil
 }
 
-func (stmt ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	// TODO : implement
-	return InvalidExpKind, nil
+func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
+	gen.pushContext()
+	gen.pushProcedure()
+
+	err := exp.Body.Generate(gen)
+	if err != nil {
+		return InvalidExpKind, fmt.Errorf("failed to generate function body: %w", err)
+	}
+
+	gen.popProcedure()
+	gen.popContext()
+
+	return ProcExp, nil
 }
 
 func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
