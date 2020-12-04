@@ -22,8 +22,18 @@ func Compile(program string) (string, error) {
 	}
 	assembly := ""
 	for i := range gen.Operations {
-		assembly += gen.Operations[i] + "\n"
+		assembly += "\t" + gen.Operations[i] + "\n"
 	}
+
+	for i := range gen.AllProcedures {
+		proc := gen.AllProcedures[i]
+		assembly += proc.Name + ":\n"
+		for j := range proc.Operations {
+			assembly += "\t" + proc.Operations[j] + "\n"
+		}
+
+	}
+
 	return assembly, nil
 }
 

@@ -106,7 +106,10 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 		return InvalidExpKind, fmt.Errorf("failed to generate function body: %w", err)
 	}
 
-	gen.popProcedure()
+	err = gen.popProcedure()
+	if err != nil {
+		return InvalidExpKind, fmt.Errorf("failed to pop procedure: %w", err)
+	}
 	gen.popContext()
 
 	return ProcExp, nil

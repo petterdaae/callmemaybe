@@ -17,12 +17,12 @@ type AssemblyGenerator struct {
 	procedureNameCounter int
 	anonymousProcedures  []AssemblyProcedure
 	Operations           []string
-	allProcedures        []AssemblyProcedure
+	AllProcedures        []AssemblyProcedure
 }
 
 type AssemblyProcedure struct {
-	name string
-	operations []string
+	Name       string
+	Operations []string
 }
 
 type Context struct {
@@ -105,27 +105,35 @@ func (gen *AssemblyGenerator) popContext() {
 
 func (gen *AssemblyGenerator) nameLastAnonymousProc(name string) {
 	proc := gen.popAnonymousProcedure()
-	gen.peekContext().procedures[name] = proc.name
+	gen.peekContext().procedures[name] = proc.Name
 }
 
 func (gen *AssemblyGenerator) pushProcedure() {
 	gen.procedureNameCounter++
 	newProcedure := AssemblyProcedure{
-		name: fmt.Sprintf("proc%d", gen.procedureNameCounter),
+		Name: fmt.Sprintf("proc%d", gen.procedureNameCounter),
 	}
 	gen.procedureStack = append(gen.procedureStack, newProcedure)
 }
 
-func (gen *AssemblyGenerator) peekProcedure() AssemblyProcedure {
+func (gen *AssemblyGenerator) peekProcedure() (*AssemblyProcedure, error) {
 	n := len(gen.procedureStack)
-	return gen.procedureStack[n-1]
+	if n == 0 {
+		return nil, fmt.Errorf("procedureStack is empty")
+	}
+	return &gen.procedureStack[n-1], nil
 }
 
-func (gen *AssemblyGenerator) popProcedure() {
+func (gen *AssemblyGenerator) popProcedure() error {
 	n := len(gen.procedureStack)
-	gen.anonymousProcedures = append(gen.anonymousProcedures, gen.procedureStack[n-1])
+	if n == 0 {
+		return fmt.Errorf("procedureStack is empty")
+	}
+	last := gen.procedureStack[n-1]
+	gen.anonymousProcedures = append(gen.anonymousProcedures, last)
+	gen.AllProcedures = append(gen.AllProcedures, last)
 	gen.procedureStack = gen.procedureStack[:n-1]
-	gen.allProcedures = append(gen.allProcedures, gen.procedureStack[n-1])
+	return nil
 }
 
 func (gen *AssemblyGenerator) Start() {
@@ -147,13 +155,17 @@ func (gen *AssemblyGenerator) End() {
 	gen.Operations = append(gen.Operations, "ret")
 }
 
-func (gen *AssemblyGenerator) addOperation(operation string) {
+func (gen *AssemblyGenerator) addOperation(operation string) error {
 	if len(gen.procedureStack) > 0 {
-		procedure := gen.peekProcedure()
-		procedure.operations = append(procedure.operations, operation)
+		procedure, err := gen.peekProcedure()
+		if err != nil {
+			return fmt.Errorf("failed to peek procedure")
+		}
+		procedure.Operations = append(procedure.Operations, operation)
 	} else {
 		gen.Operations = append(gen.Operations, operation)
 	}
+	return nil
 }
 
 func (gen *AssemblyGenerator) move(destination string, source string) {
