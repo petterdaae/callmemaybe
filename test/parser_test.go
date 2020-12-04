@@ -22,7 +22,7 @@ func parseExpected(t *testing.T, program string, expected language.Exp) {
 }
 
 
-func parseExpectedStmt(t *testing.T, program string, expected language.Exp) {
+func parseExpectedStmt(t *testing.T, program string, expected language.Stmt) {
 	reader := strings.NewReader(program)
 	parser := language.NewParser(reader)
 	actual, err := parser.Parse()
@@ -169,15 +169,18 @@ func TestFunctionAssignWithType(t *testing.T) {
 }
 
 func TestSimpleFunctionCall(t *testing.T) {
-	str := "call func with 1, 2, 3"
+	str := "a = call func with 1, 2, 3"
 	expected := language.StmtSeq{
 		Statements: []language.Stmt{
-			language.FunctionCall{
-				Name: "func",
-				Arguments: []language.Exp{
-					language.ExpNum{Value: 1},
-					language.ExpNum{Value: 2},
-					language.ExpNum{Value: 3},
+			language.StmtAssign{
+				Identifier: "a",
+				Expression: language.FunctionCall{
+					Name: "func",
+					Arguments: []language.Exp{
+						language.ExpNum{Value: 1},
+						language.ExpNum{Value: 2},
+						language.ExpNum{Value: 3},
+					},
 				},
 			},
 		},
@@ -186,12 +189,15 @@ func TestSimpleFunctionCall(t *testing.T) {
 }
 
 func TestSimpleFunctionCallWithoutArgs(t *testing.T) {
-	str := "call func"
+	str := "a = call func"
 	expected := language.StmtSeq{
 		Statements: []language.Stmt{
-			language.FunctionCall{
-				Name: "func",
-				Arguments: nil,
+			language.StmtAssign{
+				Identifier: "a",
+				Expression: language.FunctionCall{
+					Name:      "func",
+					Arguments: nil,
+				},
 			},
 		},
 	}

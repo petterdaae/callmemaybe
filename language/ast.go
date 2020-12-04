@@ -1,7 +1,15 @@
 package language
 
+type ExpKind int
+
+const (
+	StackExp ExpKind = iota
+	ProcExp
+	InvalidExpKind
+)
+
 type Exp interface {
-	Generate(output *AssemblyOutput) error
+	Generate(gen AssemblyGenerator) (ExpKind, error)
 }
 
 type ExpPlus struct {
@@ -49,7 +57,7 @@ type FunctionCall struct {
 }
 
 type Stmt interface {
-	Generate(output *AssemblyOutput) error
+	Generate(gen AssemblyGenerator) error
 }
 
 type StmtSeq struct {
@@ -67,8 +75,4 @@ type StmtPrintln struct {
 
 type StmtReturn struct {
 	Expression Exp
-}
-
-type ExprStmt interface {
-	Generate(output *AssemblyOutput) error
 }

@@ -191,22 +191,22 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 			statements = append(statements, statement)
 			continue
 		}
-		if nextKind == Call {
-			parser.unread()
-			statement, err := parser.parseCall()
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse function call: %w", err)
-			}
-			statements = append(statements, statement)
-			continue
-		}
+		//if nextKind == Call {
+		//	parser.unread()
+		//	statement, err := parser.parseCall()
+		//	if err != nil {
+		//		return nil, fmt.Errorf("failed to parse function call: %w", err)
+		//	}
+		//	statements = append(statements, statement)
+		//	continue
+		//}
 		parser.unread()
 		break
 	}
 	return StmtSeq{Statements: statements}, nil
 }
 
-func (parser *Parser) parseCall() (ExprStmt, error) {
+func (parser *Parser) parseCall() (Exp, error) {
 	kind, _ := parser.readIgnoreWhiteSpace()
 	if kind != Call {
 		return nil, fmt.Errorf("expected call keyword at start of function call")

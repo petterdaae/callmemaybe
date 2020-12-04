@@ -13,20 +13,16 @@ func Compile(program string) (string, error) {
 		return "", err
 	}
 
-	out := language.AssemblyOutput{
-		Operations: []string{},
-		StackSize: 0,
-		Identifiers: make(map[string]int),
-	}
-	out.Start()
-	err = ast.Generate(&out)
-	out.End()
+	gen := language.NewAssemblyGenerator()
+	gen.Start()
+	err = ast.Generate(gen)
+	gen.End()
 	if err != nil {
 		return "", err
 	}
 	assembly := ""
-	for i := range out.Operations {
-		assembly += out.Operations[i] + "\n"
+	for i := range gen.Operations {
+		assembly += gen.Operations[i] + "\n"
 	}
 	return assembly, nil
 }
