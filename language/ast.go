@@ -9,7 +9,7 @@ const (
 )
 
 type Exp interface {
-	Generate(gen AssemblyGenerator) (ExpKind, error)
+	Generate(gen *AssemblyGenerator) (ExpKind, error)
 }
 
 type ExpPlus struct {
@@ -28,12 +28,6 @@ type ExpParentheses struct {
 
 type ExpNum struct {
 	Value int
-}
-
-type ExpLet struct {
-	Identifier    string
-	IdentifierExp Exp
-	Inside        Exp
 }
 
 type ExpIdentifier struct {
@@ -57,7 +51,7 @@ type FunctionCall struct {
 }
 
 type Stmt interface {
-	Generate(gen AssemblyGenerator) error
+	Generate(gen *AssemblyGenerator) error
 }
 
 type StmtSeq struct {

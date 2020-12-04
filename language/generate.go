@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func (exp ExpPlus) Generate(gen AssemblyGenerator) (ExpKind, error) {
+func (exp ExpPlus) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	_, err := exp.Left.Generate(gen)
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to generate code for left side of plus exp: %w", err)
@@ -20,7 +20,7 @@ func (exp ExpPlus) Generate(gen AssemblyGenerator) (ExpKind, error) {
 	return InvalidExpKind, nil
 }
 
-func (exp ExpMultiply) Generate(gen AssemblyGenerator) (ExpKind, error) {
+func (exp ExpMultiply) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	_, err := exp.Left.Generate(gen)
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to generate code for left side of multiply exp: %w", err)
@@ -35,7 +35,7 @@ func (exp ExpMultiply) Generate(gen AssemblyGenerator) (ExpKind, error) {
 	return InvalidExpKind, nil
 }
 
-func (exp ExpParentheses) Generate(gen AssemblyGenerator) (ExpKind, error) {
+func (exp ExpParentheses) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	_, err := exp.Inside.Generate(gen)
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to generate code for inside of parentheses exp: %w", err)
@@ -43,28 +43,13 @@ func (exp ExpParentheses) Generate(gen AssemblyGenerator) (ExpKind, error) {
 	return InvalidExpKind, nil
 }
 
-func (exp ExpNum) Generate(gen AssemblyGenerator) (ExpKind, error) {
+func (exp ExpNum) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	val := strconv.Itoa(exp.Value)
 	gen.move(rax, fmt.Sprintf("%s", val))
 	return InvalidExpKind, nil
 }
 
-func (exp ExpLet) Generate(gen AssemblyGenerator) (ExpKind, error) {
-	_, err := exp.IdentifierExp.Generate(gen)
-	if err != nil {
-		return InvalidExpKind, fmt.Errorf("failed to generate code for identifier exp in let exp: %w", err)
-	}
-	gen.push(rax)
-	gen.pushToStack(exp.Identifier)
-	_, err = exp.Inside.Generate(gen)
-	if err != nil {
-		return InvalidExpKind, fmt.Errorf("failed to generate code for exp inside let exp: %w", err)
-	}
-	gen.pop(rbx)
-	return InvalidExpKind, nil
-}
-
-func (exp ExpIdentifier) Generate(gen AssemblyGenerator) (ExpKind, error) {
+func (exp ExpIdentifier) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	/*
 	identifierStackPos, ok := gen.Identifiers[exp.Name]
 	if !ok {
@@ -84,7 +69,7 @@ func (exp ExpIdentifier) Generate(gen AssemblyGenerator) (ExpKind, error) {
 	return InvalidExpKind, nil
 }
 
-func (stmt StmtSeq) Generate(gen AssemblyGenerator) error {
+func (stmt StmtSeq) Generate(gen *AssemblyGenerator) error {
 	for i := range stmt.Statements {
 		err := stmt.Statements[i].Generate(gen)
 		if err != nil {
@@ -94,7 +79,7 @@ func (stmt StmtSeq) Generate(gen AssemblyGenerator) error {
 	return nil
 }
 
-func (stmt StmtAssign) Generate(gen AssemblyGenerator) error {
+func (stmt StmtAssign) Generate(gen *AssemblyGenerator) error {
 	_, err := stmt.Expression.Generate(gen)
 	if err != nil {
 		return fmt.Errorf("failed to generate code for expression in assign statement: %w", err)
@@ -104,7 +89,7 @@ func (stmt StmtAssign) Generate(gen AssemblyGenerator) error {
 	return nil
 }
 
-func (stmt StmtPrintln) Generate(gen AssemblyGenerator) error {
+func (stmt StmtPrintln) Generate(gen *AssemblyGenerator) error {
 	_, err := stmt.Expression.Generate(gen)
 	if err != nil {
 		return fmt.Errorf("failed to generate code for expression in println: %w", err)
@@ -113,17 +98,17 @@ func (stmt StmtPrintln) Generate(gen AssemblyGenerator) error {
 	return nil
 }
 
-func (stmt StmtReturn) Generate(gen AssemblyGenerator) error {
+func (stmt StmtReturn) Generate(gen *AssemblyGenerator) error {
 	// TODO : implement
 	return nil
 }
 
-func (stmt ExpFunction) Generate(gen AssemblyGenerator) (ExpKind, error) {
+func (stmt ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	// TODO : implement
 	return InvalidExpKind, nil
 }
 
-func (stmt FunctionCall) Generate(gen AssemblyGenerator) (ExpKind, error) {
+func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	// TODO : implement
 	return InvalidExpKind, nil
 }

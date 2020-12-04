@@ -15,7 +15,7 @@ func Compile(program string) (string, error) {
 
 	gen := language.NewAssemblyGenerator()
 	gen.Start()
-	err = ast.Generate(gen)
+	err = ast.Generate(&gen)
 	gen.End()
 	if err != nil {
 		return "", err

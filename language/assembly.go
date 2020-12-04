@@ -46,12 +46,12 @@ func NewAssemblyGenerator() AssemblyGenerator {
 	}
 }
 
-func (gen AssemblyGenerator) peekContext() Context {
+func (gen *AssemblyGenerator) peekContext() Context {
 	n := len(gen.contexts)
 	return gen.contexts[n - 1]
 }
 
-func (gen AssemblyGenerator) get(field string) (ContextKind, string, error) {
+func (gen *AssemblyGenerator) get(field string) (ContextKind, string, error) {
 	context := gen.peekContext()
 	stack, ok := context.fields[field]
 	if ok {
@@ -68,11 +68,11 @@ func (gen AssemblyGenerator) get(field string) (ContextKind, string, error) {
 	return Invalid, "", fmt.Errorf("field not available in current context: %s", field)
 }
 
-func (gen AssemblyGenerator) pushToStack(field string) {
+func (gen *AssemblyGenerator) pushToStack(field string) {
 	gen.peekContext().fields[field] = gen.stackSize
 }
 
-func (gen AssemblyGenerator) pushContext() {
+func (gen *AssemblyGenerator) pushContext() {
 	// TODO : copy context to stack
 	fieldsCopy := make(map[string]int)
 	for k, v := range gen.peekContext().fields {
@@ -85,12 +85,12 @@ func (gen AssemblyGenerator) pushContext() {
 	gen.contexts = append(gen.contexts, Context{fields: fieldsCopy, procedures: proceduresCopy})
 }
 
-func (gen AssemblyGenerator) popContext() {
+func (gen *AssemblyGenerator) popContext() {
 	n := len(gen.contexts)
 	gen.contexts = gen.contexts[:n-1]
 }
 
-func (gen AssemblyGenerator) pushProcedure() {
+func (gen *AssemblyGenerator) pushProcedure() {
 	gen.procedureNameCounter++
 	newProcedure := AssemblyProcedure{
 		name: fmt.Sprintf("proc%d", gen.procedureNameCounter),
@@ -98,12 +98,12 @@ func (gen AssemblyGenerator) pushProcedure() {
 	gen.procedureStack = append(gen.procedureStack, newProcedure)
 }
 
-func (gen AssemblyGenerator) peekProcedure() AssemblyProcedure {
+func (gen *AssemblyGenerator) peekProcedure() AssemblyProcedure {
 	n := len(gen.procedureStack)
 	return gen.procedureStack[n-1]
 }
 
-func (gen AssemblyGenerator) popProcedure() {
+func (gen *AssemblyGenerator) popProcedure() {
 	n := len(gen.procedureStack)
 	gen.procedureStack = gen.procedureStack[:n-1]
 }
@@ -132,7 +132,7 @@ func (gen *AssemblyGenerator) End() {
 	gen.Operations = append(gen.Operations, "ret")
 }
 
-func (gen AssemblyGenerator) addOperation(operation string) {
+func (gen *AssemblyGenerator) addOperation(operation string) {
 	if len(gen.procedureStack) > 0 {
 		procedure := gen.peekProcedure()
 		procedure.operations = append(procedure.operations, operation)
@@ -141,34 +141,34 @@ func (gen AssemblyGenerator) addOperation(operation string) {
 	}
 }
 
-func (gen AssemblyGenerator) move(destination string, source string) {
+func (gen *AssemblyGenerator) move(destination string, source string) {
 	line := fmt.Sprintf("mov %s, %s", destination, source)
 	gen.addOperation(line)
 }
 
-func (gen AssemblyGenerator) add(destination string, value string) {
+func (gen *AssemblyGenerator) add(destination string, value string) {
 	line := fmt.Sprintf("%s %s, %s", add, destination, value)
 	gen.addOperation(line)
 }
 
-func (gen AssemblyGenerator) mult(destination string, value string) {
+func (gen *AssemblyGenerator) mult(destination string, value string) {
 	line := fmt.Sprintf("imul %s, %s", destination, value)
 	gen.addOperation(line)
 }
 
-func (gen AssemblyGenerator) push(value string) {
+func (gen *AssemblyGenerator) push(value string) {
 	line := fmt.Sprintf("push %s", value)
 	gen.stackSize++
 	gen.addOperation(line)
 }
 
-func (gen AssemblyGenerator) pop(destination string) {
+func (gen *AssemblyGenerator) pop(destination string) {
 	line := fmt.Sprintf("pop %s", destination)
 	gen.stackSize--
 	gen.addOperation(line)
 }
 
-func (gen AssemblyGenerator) println(value string) {
+func (gen *AssemblyGenerator) println(value string) {
 	gen.addOperation(fmt.Sprintf("mov rdi, format"))
 	gen.addOperation(fmt.Sprintf("mov rsi, %s", value))
 	gen.addOperation(fmt.Sprintf("xor rax, rax"))
