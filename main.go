@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/alecthomas/kong"
 	"os"
 	"os/exec"
@@ -74,7 +75,7 @@ func (args *Nasm) Run() error {
 	if err != nil {
 		return nil
 	}
-	println(nasm)
+	fmt.Println(nasm)
 	return nil
 }
 

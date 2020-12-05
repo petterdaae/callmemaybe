@@ -1,6 +1,5 @@
-c = 2
-a = <> => {
-    b = 3
-    a = 2 + c
-    println a
+x = 42
+f = <> => {
+    println x + 1
 }
+b = call f

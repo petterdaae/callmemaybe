@@ -98,18 +98,6 @@ func (stmt StmtReturn) Generate(gen *AssemblyGenerator) error {
 }
 
 func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	/*
-	This does not work, possible solution:
-	- record stack pointer when procedure was created
-	  and use this to dynamically change the addresses
-	  that are referred to in different calls to the
-	  procedure
-	- should not update the global stack size when generating
-	  for the procedure body ("this does not happen before the
-	  procedure is called
-	- the reason for segmentation fault is that the stack is popped
-	  when it is actually empty
-	 */
 	gen.pushContext()
 	gen.pushProcedure()
 
@@ -118,7 +106,7 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 		return InvalidExpKind, fmt.Errorf("failed to generate function body: %w", err)
 	}
 
-	err = gen.popProcedure()
+	gen.popProcedure()
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to pop procedure: %w", err)
 	}
@@ -128,6 +116,9 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 }
 
 func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	// TODO : implement
+	err := gen.call(stmt.Name)
+	if err != nil {
+		return InvalidExpKind, fmt.Errorf("failed to call function: %w", err)
+	}
 	return InvalidExpKind, nil
 }

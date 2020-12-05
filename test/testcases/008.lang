@@ -1,0 +1,6 @@
+x = 42
+f = <> => {
+    y = x + 1
+    println y
+}
+b = call f

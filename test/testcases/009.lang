@@ -1,0 +1,15 @@
+A = 42
+first = <> => {
+    println A + 1
+}
+B = 37
+a = call first
+C = 12
+second = <> => {
+    D = 8
+    println B + D
+}
+b = call first
+c = call second
+E = 14
+d = call second

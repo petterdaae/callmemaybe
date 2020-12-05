@@ -34,6 +34,7 @@ Current terminals: letters, digits, "{", "}", "(", ")", "<", ">", "+", "*", ",",
 - `[ _ ]` means zero or one
 - `|` means or  
 - Operators are left-associative
+- Should not be possible to ignore function return types
 
 ### Resources
 - The structure of the tokenizer and parser is inspired by this blog post: https://blog.gopheracademy.com/advent-2014/parsers-lexers/.
