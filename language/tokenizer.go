@@ -152,7 +152,7 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 
 	for {
 		character := tokenizer.read()
-		if !unicode.IsLetter(character) {
+		if !unicode.IsLetter(character) && !unicode.IsDigit(character){
 			tokenizer.unread()
 			break
 		}

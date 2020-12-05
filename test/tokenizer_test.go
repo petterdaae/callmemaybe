@@ -17,6 +17,21 @@ func TestIdentifier(t *testing.T) {
 	}
 }
 
+func TestIdentifierStartingWithDigit(t *testing.T) {
+	tokenizer := language.NewTokenizer(strings.NewReader("4sound"))
+	first, _ := tokenizer.NextToken()
+
+	if first == language.Identifier {
+		t.Error()
+	}
+
+	tokenizer = language.NewTokenizer(strings.NewReader("proc1"))
+	first, text := tokenizer.NextToken()
+	if first != language.Identifier || text != "proc1" {
+		t.Error()
+	}
+}
+
 func TestPrintln(t *testing.T) {
 	tokenizer := language.NewTokenizer(strings.NewReader("println 1"))
 	first, _ := tokenizer.NextToken()

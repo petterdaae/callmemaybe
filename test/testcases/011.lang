@@ -1,0 +1,7 @@
+outer = <> => {
+    inner = <> => {
+        println 5
+    }
+    temp1 = call inner
+}
+temp2 = call outer
