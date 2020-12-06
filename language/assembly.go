@@ -10,7 +10,7 @@ const (
 	rbx = "rbx"
 	rcx = "rcx"
 	rdx = "rdx"
-	rsp = "rsp" // stack pointer
+	rsp = "rsp"
 	add = "add"
 	sub = "sub"
 )
@@ -68,21 +68,10 @@ func (gen *AssemblyGenerator) peekContext() Context {
 }
 
 func (gen *AssemblyGenerator) get(field string) (ExpKind, string, error) {
-	// Get the context
 	context := gen.peekContext()
-
-	// Get the stack time of the field
 	stack, ok := context.fields[field]
-
 	if ok {
-		// Find the difference
 		diff := (gen.stackSize - stack) * 8
-
-		if diff < 0 {
-			return InvalidExpKind, "", fmt.Errorf("the stack reference was negative: %d", diff)
-		}
-
-		// Special case if we are inside a procedure
 		if len(gen.procedureStack) != 0 {
 			procedure := gen.peekProcedure()
 			if stack > procedure.stackSizeWhenInitialized {
@@ -90,7 +79,6 @@ func (gen *AssemblyGenerator) get(field string) (ExpKind, string, error) {
 			}
 			return StackExp, fmt.Sprintf("[%s+%s+%d+%d]", rsp, rcx, diff, 8), nil
 		}
-
 		return StackExp, fmt.Sprintf("[%s+%d]", rsp, diff), nil
 	}
 	proc, ok := context.procedures[field]
@@ -106,7 +94,6 @@ func (gen *AssemblyGenerator) pushToStack(field string) {
 
 func (gen *AssemblyGenerator) pushContext() {
 	fieldsCopy := make(map[string]int)
-	// size := len(gen.peekContext().fields)
 	for k, _ := range gen.peekContext().fields {
 		_, address, _ := gen.get(k)
 		gen.move(rax, address)
@@ -155,9 +142,7 @@ func (gen *AssemblyGenerator) popProcedure() {
 	for i := 0; i < diff; i++ {
 		gen.pop(rax)
 	}
-
 	gen.ret()
-
 	gen.anonymousProcedures = append(gen.anonymousProcedures, last)
 	gen.AllProcedures = append(gen.AllProcedures, last)
 	gen.procedureStack = gen.procedureStack[:n-1]
@@ -170,13 +155,13 @@ func (gen *AssemblyGenerator) Start() {
 	gen.Operations = append(gen.Operations, "format: db '%d', 10, 0")
 	gen.Operations = append(gen.Operations, "section .text")
 	gen.Operations = append(gen.Operations, "main:")
-	gen.Operations = append(gen.Operations, "push rbx") // stack pointer might not be initialized without doing this?
+	gen.Operations = append(gen.Operations, "push rbx")
 }
 
 func (gen *AssemblyGenerator) End() {
 	gen.Operations = append(gen.Operations, "pop rbx")
 	for i := 0; i < gen.stackSize; i++ {
-		gen.Operations = append(gen.Operations, "pop rbx") // stack should be empty at end of program? (fixed segmentation fault)
+		gen.Operations = append(gen.Operations, "pop rbx")
 	}
 	gen.Operations = append(gen.Operations, "mov rax, 0")
 	gen.Operations = append(gen.Operations, "ret")
@@ -232,7 +217,6 @@ func (gen *AssemblyGenerator) call(name string) error {
 	if kind != ProcExp || err != nil {
 		return fmt.Errorf("failed to call procedure with name: %s", name)
 	}
-
 	var procedure *AssemblyProcedure
 	for i := range gen.AllProcedures {
 		p := gen.AllProcedures[i]
@@ -240,14 +224,10 @@ func (gen *AssemblyGenerator) call(name string) error {
 			procedure = p
 		}
 	}
-
 	if procedure == nil {
 		return fmt.Errorf("failed to find procedure with name: %s", actualName)
 	}
-
 	gen.move(rcx, strconv.Itoa(gen.stackSize))
-
-
 	gen.addOperation(fmt.Sprintf("call %s", actualName))
 	return nil
 }
