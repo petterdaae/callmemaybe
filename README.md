@@ -36,6 +36,16 @@ Current terminals: letters, digits, "{", "}", "(", ")", "<", ">", "+", "*", ",",
 - Operators are left-associative
 - Should not be possible to ignore function return types
 
+### TODO
+- Refactor
+- Bind func args when calling + function returns
+- Booleans
+- If
+- Loop
+- Strings & IO
+- Typechecking  
+- Structs
+
 ### Resources
 - The structure of the tokenizer and parser is inspired by this blog post: https://blog.gopheracademy.com/advent-2014/parsers-lexers/.
 - This site was very helpful when constructing the grammar: http://www.engr.mun.ca/~theo/Misc/exp_parsing.htm.
