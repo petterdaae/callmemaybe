@@ -2,6 +2,7 @@ package language
 
 import (
 	"fmt"
+	"lang/language/assembly"
 	"strconv"
 )
 
@@ -16,19 +17,11 @@ const (
 )
 
 type AssemblyGenerator struct {
-	contexts             []Context
-	procedureStack       []*AssemblyProcedure
+	contexts             *assembly.Contexts
 	stackSize            int
-	procedureNameCounter int
-	anonymousProcedures  []*AssemblyProcedure
 	Operations           []string
-	AllProcedures        []*AssemblyProcedure
-}
-
-type AssemblyProcedure struct {
-	Name                     string
-	Operations               []string
-	stackSizeWhenInitialized int
+	AllProcedures        []*assembly.Procedure
+	NamelessProcedures   []*assembly.Procedure
 }
 
 type Context struct {
@@ -37,115 +30,11 @@ type Context struct {
 }
 
 func NewAssemblyGenerator() AssemblyGenerator {
-	fields := make(map[string]int)
-	procedures := make(map[string]string)
 	return AssemblyGenerator{
-		contexts: []Context{{
-			fields:     fields,
-			procedures: procedures,
-		}},
-		procedureStack:       []*AssemblyProcedure{},
+		contexts: assembly.NewContexts(),
 		stackSize:            0,
-		procedureNameCounter: 0,
 		Operations:           []string{},
 	}
-}
-
-func (gen *AssemblyGenerator) pushAnonymousProcedure(proc *AssemblyProcedure) {
-	gen.anonymousProcedures = append(gen.anonymousProcedures, proc)
-}
-
-func (gen *AssemblyGenerator) popAnonymousProcedure() *AssemblyProcedure {
-	n := len(gen.anonymousProcedures)
-	temp := gen.anonymousProcedures[n-1]
-	gen.anonymousProcedures = gen.anonymousProcedures[:n-1]
-	return temp
-}
-
-func (gen *AssemblyGenerator) peekContext() Context {
-	n := len(gen.contexts)
-	return gen.contexts[n-1]
-}
-
-func (gen *AssemblyGenerator) get(field string) (ExpKind, string, error) {
-	context := gen.peekContext()
-	stack, ok := context.fields[field]
-	if ok {
-		diff := (gen.stackSize - stack) * 8
-		if len(gen.procedureStack) != 0 {
-			procedure := gen.peekProcedure()
-			if stack > procedure.stackSizeWhenInitialized {
-				return StackExp, fmt.Sprintf("[%s+%d]", rsp, diff), nil
-			}
-			return StackExp, fmt.Sprintf("[%s+%s+%d+%d]", rsp, rcx, diff, 8), nil
-		}
-		return StackExp, fmt.Sprintf("[%s+%d]", rsp, diff), nil
-	}
-	proc, ok := context.procedures[field]
-	if ok {
-		return ProcExp, proc, nil
-	}
-	return InvalidExpKind, "", fmt.Errorf("field not available in current context: %s", field)
-}
-
-func (gen *AssemblyGenerator) pushToStack(field string) {
-	gen.peekContext().fields[field] = gen.stackSize
-}
-
-func (gen *AssemblyGenerator) pushContext() {
-	fieldsCopy := make(map[string]int)
-	for k, _ := range gen.peekContext().fields {
-		_, address, _ := gen.get(k)
-		gen.move(rax, address)
-		gen.push(rax)
-		fieldsCopy[k] = gen.stackSize
-	}
-	proceduresCopy := make(map[string]string)
-	for k, v := range gen.peekContext().procedures {
-		proceduresCopy[k] = v
-	}
-	gen.contexts = append(gen.contexts, Context{fields: fieldsCopy, procedures: proceduresCopy})
-}
-
-func (gen *AssemblyGenerator) popContext() {
-	n := len(gen.contexts)
-	gen.contexts = gen.contexts[:n-1]
-}
-
-func (gen *AssemblyGenerator) nameLastAnonymousProc(name string) {
-	proc := gen.popAnonymousProcedure()
-	gen.peekContext().procedures[name] = proc.Name
-}
-
-func (gen *AssemblyGenerator) pushProcedure() {
-	gen.procedureNameCounter++
-	newProcedure := AssemblyProcedure{
-		Name: fmt.Sprintf("proc%d", gen.procedureNameCounter),
-		stackSizeWhenInitialized: gen.stackSize,
-	}
-	gen.procedureStack = append(gen.procedureStack, &newProcedure)
-	gen.move(rdx, strconv.Itoa(gen.stackSize))
-	gen.sub(rcx, rdx)
-	gen.mult(rcx, "8")
-}
-
-func (gen *AssemblyGenerator) peekProcedure() *AssemblyProcedure {
-	n := len(gen.procedureStack)
-	return gen.procedureStack[n-1]
-}
-
-func (gen *AssemblyGenerator) popProcedure() {
-	n := len(gen.procedureStack)
-	last := gen.procedureStack[n-1]
-
-	diff := gen.stackSize - last.stackSizeWhenInitialized
-	for i := 0; i < diff; i++ {
-		gen.pop(rax)
-	}
-	gen.ret()
-	gen.anonymousProcedures = append(gen.anonymousProcedures, last)
-	gen.AllProcedures = append(gen.AllProcedures, last)
-	gen.procedureStack = gen.procedureStack[:n-1]
 }
 
 func (gen *AssemblyGenerator) Start() {
@@ -168,15 +57,15 @@ func (gen *AssemblyGenerator) End() {
 }
 
 func (gen *AssemblyGenerator) addOperation(operation string) {
-	if len(gen.procedureStack) > 0 {
-		procedure := gen.peekProcedure()
+	procedure := gen.contexts.GetTopProcedure()
+	if procedure != nil {
 		procedure.Operations = append(procedure.Operations, operation)
 	} else {
 		gen.Operations = append(gen.Operations, operation)
 	}
 }
 
-func (gen *AssemblyGenerator) move(destination string, source string) {
+func (gen *AssemblyGenerator) mov(destination string, source string) {
 	line := fmt.Sprintf("mov %s, %s", destination, source)
 	gen.addOperation(line)
 }
@@ -213,11 +102,11 @@ func (gen *AssemblyGenerator) ret() {
 }
 
 func (gen *AssemblyGenerator) call(name string) error {
-	kind, actualName, err := gen.get(name)
-	if kind != ProcExp || err != nil {
+	kind, actualName, err := gen.contexts.Get(name, gen.stackSize)
+	if kind != assembly.ProcedureElem || err != nil {
 		return fmt.Errorf("failed to call procedure with name: %s", name)
 	}
-	var procedure *AssemblyProcedure
+	var procedure *assembly.Procedure
 	for i := range gen.AllProcedures {
 		p := gen.AllProcedures[i]
 		if p.Name == actualName {
@@ -227,9 +116,27 @@ func (gen *AssemblyGenerator) call(name string) error {
 	if procedure == nil {
 		return fmt.Errorf("failed to find procedure with name: %s", actualName)
 	}
-	gen.move(rcx, strconv.Itoa(gen.stackSize))
+	gen.mov(rcx, strconv.Itoa(gen.stackSize))
 	gen.addOperation(fmt.Sprintf("call %s", actualName))
 	return nil
+}
+
+func (gen *AssemblyGenerator) AddOperations(operations []string) {
+	for _, operation := range operations {
+		gen.addOperation(operation)
+	}
+}
+
+func (gen *AssemblyGenerator) PushNamelessProcedure(procedure *assembly.Procedure) {
+	gen.NamelessProcedures = append(gen.NamelessProcedures, procedure)
+	gen.AllProcedures = append(gen.AllProcedures, procedure)
+}
+
+func (gen *AssemblyGenerator) NameNamelessProcedure(name string) {
+	n := len(gen.NamelessProcedures)
+	recent := gen.NamelessProcedures[n-1]
+	gen.contexts.ProcInsert(name, recent.Name)
+	gen.NamelessProcedures = gen.NamelessProcedures[:n-1]
 }
 
 func (gen *AssemblyGenerator) println(value string) {

@@ -2,6 +2,7 @@ package language
 
 import (
 	"fmt"
+	"lang/language/assembly"
 	"strconv"
 )
 
@@ -45,17 +46,26 @@ func (exp ExpParentheses) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 
 func (exp ExpNum) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	val := strconv.Itoa(exp.Value)
-	gen.move(rax, fmt.Sprintf("%s", val))
+	gen.mov(rax, fmt.Sprintf("%s", val))
 	return StackExp, nil
 }
 
 func (exp ExpIdentifier) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	kind, addr, err := gen.get(exp.Name)
+	kind, addr, err := gen.contexts.Get(exp.Name, gen.stackSize)
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to evaluate identifer: %w", err)
 	}
-	gen.move(rax, addr)
-	return kind, nil
+	gen.mov(rax, addr)
+
+	translatedKind := InvalidExpKind
+	if kind == assembly.ProcedureElem {
+		translatedKind = ProcExp
+	} else {
+		translatedKind = StackExp
+	}
+
+
+	return translatedKind, nil
 }
 
 func (stmt StmtSeq) Generate(gen *AssemblyGenerator) error {
@@ -74,11 +84,15 @@ func (stmt StmtAssign) Generate(gen *AssemblyGenerator) error {
 		return fmt.Errorf("failed to generate code for expression in assign statement: %w", err)
 	}
 	if kind == StackExp {
-		gen.push(rax)
-		gen.pushToStack(stmt.Identifier)
+		operations, pushes, err := gen.contexts.StackInsert(stmt.Identifier, rax, gen.stackSize)
+		if err != nil {
+			return fmt.Errorf("failed to insert element into stack: %w", err)
+		}
+		gen.AddOperations(operations)
+		gen.stackSize += pushes
 	}
 	if kind == ProcExp {
-		gen.nameLastAnonymousProc(stmt.Identifier)
+		gen.NameNamelessProcedure(stmt.Identifier)
 	}
 	return nil
 }
@@ -98,19 +112,19 @@ func (stmt StmtReturn) Generate(gen *AssemblyGenerator) error {
 }
 
 func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	gen.pushContext()
-	gen.pushProcedure()
+	operations, pushes := gen.contexts.NewContext(true, gen.stackSize)
+	gen.AddOperations(operations)
+	gen.stackSize += pushes
 
 	err := exp.Body.Generate(gen)
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to generate function body: %w", err)
 	}
 
-	gen.popProcedure()
-	if err != nil {
-		return InvalidExpKind, fmt.Errorf("failed to pop procedure: %w", err)
-	}
-	gen.popContext()
+	pops, context := gen.contexts.Pop(gen.stackSize)
+	gen.stackSize -= pops
+
+	gen.PushNamelessProcedure(context.Procedure)
 
 	return ProcExp, nil
 }
