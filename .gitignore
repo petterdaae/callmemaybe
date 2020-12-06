@@ -3,3 +3,4 @@
 lang
 out
 *.o
+temp.asm

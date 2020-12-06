@@ -35,18 +35,18 @@ func NewContexts() *Contexts {
 	}
 }
 
-func (contexts Contexts) push(context *context) {
+func (contexts *Contexts) Push(context *context) {
 	contexts.stack = append(contexts.stack, context)
 }
 
-func (contexts Contexts) NewContext(newProcedure bool, stackSize int) ([]string, int) {
+func (contexts *Contexts) NewContext(newProcedure bool, stackSize int) (*context, []string, int) {
 	var operations []string
 	initStackSize := stackSize
 	current := contexts.Peek()
 	stackCopy := make(map[string]int)
 	for k, _ := range current.stack {
 		_, address, _ := contexts.Get(k, stackSize)
-		operations = append(operations, fmt.Sprintf("move rax, %s", address))
+		operations = append(operations, fmt.Sprintf("mov rax, %s", address))
 		operations = append(operations, fmt.Sprintf("push rax"))
 		stackSize++
 		stackCopy[k] = stackSize
@@ -73,17 +73,14 @@ func (contexts Contexts) NewContext(newProcedure bool, stackSize int) ([]string,
 		Procedure:  proc,
 	}
 
-	contexts.push(new)
-
-	return operations, stackSize - initStackSize
-
+	return new, operations, stackSize - initStackSize
 }
 
-func (contexts Contexts) Size() int {
+func (contexts *Contexts) Size() int {
 	return len(contexts.stack)
 }
 
-func (contexts Contexts) Peek() *context {
+func (contexts *Contexts) Peek() *context {
 	size := contexts.Size()
 	if size == 0 {
 		return nil
@@ -91,7 +88,7 @@ func (contexts Contexts) Peek() *context {
 	return contexts.stack[size-1]
 }
 
-func (contexts Contexts) Pop(stackSize int) (int, *context) {
+func (contexts *Contexts) Pop(stackSize int) (int, *context) {
 	result := contexts.Peek()
 	if result == nil {
 		return 0, nil
@@ -105,7 +102,7 @@ func (contexts Contexts) Pop(stackSize int) (int, *context) {
 	return pops, result
 }
 
-func (contexts Contexts) getFromContext(context *context, name string, stackSize int) (ContextElementType, string, error) {
+func (contexts *Contexts) getFromContext(context *context, name string, stackSize int) (ContextElementType, string, error) {
 	if context == nil {
 		return InvalidElem, "", fmt.Errorf("context stack is empty")
 	}
@@ -135,7 +132,7 @@ func (contexts Contexts) getFromContext(context *context, name string, stackSize
 	return InvalidElem, "", fmt.Errorf("could not get '%s' from context", name)
 }
 
-func (contexts Contexts) GetTopProcedure() *Procedure {
+func (contexts *Contexts) GetTopProcedure() *Procedure {
 	for i := contexts.Size() - 1; i >= 0; i-- {
 		current := contexts.stack[i].Procedure
 		if current != nil {
@@ -145,29 +142,29 @@ func (contexts Contexts) GetTopProcedure() *Procedure {
 	return nil
 }
 
-func (contexts Contexts) Get(name string, stackSize int) (ContextElementType, string, error) {
+func (contexts *Contexts) Get(name string, stackSize int) (ContextElementType, string, error) {
 	context := contexts.Peek()
 	return contexts.getFromContext(context, name, stackSize)
 }
 
-func (contexts Contexts) StackInsert(name string, value string, stackSize int) ([]string, int, error) {
+func (contexts *Contexts) StackInsert(name string, value string, stackSize int) ([]string, int, error) {
 	var operations []string
-	pushes := 0
+	initStackSize := stackSize
 	top := contexts.Peek()
 	if top == nil {
 		return nil, 0, fmt.Errorf("context stack is empty")
 	}
 
-	// If Name is not in current stack
+	// If name is not in current stack
 	_, ok := top.stack[name]
 	if !ok {
 		operations = append(operations, fmt.Sprintf("push %s", value))
-		pushes++
+		stackSize++
 		top.stack[name] = stackSize
-		return operations, pushes, nil
+		return operations, stackSize - initStackSize, nil
 	}
 
-	// If Name is in current stack
+	// If name is in current stack
 	if top.Procedure == nil {
 		for i := contexts.Size() - 1; i >= 0; i-- {
 			current := contexts.stack[i]
@@ -185,9 +182,36 @@ func (contexts Contexts) StackInsert(name string, value string, stackSize int) (
 		}
 	}
 
-	return operations, pushes, nil
+	return operations, initStackSize - stackSize, nil
 }
 
-func (contexts Contexts) ProcInsert(name string, alias string) error {
+func (contexts *Contexts) ProcInsert(name string, alias string) error {
+	top := contexts.Peek()
+	if top == nil {
+		return fmt.Errorf("context stack is empty")
+	}
+
+	_, ok := top.procedures[name]
+	if !ok {
+		top.procedures[name] = alias
+		return nil
+	}
+
+	if top.Procedure == nil {
+		for i := contexts.Size() - 1; i >= 0; i-- {
+			current := contexts.stack[i]
+			_, ok := current.procedures[name]
+			if !ok {
+				break
+			}
+
+			current.procedures[name] = alias
+
+			if current.Procedure != nil {
+				break
+			}
+		}
+	}
+
 	return nil
 }

@@ -112,9 +112,10 @@ func (stmt StmtReturn) Generate(gen *AssemblyGenerator) error {
 }
 
 func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	operations, pushes := gen.contexts.NewContext(true, gen.stackSize)
+	newContext, operations, pushes := gen.contexts.NewContext(true, gen.stackSize)
 	gen.AddOperations(operations)
 	gen.stackSize += pushes
+	gen.contexts.Push(newContext)
 
 	err := exp.Body.Generate(gen)
 	if err != nil {
