@@ -1,0 +1,6 @@
+twice = <x int> => {
+    println x
+    println x
+}
+
+temp = call twice with 42

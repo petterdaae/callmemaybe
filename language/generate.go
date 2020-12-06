@@ -117,6 +117,16 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	gen.stackSize += pushes
 	gen.contexts.Push(newContext)
 
+	for i := 0; i < len(exp.Args); i++ {
+		arg := exp.Args[i]
+		operations, pushes, err := gen.contexts.StackInsert(arg.Identifier, "0", gen.stackSize)
+		if err != nil {
+			return InvalidExpKind, fmt.Errorf("failed to init function args: %w", err)
+		}
+		gen.AddOperations(operations)
+		gen.stackSize += pushes
+	}
+
 	err := exp.Body.Generate(gen)
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to generate function body: %w", err)

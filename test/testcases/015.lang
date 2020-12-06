@@ -1,0 +1,7 @@
+a = 42
+
+f = <g int> => {
+    b = g + 2
+}
+
+println a
