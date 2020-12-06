@@ -155,7 +155,6 @@ func (contexts *Contexts) StackInsert(name string, value string, stackSize int) 
 		return nil, 0, fmt.Errorf("context stack is empty")
 	}
 
-	// If name is not in current stack
 	_, ok := top.stack[name]
 	if !ok {
 		operations = append(operations, fmt.Sprintf("push %s", value))
@@ -164,7 +163,6 @@ func (contexts *Contexts) StackInsert(name string, value string, stackSize int) 
 		return operations, stackSize - initStackSize, nil
 	}
 
-	// If name is in current stack
 	if top.Procedure == nil {
 		for i := contexts.Size() - 1; i >= 0; i-- {
 			current := contexts.stack[i]
@@ -177,9 +175,18 @@ func (contexts *Contexts) StackInsert(name string, value string, stackSize int) 
 			operations = append(operations, fmt.Sprintf("mov %s, %s", address, value))
 
 			if current.Procedure != nil {
+				operations = append(operations, fmt.Sprintf("push %s", value))
+				stackSize++
+				current.stack[name] = stackSize
+				return operations, stackSize - initStackSize, nil
 				break
 			}
 		}
+	} else {
+		operations = append(operations, fmt.Sprintf("push %s", value))
+		stackSize++
+		top.stack[name] = stackSize
+		return operations, stackSize - initStackSize, nil
 	}
 
 	return operations, initStackSize - stackSize, nil

@@ -1,0 +1,10 @@
+a = 2
+
+f = <> => {
+    a = 3
+    println a
+}
+
+b = call f
+
+println a

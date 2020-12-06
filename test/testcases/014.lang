@@ -1,0 +1,20 @@
+a = 0
+
+f = <> => {
+    a = 1
+    g = <> => {
+        a = 2
+        h = <> => {
+            a = 3
+            println a
+        }
+        t1 = call h
+        println a
+    }
+    t2 = call g
+    println a
+}
+
+t3 = call f
+
+println a
