@@ -106,7 +106,11 @@ func (stmt StmtPrintln) Generate(gen *AssemblyGenerator) error {
 }
 
 func (stmt StmtReturn) Generate(gen *AssemblyGenerator) error {
-	// TODO : implement
+	_, err := stmt.Expression.Generate(gen)
+	if err != nil {
+		return fmt.Errorf("failed to evaluate expression when returning: %w", err)
+	}
+	gen.ret()
 	return nil
 }
 
@@ -162,5 +166,5 @@ func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 		return InvalidExpKind, fmt.Errorf("failed to call function: %w", err)
 	}
 
-	return InvalidExpKind, nil
+	return StackExp, nil
 }

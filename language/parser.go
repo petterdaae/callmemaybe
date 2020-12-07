@@ -230,6 +230,7 @@ func (parser *Parser) parseCall() (Exp, error) {
 			call.Arguments = append(call.Arguments, expr)
 			kind, _ = parser.readIgnoreWhiteSpace()
 			if kind != Comma {
+				parser.unread()
 				break
 			}
 		}

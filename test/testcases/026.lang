@@ -1,0 +1,7 @@
+f = <> => int {
+    return 10
+}
+
+a = call f
+
+println a
