@@ -1,0 +1,13 @@
+outer = <a int, b int> => int {
+    plus2 = <x int> => int {
+        return x + 2
+    }
+
+    plus3 = <x int> => int {
+        return x + 3
+    }
+
+    return (call plus2 with a) * (call plus3 with b)
+}
+
+println call outer with 2, 2

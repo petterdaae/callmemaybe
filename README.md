@@ -43,6 +43,7 @@ Current terminals: letters, digits, "{", "}", "(", ")", "<", ">", "+", "*", ",",
 - Booleans
 - If
 - Loop
+- Refactor  
 - Strings & IO
 - Typechecking  
 - Structs
