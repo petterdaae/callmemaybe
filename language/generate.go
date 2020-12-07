@@ -117,15 +117,13 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	gen.stackSize += pushes
 	gen.contexts.Push(newContext)
 
+	initStackSize := newContext.Procedure.StackSizeWhenInitialized
 	for i := 0; i < len(exp.Args); i++ {
 		arg := exp.Args[i]
-		operations, pushes, err := gen.contexts.StackInsert(arg.Identifier, "0", gen.stackSize)
-		if err != nil {
-			return InvalidExpKind, fmt.Errorf("failed to init function args: %w", err)
-		}
-		gen.AddOperations(operations)
-		gen.stackSize += pushes
+		gen.contexts.Peek().Stack[arg.Identifier] = initStackSize + i + 1
 	}
+
+	gen.stackSize += len(exp.Args) + 1
 
 	err := exp.Body.Generate(gen)
 	if err != nil {
@@ -141,7 +139,14 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 }
 
 func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
+	for _, arg := range stmt.Arguments {
+		arg.Generate(gen)
+		gen.pushWithoutIncreasingStackSize(rax)
+	}
+
 	err := gen.call(stmt.Name)
+
+
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to call function: %w", err)
 	}

@@ -18,7 +18,7 @@ type Contexts struct {
 
 type context struct {
 	procedures map[string]string
-	stack      map[string]int
+	Stack      map[string]int
 	Procedure  *Procedure
 }
 
@@ -27,7 +27,7 @@ func NewContexts() *Contexts {
 		stack: []*context{
 			&context{
 				procedures: make(map[string]string),
-				stack:      make(map[string]int),
+				Stack:      make(map[string]int),
 				Procedure:  nil,
 			},
 		},
@@ -44,7 +44,7 @@ func (contexts *Contexts) NewContext(newProcedure bool, stackSize int) (*context
 	initStackSize := stackSize
 	current := contexts.Peek()
 	stackCopy := make(map[string]int)
-	for k, _ := range current.stack {
+	for k, _ := range current.Stack {
 		_, address, _ := contexts.Get(k, stackSize)
 		operations = append(operations, fmt.Sprintf("mov rax, %s", address))
 		operations = append(operations, fmt.Sprintf("push rax"))
@@ -60,15 +60,15 @@ func (contexts *Contexts) NewContext(newProcedure bool, stackSize int) (*context
 	if newProcedure {
 		contexts.procedureNameCounter++
 		proc = &Procedure{
-			Name:                 fmt.Sprintf("proc%d", contexts.procedureNameCounter),
-			Operations:           []string{},
-			stackSizeWhenCreated: stackSize,
+			Name:                     fmt.Sprintf("proc%d", contexts.procedureNameCounter),
+			Operations:               []string{},
+			StackSizeWhenInitialized: stackSize,
 		}
 		proc.start(stackSize)
 	}
 
 	new := &context{
-		stack:      stackCopy,
+		Stack:      stackCopy,
 		procedures: proceduresCopy,
 		Procedure:  proc,
 	}
@@ -109,12 +109,12 @@ func (contexts *Contexts) getFromContext(context *context, name string, stackSiz
 
 	procedure := contexts.GetTopProcedure()
 
-	stack, ok := context.stack[name]
+	stack, ok := context.Stack[name]
 	if ok {
 		diff := (stackSize - stack) * 8
 
 		if procedure != nil {
-			if stack > procedure.stackSizeWhenCreated {
+			if stack > procedure.StackSizeWhenInitialized {
 				return StackElem, fmt.Sprintf("[rsp+%d]", diff), nil
 			}
 
@@ -155,18 +155,18 @@ func (contexts *Contexts) StackInsert(name string, value string, stackSize int) 
 		return nil, 0, fmt.Errorf("context stack is empty")
 	}
 
-	_, ok := top.stack[name]
+	_, ok := top.Stack[name]
 	if !ok {
 		operations = append(operations, fmt.Sprintf("push %s", value))
 		stackSize++
-		top.stack[name] = stackSize
+		top.Stack[name] = stackSize
 		return operations, stackSize - initStackSize, nil
 	}
 
 	if top.Procedure == nil {
 		for i := contexts.Size() - 1; i >= 0; i-- {
 			current := contexts.stack[i]
-			_, ok := current.stack[name]
+			_, ok := current.Stack[name]
 			if !ok {
 				break
 			}
@@ -177,15 +177,14 @@ func (contexts *Contexts) StackInsert(name string, value string, stackSize int) 
 			if current.Procedure != nil {
 				operations = append(operations, fmt.Sprintf("push %s", value))
 				stackSize++
-				current.stack[name] = stackSize
+				current.Stack[name] = stackSize
 				return operations, stackSize - initStackSize, nil
 				break
 			}
 		}
 	} else {
-		operations = append(operations, fmt.Sprintf("push %s", value))
-		stackSize++
-		top.stack[name] = stackSize
+		_, address, _ := contexts.getFromContext(top, name, stackSize)
+		operations = append(operations, fmt.Sprintf("mov %s, %s", address, value))
 		return operations, stackSize - initStackSize, nil
 	}
 

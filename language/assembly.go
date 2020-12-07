@@ -86,6 +86,12 @@ func (gen *AssemblyGenerator) push(value string) {
 	gen.addOperation(line)
 }
 
+
+func (gen *AssemblyGenerator) pushWithoutIncreasingStackSize(value string) {
+	line := fmt.Sprintf("push %s", value)
+	gen.addOperation(line)
+}
+
 func (gen *AssemblyGenerator) pop(destination string) {
 	line := fmt.Sprintf("pop %s", destination)
 	gen.stackSize--
@@ -116,6 +122,7 @@ func (gen *AssemblyGenerator) call(name string) error {
 	if procedure == nil {
 		return fmt.Errorf("failed to find procedure with name: %s", actualName)
 	}
+
 	gen.mov(rcx, strconv.Itoa(gen.stackSize))
 	gen.addOperation(fmt.Sprintf("call %s", actualName))
 	return nil

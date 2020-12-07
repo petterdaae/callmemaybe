@@ -5,9 +5,9 @@ import (
 )
 
 type Procedure struct{
-	Name                 string
-	Operations           []string
-	stackSizeWhenCreated int
+	Name                     string
+	Operations               []string
+	StackSizeWhenInitialized int
 }
 
 func (proc *Procedure) start(stackSize int) {
@@ -17,7 +17,7 @@ func (proc *Procedure) start(stackSize int) {
 }
 
 func (proc *Procedure) end(stackSize int) int {
-	diff := stackSize - proc.stackSizeWhenCreated
+	diff := stackSize - proc.StackSizeWhenInitialized
 	for i := 0; i < diff; i++ {
 		proc.Operations = append(proc.Operations, fmt.Sprintf("pop rax"))
 	}
