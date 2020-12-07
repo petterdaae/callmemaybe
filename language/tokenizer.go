@@ -31,6 +31,10 @@ const (
 	Return
 	Identifier
 	Placeholder
+	True
+	False
+	If
+	Equals
 	EOF
 	Error
 )
@@ -94,6 +98,9 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		next := tokenizer.read()
 		if next == '>' {
 			return Arrow, "=>"
+		}
+		if next == '=' {
+			return Equals, "=="
 		}
 		tokenizer.unread()
 		return Assign, string(character)
@@ -177,6 +184,12 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return TypeEmpty, word
 	case "return":
 		return Return, word
+	case "if":
+		return If, word
+	case "true":
+		return True, word
+	case "false":
+		return False, word
 	}
 
 	return Identifier, word
