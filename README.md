@@ -4,17 +4,20 @@ A simple compiler.
 ### The current grammar that I am trying to implement
 ```
 <seq>         := { <stmt> }
-<stmt>        := <assign> | <prinln> | <call> | <return>
+<stmt>        := <assign> | <prinln> | <call> | <return> | <if>
 <assign>      := <identifier> "=" <exp> | "_" "=" <exp>
 <println>     := "println" <exp>
 <return>      := "return" <exp>
 
 <expr>        := <calculation> | <function> | <call>
 <calculation> := <val> { <bop> <val> }
-<val>         := "(" <calulation> ")" | <num> | <identifier>
-<bop>         := "+" | "*"
+<val>         := "(" <calulation> ")" | <num> | <identifier> | <bool>
+<bop>         := "+" | "*" | "<" | ">" | "=="
 <num>         := sequence of digits
 <identifier>  := simple words, only letters
+
+<if>          := "if" <expr> "{" <seq> "}" // Typecheck this later
+<bool>        := "true" | "false"
 
 <function>    := <argList> "=>" [ <type> ] "{" <seq> "}"
 <argList>     := "<" ">" | "<" { <arg> "," } <arg> ">"
@@ -37,7 +40,6 @@ Current terminals: letters, digits, "{", "}", "(", ")", "<", ">", "+", "*", ",",
 - Should not be possible to ignore function return types
 
 ### TODO
-- Bind func args when calling + function returns
 - Booleans
 - If
 - Loop
