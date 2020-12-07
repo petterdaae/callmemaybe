@@ -1,0 +1,5 @@
+twoArgs = <a int, b int> => {
+    println a + b
+}
+
+z = call twoArgs with 2, 3

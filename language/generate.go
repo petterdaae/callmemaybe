@@ -64,7 +64,6 @@ func (exp ExpIdentifier) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 		translatedKind = StackExp
 	}
 
-
 	return translatedKind, nil
 }
 
@@ -117,23 +116,38 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	gen.stackSize += pushes
 	gen.contexts.Push(newContext)
 
-	initStackSize := newContext.Procedure.StackSizeWhenInitialized
-	for i := 0; i < len(exp.Args); i++ {
-		arg := exp.Args[i]
-		gen.contexts.Peek().Stack[arg.Identifier] = initStackSize + i + 1
+	if len(exp.Args) != 0 {
+		initStackSize := newContext.Procedure.StackSizeWhenInitialized
+		for i := 1; i <= len(exp.Args); i++ {
+			arg := exp.Args[i-1]
+			gen.contexts.Peek().Stack[arg.Identifier] = initStackSize + i
+		}
+
+		gen.stackSize += len(exp.Args) + 1
 	}
 
-	gen.stackSize += len(exp.Args) + 1
+
+
 
 	err := exp.Body.Generate(gen)
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to generate function body: %w", err)
 	}
 
+
+
+
+	if len(exp.Args) != 0 {
+		gen.stackSize -= len(exp.Args) + 1
+	}
+
+
 	pops, context := gen.contexts.Pop(gen.stackSize)
 	gen.stackSize -= pops
-
 	gen.PushNamelessProcedure(context.Procedure)
+
+
+
 
 	return ProcExp, nil
 }
@@ -145,10 +159,12 @@ func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	}
 
 	err := gen.call(stmt.Name)
-
-
+	for range stmt.Arguments {
+		gen.popWithoutDecreasingStackSize(rbx)
+	}
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to call function: %w", err)
 	}
+
 	return InvalidExpKind, nil
 }

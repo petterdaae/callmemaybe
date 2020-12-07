@@ -37,7 +37,6 @@ Current terminals: letters, digits, "{", "}", "(", ")", "<", ">", "+", "*", ",",
 - Should not be possible to ignore function return types
 
 ### TODO
-- Refactor
 - Bind func args when calling + function returns
 - Booleans
 - If

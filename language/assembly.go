@@ -98,6 +98,12 @@ func (gen *AssemblyGenerator) pop(destination string) {
 	gen.addOperation(line)
 }
 
+
+func (gen *AssemblyGenerator) popWithoutDecreasingStackSize(destination string) {
+	line := fmt.Sprintf("pop %s", destination)
+	gen.addOperation(line)
+}
+
 func (gen *AssemblyGenerator) sub(destination string, value string) {
 	line := fmt.Sprintf("%s %s, %s", sub, destination, value)
 	gen.addOperation(line)
