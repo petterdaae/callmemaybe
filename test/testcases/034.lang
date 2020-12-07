@@ -1,0 +1,6 @@
+what = <> => bool {
+    return true
+}
+
+a = call what
+println a

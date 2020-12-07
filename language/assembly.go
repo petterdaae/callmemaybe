@@ -16,11 +16,12 @@ const (
 )
 
 type AssemblyGenerator struct {
-	contexts             *assembly.Contexts
-	stackSize            int
-	Operations           []string
-	AllProcedures        []*assembly.Procedure
-	NamelessProcedures   []*assembly.Procedure
+	contexts           *assembly.Contexts
+	stackSize          int
+	Operations         []string
+	AllProcedures      []*assembly.Procedure
+	NamelessProcedures []*assembly.Procedure
+	aliasCounter       int
 }
 
 type Context struct {
@@ -30,9 +31,10 @@ type Context struct {
 
 func NewAssemblyGenerator() AssemblyGenerator {
 	return AssemblyGenerator{
-		contexts: assembly.NewContexts(),
-		stackSize:            0,
-		Operations:           []string{},
+		contexts:   assembly.NewContexts(),
+		stackSize:  0,
+		Operations: []string{},
+		aliasCounter: 0,
 	}
 }
 
@@ -64,6 +66,11 @@ func (gen *AssemblyGenerator) addOperation(operation string) {
 	}
 }
 
+func (gen *AssemblyGenerator) generateUniqueAlias() string {
+	gen.aliasCounter++
+	return fmt.Sprintf("alias%d", gen.aliasCounter)
+}
+
 func (gen *AssemblyGenerator) mov(destination string, source string) {
 	line := fmt.Sprintf("mov %s, %s", destination, source)
 	gen.addOperation(line)
@@ -85,7 +92,6 @@ func (gen *AssemblyGenerator) push(value string) {
 	gen.addOperation(line)
 }
 
-
 func (gen *AssemblyGenerator) pushWithoutIncreasingStackSize(value string) {
 	line := fmt.Sprintf("push %s", value)
 	gen.addOperation(line)
@@ -96,7 +102,6 @@ func (gen *AssemblyGenerator) pop(destination string) {
 	gen.stackSize--
 	gen.addOperation(line)
 }
-
 
 func (gen *AssemblyGenerator) popWithoutDecreasingStackSize(destination string) {
 	line := fmt.Sprintf("pop %s", destination)
@@ -114,6 +119,26 @@ func (gen *AssemblyGenerator) ret() {
 
 func (gen *AssemblyGenerator) jmp(label string) {
 	gen.addOperation(fmt.Sprintf("jmp %s", label))
+}
+
+func (gen *AssemblyGenerator) cmp(reg1 string, reg2 string) {
+	gen.addOperation(fmt.Sprintf("cmp %s, %s", reg1, reg2))
+}
+
+func (gen *AssemblyGenerator) je(alias string) {
+	gen.addOperation(fmt.Sprintf("je %s", alias))
+}
+
+func (gen *AssemblyGenerator) jne(alias string) {
+	gen.addOperation(fmt.Sprintf("jne %s", alias))
+}
+
+func (gen *AssemblyGenerator) jl(alias string) {
+	gen.addOperation(fmt.Sprintf("jl %s", alias))
+}
+
+func (gen *AssemblyGenerator) jg(alias string) {
+	gen.addOperation(fmt.Sprintf("cmp %s", alias))
 }
 
 func (gen *AssemblyGenerator) AddOperations(operations []string) {

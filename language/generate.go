@@ -191,6 +191,7 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 }
 
 // TODO : require returns for typed functions
+// TODO : check argument types
 func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	// Bind arguments
 	for _, arg := range stmt.Arguments {
@@ -248,8 +249,38 @@ func (stmt StmtIf) Generate(gen *AssemblyGenerator) error {
 }
 
 func (expr ExpEquals) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	// TODO
-	return InvalidExp, nil
+	kind, err := expr.Left.Generate(gen)
+	if err != nil {
+		return InvalidExp, fmt.Errorf("failed to generate left expression of equals: %w", err)
+	}
+	if kind != StackNumExp && kind != StackBoolExp {
+		return InvalidExp, fmt.Errorf("equals only supported for numns and bools")
+	}
+	gen.push(rax)
+
+	kind, err = expr.Right.Generate(gen)
+	if err != nil {
+		return InvalidExp, fmt.Errorf("failed to generate right expression of equals: %w", err)
+	}
+	if kind != StackNumExp && kind != StackBoolExp {
+		return InvalidExp, fmt.Errorf("equals only supported for numns and bools")
+	}
+
+	gen.pop(rbx)
+	gen.cmp(rbx, rax)
+	equal := gen.generateUniqueAlias()
+	notEqual := gen.generateUniqueAlias()
+	done := gen.generateUniqueAlias()
+	gen.je(equal)
+	gen.jne(notEqual)
+	gen.addOperation(fmt.Sprintf("%s:", equal))
+	gen.mov(rax, "1")
+	gen.jmp(done);
+	gen.addOperation(fmt.Sprintf("%s:", notEqual))
+	gen.mov(rax, "0")
+	gen.addOperation(fmt.Sprintf("%s:", done))
+
+	return StackBoolExp, nil
 }
 
 func (expr ExpLess) Generate(gen *AssemblyGenerator) (ExpKind, error) {

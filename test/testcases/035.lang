@@ -1,0 +1,2 @@
+eq = 35 == 35
+println eq
