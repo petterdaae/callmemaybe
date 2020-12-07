@@ -80,3 +80,19 @@ func TestCase018(t *testing.T) {
 func TestCase019(t *testing.T) {
 	utils.AssertProgramOutput("testcases/019.lang", "5\n", t)
 }
+
+func TestCase020(t *testing.T) {
+	utils.AssertProgramOutput("testcases/020.lang", "21\n", t)
+}
+
+func TestCase021(t *testing.T) {
+	utils.AssertProgramOutput("testcases/021.lang", "2\n", t)
+}
+
+func TestCase022(t *testing.T) {
+	utils.AssertProgramOutput("testcases/022.lang", "12\n", t)
+}
+
+func TestCase023(t *testing.T) {
+	utils.AssertProgramOutput("testcases/023.lang", "230\n", t)
+}

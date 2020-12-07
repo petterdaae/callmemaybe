@@ -155,8 +155,11 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	for _, arg := range stmt.Arguments {
 		arg.Generate(gen)
-		gen.pushWithoutIncreasingStackSize(rax)
+		gen.push(rax)
+		// gen.pushWithoutIncreasingStackSize(rax)
 	}
+
+	gen.stackSize -= len(stmt.Arguments)
 
 	err := gen.call(stmt.Name)
 	for range stmt.Arguments {

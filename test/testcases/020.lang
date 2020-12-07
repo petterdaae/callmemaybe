@@ -1,0 +1,5 @@
+f1 = <a int, b int, c int, d int, e int, f int> => {
+    println a + b + c + d + e + f
+}
+
+temp = call f1 with 1, 2, 3, 4, 5, 6
