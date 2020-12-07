@@ -202,3 +202,27 @@ func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 
 	return StackExp, nil
 }
+
+func (stmt StmtIf) Generate(gen *AssemblyGenerator) error {
+	// TODO
+	return nil
+}
+
+func (expr ExpEquals) Generate(gen *AssemblyGenerator) (ExpKind, error) {
+	// TODO
+	return InvalidExpKind, nil
+}
+
+func (expr ExpLess) Generate(gen *AssemblyGenerator) (ExpKind, error) {
+	// TODO
+	return InvalidExpKind, nil
+}
+
+func (expr ExpGreater) Generate(gen *AssemblyGenerator) (ExpKind, error) {
+	// TODO
+	return InvalidExpKind, nil
+}
+
+func (expr ExpBool) Generate(gen *AssemblyGenerator) (ExpKind, error) {
+	return InvalidExpKind, nil
+}

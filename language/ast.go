@@ -23,6 +23,21 @@ type ExpMultiply struct {
 	Right Exp
 }
 
+type ExpLess struct {
+	Left  Exp
+	Right Exp
+}
+
+type ExpGreater struct {
+	Left  Exp
+	Right Exp
+}
+
+type ExpEquals struct {
+	Left  Exp
+	Right Exp
+}
+
 type ExpParentheses struct {
 	Inside Exp
 }
@@ -31,23 +46,27 @@ type ExpNum struct {
 	Value int
 }
 
+type ExpBool struct {
+	Value bool
+}
+
 type ExpIdentifier struct {
 	Name string
 }
 
 type ExpFunction struct {
-	Args []Arg
-	Body Stmt
+	Args       []Arg
+	Body       Stmt
 	ReturnType string
 }
 
 type Arg struct {
 	Identifier string
-	Type string
+	Type       string
 }
 
 type FunctionCall struct {
-	Name string
+	Name      string
 	Arguments []Exp
 }
 
@@ -70,4 +89,9 @@ type StmtPrintln struct {
 
 type StmtReturn struct {
 	Expression Exp
+}
+
+type StmtIf struct {
+	Expression Exp
+	Body       Stmt
 }

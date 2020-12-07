@@ -97,6 +97,39 @@ func (parser *Parser) ParseCalculation() (Exp, error) {
 			}
 			continue
 		}
+		if nextKind == AngleBracketStart {
+			right, err := parser.parseVal()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse right side of less expression")
+			}
+			left = ExpLess{
+				Left: left,
+				Right: right,
+			}
+			continue
+		}
+		if nextKind == AngleBracketEnd {
+			right, err := parser.parseVal()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse right side of greater expression")
+			}
+			left = ExpGreater{
+				Left: left,
+				Right: right,
+			}
+			continue
+		}
+		if nextKind == Equals {
+			right, err := parser.parseVal()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse right side of equals expression")
+			}
+			left = ExpEquals{
+				Left: left,
+				Right: right,
+			}
+			continue
+	}
 		parser.unread()
 		break
 	}
@@ -109,6 +142,16 @@ func (parser *Parser) parseVal() (Exp, error) {
 		value, _ := strconv.Atoi(nextToken)
 		return ExpNum{
 			Value: value,
+		}, nil
+	}
+	if nextKind == True {
+		return ExpBool{
+			Value: true,
+		}, nil
+	}
+	if nextKind == False {
+		return ExpBool{
+			Value: false,
 		}, nil
 	}
 	if nextKind == RoundBracketStart {
@@ -191,10 +234,45 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 			statements = append(statements, statement)
 			continue
 		}
+		if nextKind == If {
+			parser.unread()
+		}
 		parser.unread()
 		break
 	}
 	return StmtSeq{Statements: statements}, nil
+}
+
+func (parser *Parser) parseIf() (Stmt, error) {
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != If {
+		return nil, fmt.Errorf("expected if keyword at start of if statement")
+	}
+
+	expr, err := parser.ParseExp()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse condition expression in if statement: %w", err)
+	}
+
+	kind, text := parser.readIgnoreWhiteSpace()
+	if kind != CurlyBracketStart {
+		return nil, fmt.Errorf("expected { when parsing if statement, but got: %s", text)
+	}
+
+	seq, err := parser.parseSeq()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse sequence in if statement: %w", err)
+	}
+
+	kind, text = parser.readIgnoreWhiteSpace()
+	if kind != CurlyBracketEnd {
+		return nil, fmt.Errorf("expected } when parsing if statement, but got: %s", text)
+	}
+
+	return StmtIf{
+		Expression: expr,
+		Body: seq,
+	}, nil
 }
 
 func (parser *Parser) parseCall() (Exp, error) {
