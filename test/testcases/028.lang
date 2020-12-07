@@ -1,0 +1,16 @@
+double = <x int> => int {
+    return x * 2
+}
+
+add2 = <x int> => int {
+    return x + 2
+}
+
+printIt = <x int> => {
+    println x
+}
+
+a = call double with 10
+b = call add2 with 10
+
+_ = call printIt with a + b

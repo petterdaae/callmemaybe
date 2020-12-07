@@ -1,0 +1,10 @@
+outer = <a int> => int {
+    inner = <a int> => int {
+        return a + 2
+    }
+    return call inner with a
+}
+
+a = call outer with 5
+
+println a

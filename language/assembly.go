@@ -112,6 +112,10 @@ func (gen *AssemblyGenerator) ret() {
 	gen.addOperation("ret")
 }
 
+func (gen *AssemblyGenerator) jmp(label string) {
+	gen.addOperation(fmt.Sprintf("jmp %s", label))
+}
+
 func (gen *AssemblyGenerator) AddOperations(operations []string) {
 	for _, operation := range operations {
 		gen.addOperation(operation)

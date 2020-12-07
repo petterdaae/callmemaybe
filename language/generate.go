@@ -113,7 +113,13 @@ func (stmt StmtReturn) Generate(gen *AssemblyGenerator) error {
 	if err != nil {
 		return fmt.Errorf("failed to evaluate expression when returning: %w", err)
 	}
-	gen.ret()
+	procedure := gen.contexts.GetTopProcedure()
+
+	if procedure == nil {
+		return fmt.Errorf("cant return outside a procedure")
+	}
+
+	gen.jmp(fmt.Sprintf("%send", procedure.Name))
 	return nil
 }
 
