@@ -357,7 +357,7 @@ func (parser *Parser) parseFunction() (Exp, error) {
 	}
 
 	kind, typeName := parser.readIgnoreWhiteSpace()
-	if kind == TypeInt {
+	if kind == TypeInt || kind == TypeBool {
 		function.ReturnType = typeName
 		kind, _ = parser.readIgnoreWhiteSpace()
 	} else {

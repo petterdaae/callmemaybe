@@ -25,7 +25,7 @@ A simple compiler.
 
 <call>        := "call" <identifier> [ "with" { <expr> "," } <expr> ]
 
-<type>        := "int" | "empty"
+<type>        := "int" | "empty" | "bool"
 
 --------------------------------------------------------------
 

@@ -25,6 +25,7 @@ const (
 	Call
 	With
 	TypeInt
+	TypeBool
 	TypeEmpty
 	Whitespace
 	PrintLn
@@ -190,6 +191,8 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return True, word
 	case "false":
 		return False, word
+	case "bool":
+		return TypeBool, word
 	}
 
 	return Identifier, word

@@ -5,7 +5,8 @@ import "fmt"
 type ContextElementType int
 
 const (
-	StackElem ContextElementType = iota
+	StackNumElem ContextElementType = iota
+	StackBoolElem
 	HeapElem
 	ProcedureElem
 	InvalidElem
@@ -19,6 +20,7 @@ type Contexts struct {
 type context struct {
 	procedures map[string]string
 	Stack      map[string]int
+	stackTypes map[string]ContextElementType
 	Procedure  *Procedure
 }
 
@@ -28,6 +30,7 @@ func NewContexts() *Contexts {
 			&context{
 				procedures: make(map[string]string),
 				Stack:      make(map[string]int),
+				stackTypes: make(map[string]ContextElementType),
 				Procedure:  nil,
 			},
 		},
@@ -55,6 +58,10 @@ func (contexts *Contexts) NewContext(newProcedure bool, stackSize int) (*context
 	for k, v := range current.procedures {
 		proceduresCopy[k] = v
 	}
+	stackTypesCopy := make(map[string]ContextElementType)
+	for k, v := range current.stackTypes {
+		stackTypesCopy[k] = v
+	}
 
 	var proc *Procedure
 	if newProcedure {
@@ -71,6 +78,7 @@ func (contexts *Contexts) NewContext(newProcedure bool, stackSize int) (*context
 		Stack:      stackCopy,
 		procedures: proceduresCopy,
 		Procedure:  proc,
+		stackTypes: stackTypesCopy,
 	}
 
 	return new, operations, stackSize - initStackSize
@@ -110,18 +118,19 @@ func (contexts *Contexts) getFromContext(context *context, name string, stackSiz
 	procedure := contexts.GetTopProcedure()
 
 	stack, ok := context.Stack[name]
+	kind, _ := context.stackTypes[name]
 	if ok {
 		diff := (stackSize - stack) * 8
 
 		if procedure != nil {
 			if stack > procedure.StackSizeWhenInitialized {
-				return StackElem, fmt.Sprintf("[rsp+%d]", diff), nil
+				return kind, fmt.Sprintf("[rsp+%d]", diff), nil
 			}
 
-			return StackElem, fmt.Sprintf("[rsp+rcx+%d+8]", diff), nil
+			return kind, fmt.Sprintf("[rsp+rcx+%d+8]", diff), nil
 		}
 
-		return StackElem, fmt.Sprintf("[rsp+%d]", diff), nil
+		return kind, fmt.Sprintf("[rsp+%d]", diff), nil
 	}
 
 	proc, ok := context.procedures[name]
@@ -147,7 +156,7 @@ func (contexts *Contexts) Get(name string, stackSize int) (ContextElementType, s
 	return contexts.getFromContext(context, name, stackSize)
 }
 
-func (contexts *Contexts) StackInsert(name string, value string, stackSize int) ([]string, int, error) {
+func (contexts *Contexts) StackInsert(name string, value string, stackSize int, kind ContextElementType) ([]string, int, error) {
 	var operations []string
 	initStackSize := stackSize
 	top := contexts.Peek()
@@ -160,6 +169,7 @@ func (contexts *Contexts) StackInsert(name string, value string, stackSize int) 
 		operations = append(operations, fmt.Sprintf("push %s", value))
 		stackSize++
 		top.Stack[name] = stackSize
+		top.stackTypes[name] = kind
 		return operations, stackSize - initStackSize, nil
 	}
 
@@ -178,12 +188,14 @@ func (contexts *Contexts) StackInsert(name string, value string, stackSize int) 
 				operations = append(operations, fmt.Sprintf("push %s", value))
 				stackSize++
 				current.Stack[name] = stackSize
+				current.stackTypes[name] = kind
 				return operations, stackSize - initStackSize, nil
 				break
 			}
 		}
 	} else {
 		_, address, _ := contexts.getFromContext(top, name, stackSize)
+		top.stackTypes[name] = kind
 		operations = append(operations, fmt.Sprintf("mov %s, %s", address, value))
 		return operations, stackSize - initStackSize, nil
 	}

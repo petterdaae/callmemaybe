@@ -3,10 +3,11 @@ package language
 type ExpKind int
 
 const (
-	StackExp ExpKind = iota
+	StackNumExp ExpKind = iota
+	StackBoolExp
 	EmptyExp
 	ProcExp
-	InvalidExpKind
+	InvalidExp
 )
 
 type Exp interface {
