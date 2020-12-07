@@ -30,6 +30,7 @@ const (
 	PrintLn
 	Return
 	Identifier
+	Placeholder
 	EOF
 	Error
 )
@@ -110,6 +111,8 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return AngleBracketEnd, string(character)
 	case ',':
 		return Comma, string(character)
+	case '_':
+		return Placeholder, string(character)
 	}
 	
 	return Error, ""

@@ -5,7 +5,7 @@ A simple compiler.
 ```
 <seq>         := { <stmt> }
 <stmt>        := <assign> | <prinln> | <call> | <return>
-<assign>      := <identifier> "=" <exp>
+<assign>      := <identifier> "=" <exp> | "_" "=" <exp>
 <println>     := "println" <exp>
 <return>      := "return" <exp>
 

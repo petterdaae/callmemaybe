@@ -134,7 +134,7 @@ func (parser *Parser) parseVal() (Exp, error) {
 
 func (parser *Parser) parseAssign() (Stmt, error) {
 	kind, identifier := parser.readIgnoreWhiteSpace()
-	if kind != Identifier {
+	if kind != Identifier && kind != Placeholder {
 		return nil, fmt.Errorf("failed to parse identifier at start of assign statement")
 	}
 	kind, token := parser.readIgnoreWhiteSpace()
@@ -164,7 +164,7 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 	var statements []Stmt
 	for {
 		nextKind, _ := parser.readIgnoreWhiteSpace()
-		if nextKind == Identifier {
+		if nextKind == Identifier || nextKind == Placeholder {
 			parser.unread()
 			statement, err := parser.parseAssign()
 			if err != nil {
@@ -191,15 +191,6 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 			statements = append(statements, statement)
 			continue
 		}
-		//if nextKind == Call {
-		//	parser.unread()
-		//	statement, err := parser.parseCall()
-		//	if err != nil {
-		//		return nil, fmt.Errorf("failed to parse function call: %w", err)
-		//	}
-		//	statements = append(statements, statement)
-		//	continue
-		//}
 		parser.unread()
 		break
 	}

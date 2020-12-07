@@ -4,6 +4,7 @@ type ExpKind int
 
 const (
 	StackExp ExpKind = iota
+	EmptyExp
 	ProcExp
 	InvalidExpKind
 )

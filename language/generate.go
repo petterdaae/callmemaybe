@@ -82,6 +82,9 @@ func (stmt StmtAssign) Generate(gen *AssemblyGenerator) error {
 	if err != nil {
 		return fmt.Errorf("failed to generate code for expression in assign statement: %w", err)
 	}
+	if stmt.Identifier == "_" {
+		return nil
+	}
 	if kind == StackExp {
 		operations, pushes, err := gen.contexts.StackInsert(stmt.Identifier, rax, gen.stackSize)
 		if err != nil {
@@ -138,9 +141,9 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 		gen.stackSize -= len(exp.Args) + 1
 	}
 
-
 	pops, context := gen.contexts.Pop(gen.stackSize)
 	context.Procedure.NumberOfArgs = len(exp.Args)
+	context.Procedure.ReturnType = exp.ReturnType
 	gen.stackSize -= pops
 	gen.PushNamelessProcedure(context.Procedure)
 
@@ -155,7 +158,28 @@ func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 	}
 	gen.stackSize -= len(stmt.Arguments)
 
-	err := gen.call(stmt.Name, len(stmt.Arguments))
+	kind, actualName, err := gen.contexts.Get(stmt.Name, gen.stackSize)
+	if kind != assembly.ProcedureElem || err != nil {
+		return InvalidExpKind, fmt.Errorf("failed to call procedure with name: %s", stmt.Name)
+	}
+
+	var procedure *assembly.Procedure
+	for i := range gen.AllProcedures {
+		p := gen.AllProcedures[i]
+		if p.Name == actualName {
+			procedure = p
+		}
+	}
+	if procedure == nil {
+		return InvalidExpKind, fmt.Errorf("failed to find procedure with name: %s", actualName)
+	}
+
+	if procedure.NumberOfArgs != len(stmt.Arguments) {
+		return InvalidExpKind, fmt.Errorf("mismatching number of arguments")
+	}
+
+	gen.mov(rcx, strconv.Itoa(gen.stackSize))
+	gen.addOperation(fmt.Sprintf("call %s", actualName))
 
 	// Pop bound arguments
 	for range stmt.Arguments {
@@ -164,6 +188,10 @@ func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to call function: %w", err)
+	}
+
+	if procedure.ReturnType == "empty" {
+		return EmptyExp, nil
 	}
 
 	return StackExp, nil

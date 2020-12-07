@@ -3,7 +3,6 @@ package language
 import (
 	"fmt"
 	"lang/language/assembly"
-	"strconv"
 )
 
 const (
@@ -111,31 +110,6 @@ func (gen *AssemblyGenerator) sub(destination string, value string) {
 
 func (gen *AssemblyGenerator) ret() {
 	gen.addOperation("ret")
-}
-
-func (gen *AssemblyGenerator) call(name string, numArgs int) error {
-	kind, actualName, err := gen.contexts.Get(name, gen.stackSize)
-	if kind != assembly.ProcedureElem || err != nil {
-		return fmt.Errorf("failed to call procedure with name: %s", name)
-	}
-	var procedure *assembly.Procedure
-	for i := range gen.AllProcedures {
-		p := gen.AllProcedures[i]
-		if p.Name == actualName {
-			procedure = p
-		}
-	}
-	if procedure == nil {
-		return fmt.Errorf("failed to find procedure with name: %s", actualName)
-	}
-
-	if procedure.NumberOfArgs != numArgs {
-		return fmt.Errorf("mismatching number of arguments")
-	}
-
-	gen.mov(rcx, strconv.Itoa(gen.stackSize))
-	gen.addOperation(fmt.Sprintf("call %s", actualName))
-	return nil
 }
 
 func (gen *AssemblyGenerator) AddOperations(operations []string) {

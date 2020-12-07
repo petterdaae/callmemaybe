@@ -4,11 +4,12 @@ import (
 	"fmt"
 )
 
-type Procedure struct{
+type Procedure struct {
 	Name                     string
 	Operations               []string
 	StackSizeWhenInitialized int
-	NumberOfArgs int
+	NumberOfArgs             int
+	ReturnType               string
 }
 
 func (proc *Procedure) start(stackSize int) {
