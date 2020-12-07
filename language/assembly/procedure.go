@@ -22,7 +22,7 @@ func (proc *Procedure) end(stackSize int) int {
 	proc.Operations = append(proc.Operations, fmt.Sprintf("%send:", proc.Name))
 	diff := stackSize - proc.StackSizeWhenInitialized
 	for i := 0; i < diff; i++ {
-		proc.Operations = append(proc.Operations, fmt.Sprintf("pop rcx"))
+		proc.Operations = append(proc.Operations, fmt.Sprintf("pop rdx"))
 	}
 	proc.Operations = append(proc.Operations, fmt.Sprintf("ret"))
 	return diff
