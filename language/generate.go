@@ -122,20 +122,13 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 			arg := exp.Args[i-1]
 			gen.contexts.Peek().Stack[arg.Identifier] = initStackSize + i
 		}
-
 		gen.stackSize += len(exp.Args) + 1
 	}
-
-
-
 
 	err := exp.Body.Generate(gen)
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to generate function body: %w", err)
 	}
-
-
-
 
 	if len(exp.Args) != 0 {
 		gen.stackSize -= len(exp.Args) + 1
@@ -143,28 +136,28 @@ func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
 
 
 	pops, context := gen.contexts.Pop(gen.stackSize)
+	context.Procedure.NumberOfArgs = len(exp.Args)
 	gen.stackSize -= pops
 	gen.PushNamelessProcedure(context.Procedure)
-
-
-
 
 	return ProcExp, nil
 }
 
 func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
+	// Bind arguments
 	for _, arg := range stmt.Arguments {
 		arg.Generate(gen)
 		gen.push(rax)
-		// gen.pushWithoutIncreasingStackSize(rax)
 	}
-
 	gen.stackSize -= len(stmt.Arguments)
 
-	err := gen.call(stmt.Name)
+	err := gen.call(stmt.Name, len(stmt.Arguments))
+
+	// Pop bound arguments
 	for range stmt.Arguments {
 		gen.popWithoutDecreasingStackSize(rbx)
 	}
+
 	if err != nil {
 		return InvalidExpKind, fmt.Errorf("failed to call function: %w", err)
 	}

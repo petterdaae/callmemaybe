@@ -1,0 +1,8 @@
+a = 50 * 2
+
+chooseOne = <x int, y int> => {
+    println a
+}
+
+b = call chooseOne with 0, 0
+

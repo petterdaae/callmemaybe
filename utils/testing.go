@@ -50,3 +50,17 @@ func AssertProgramOutput(path string, output string, t *testing.T) {
 		t.Errorf("got:\n%s\nexpected:\n%s\n", stdout, output)
 	}
 }
+
+func AssertCompilerFails(path string, t *testing.T) {
+	program, err := ReadFile(path)
+	if err != nil {
+		t.Errorf("failed to read file: %v", err)
+		return
+	}
+
+	_, err = Compile(program)
+	if err == nil {
+		t.Errorf("did not fail to compile")
+		return
+	}
+}

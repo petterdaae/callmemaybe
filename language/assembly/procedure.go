@@ -8,6 +8,7 @@ type Procedure struct{
 	Name                     string
 	Operations               []string
 	StackSizeWhenInitialized int
+	NumberOfArgs int
 }
 
 func (proc *Procedure) start(stackSize int) {

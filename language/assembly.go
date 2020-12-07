@@ -113,7 +113,7 @@ func (gen *AssemblyGenerator) ret() {
 	gen.addOperation("ret")
 }
 
-func (gen *AssemblyGenerator) call(name string) error {
+func (gen *AssemblyGenerator) call(name string, numArgs int) error {
 	kind, actualName, err := gen.contexts.Get(name, gen.stackSize)
 	if kind != assembly.ProcedureElem || err != nil {
 		return fmt.Errorf("failed to call procedure with name: %s", name)
@@ -127,6 +127,10 @@ func (gen *AssemblyGenerator) call(name string) error {
 	}
 	if procedure == nil {
 		return fmt.Errorf("failed to find procedure with name: %s", actualName)
+	}
+
+	if procedure.NumberOfArgs != numArgs {
+		return fmt.Errorf("mismatching number of arguments")
 	}
 
 	gen.mov(rcx, strconv.Itoa(gen.stackSize))
