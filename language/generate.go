@@ -2,91 +2,106 @@ package language
 
 import (
 	"fmt"
-	"lang/language/assembly"
+	"lang/language/assemblyoutput"
+	"lang/language/memorymodel"
 	"strconv"
 )
 
-func (exp ExpPlus) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	kind, err := exp.Left.Generate(gen)
+const (
+	KindNumber    = memorymodel.ContextElementKindNumber
+	KindBool      = memorymodel.ContextElementKindBoolean
+	KindInvalid   = memorymodel.ContextElementKindInvalid
+	KindProcedure = memorymodel.ContextElementKindProcedure
+	RAX           = assemblyoutput.RAX
+	RBX           = assemblyoutput.RBX
+	RDI           = assemblyoutput.RDI
+	RSI           = assemblyoutput.RSI
+	PRINTFORMAT64 = assemblyoutput.PRINTFORMAT64
+)
+
+func (exp ExpPlus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	kind, _, err := exp.Left.Generate(ao, mm)
 	if err != nil {
-		return InvalidExp, fmt.Errorf("failed to generate code for left side of plus exp: %w", err)
+		return KindInvalid, "", fmt.Errorf("failed to generate code for left side of plus exp: %w", err)
 	}
-	if kind != StackNumExp {
-		return InvalidExp, fmt.Errorf("can only add numbers")
+	if kind != KindNumber {
+		return KindInvalid, "", fmt.Errorf("can only add numbers")
 	}
-	gen.push(rax)
-	kind, err = exp.Right.Generate(gen)
+
+	mm.CurrentStackSize++
+	ao.Push(RAX)
+
+	kind, _, err = exp.Right.Generate(ao, mm)
 	if err != nil {
-		return InvalidExp, fmt.Errorf("failed to generate code for right side of plus exp: %w", err)
+		return KindInvalid, "", fmt.Errorf("failed to generate code for right side of plus exp: %w", err)
 	}
-	if kind != StackNumExp {
-		return InvalidExp, fmt.Errorf("can only add numbers")
+	if kind != KindNumber {
+		return KindInvalid, "", fmt.Errorf("can only add numbers")
 	}
-	gen.pop(rbx)
-	gen.add(rax, rbx)
-	return StackNumExp, nil
+
+	mm.CurrentStackSize--
+	ao.Pop(RBX)
+	ao.Add(RAX, RBX)
+
+	return KindNumber, "", nil
 }
 
-func (exp ExpMultiply) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	kind, err := exp.Left.Generate(gen)
+func (exp ExpMultiply) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	kind, _, err := exp.Left.Generate(ao, mm)
 	if err != nil {
-		return InvalidExp, fmt.Errorf("failed to generate code for left side of multiply exp: %w", err)
+		return KindInvalid, "", fmt.Errorf("failed to generate code for left side of multiply exp: %w", err)
 	}
-	if kind != StackNumExp {
-		return InvalidExp, fmt.Errorf("can only multiply numbers")
+	if kind != KindNumber {
+		return KindInvalid, "", fmt.Errorf("can only multiply numbers")
 	}
-	gen.push(rax)
-	kind, err = exp.Right.Generate(gen)
+
+	mm.CurrentStackSize++
+	ao.Push(RAX)
+
+	kind, _, err = exp.Right.Generate(ao, mm)
 	if err != nil {
-		return InvalidExp, fmt.Errorf("failed to generate code for right side of multiply exp: %w ", err)
+		return KindInvalid, "", fmt.Errorf("failed to generate code for right side of multiply exp: %w ", err)
 	}
-	if kind != StackNumExp {
-		return InvalidExp, fmt.Errorf("can only multiply numbers")
+	if kind != KindNumber {
+		return KindInvalid, "", fmt.Errorf("can only multiply numbers")
 	}
-	gen.pop(rbx)
-	gen.mult(rax, rbx)
-	return StackNumExp, nil
+
+	mm.CurrentStackSize--
+	ao.Pop(RBX)
+	ao.Imul(RAX, RBX)
+
+	return KindNumber, "", nil
 }
 
-func (exp ExpParentheses) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	kind, err := exp.Inside.Generate(gen)
-	if err != nil {
-		return InvalidExp, fmt.Errorf("failed to generate code for inside of parentheses exp: %w", err)
-	}
-	return kind, nil
+func (exp ExpParentheses) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	return exp.Inside.Generate(ao, mm)
 }
 
-func (exp ExpNum) Generate(gen *AssemblyGenerator) (ExpKind, error) {
+func (exp ExpNum) Generate(ao *assemblyoutput.AssemblyOutput, _ *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	val := strconv.Itoa(exp.Value)
-	gen.mov(rax, fmt.Sprintf("%s", val))
-	return StackNumExp, nil
+	ao.Mov(RAX, val)
+	return KindNumber, "", nil
 }
 
-func (exp ExpIdentifier) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	kind, addr, err := gen.contexts.Get(exp.Name, gen.stackSize)
-	if err != nil {
-		return InvalidExp, fmt.Errorf("failed to evaluate identifer: %w", err)
+func (exp ExpIdentifier) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	stackElement := mm.GetStackElement(exp.Name)
+	if stackElement != nil {
+		address := fmt.Sprintf("[rsp+%d]", mm.CurrentStackSize-stackElement.StackSizeAfterPush)
+		ao.Mov(RAX, address)
+		return stackElement.Kind, "", nil
 	}
 
-	if kind != assembly.ProcedureElem {
-		gen.mov(rax, addr)
+	procedureElement := mm.GetProcedureElement(exp.Name)
+	if procedureElement != nil {
+		return KindProcedure, procedureElement.Name, nil
 	}
 
-	translatedKind := InvalidExp
-	if kind == assembly.ProcedureElem {
-		translatedKind = ProcExp
-	} else if kind == assembly.StackBoolElem {
-		translatedKind = StackBoolExp
-	} else if kind == assembly.StackNumElem {
-		translatedKind = StackNumExp
-	}
-
-	return translatedKind, nil
+	return KindInvalid, "", fmt.Errorf("failed to find '%s' in current context", exp.Name)
 }
 
-func (stmt StmtSeq) Generate(gen *AssemblyGenerator) error {
+func (stmt StmtSeq) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
 	for i := range stmt.Statements {
-		err := stmt.Statements[i].Generate(gen)
+		err := stmt.Statements[i].Generate(ao, mm)
 		if err != nil {
 			return fmt.Errorf("failed to generate code for statement in sequence: %w", err)
 		}
@@ -94,212 +109,187 @@ func (stmt StmtSeq) Generate(gen *AssemblyGenerator) error {
 	return nil
 }
 
-func (stmt StmtAssign) Generate(gen *AssemblyGenerator) error {
-	kind, err := stmt.Expression.Generate(gen)
+func (stmt StmtAssign) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
+	kind, name, err := stmt.Expression.Generate(ao, mm)
 	if err != nil {
 		return fmt.Errorf("failed to generate code for expression in assign statement: %w", err)
 	}
+
+	// Do not assign anything to placeholders
 	if stmt.Identifier == "_" {
 		return nil
 	}
-	if kind == StackNumExp || kind == StackBoolExp {
-		contextKind := assembly.StackNumElem
-		if kind == StackBoolExp {
-			contextKind = assembly.StackBoolElem
-		}
-		operations, pushes, err := gen.contexts.StackInsert(stmt.Identifier, rax, gen.stackSize, contextKind)
-		if err != nil {
-			return fmt.Errorf("failed to insert element into stack: %w", err)
-		}
-		gen.AddOperations(operations)
-		gen.stackSize += pushes
+
+	if kind == KindNumber || kind == KindBool {
+		mm.CurrentStackSize++
+		ao.Push(RAX)
+		mm.AddNameToCurrentStackElement(stmt.Identifier, kind)
 	}
-	if kind == ProcExp {
-		gen.NameNamelessProcedure(stmt.Identifier)
+
+
+	if kind == KindProcedure {
+		procedureElement := mm.GetProcedureElement(name)
+		mm.AddProcedureAlias(name, stmt.Identifier, procedureElement.NumberOfArgs, procedureElement.ReturnKind)
 	}
+
 	return nil
 }
 
-func (stmt StmtPrintln) Generate(gen *AssemblyGenerator) error {
-	kind, err := stmt.Expression.Generate(gen)
+func (stmt StmtPrintln) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
+	kind, _, err := stmt.Expression.Generate(ao, mm)
 	if err != nil {
 		return fmt.Errorf("failed to generate code for expression in println: %w", err)
 	}
-	if kind != StackBoolExp && kind != StackNumExp {
-		return fmt.Errorf("only num and bool printing is supported")
+
+	if memorymodel.IsStackKind(kind) {
+		ao.Mov(RDI, PRINTFORMAT64)
+		ao.Mov(RSI, RAX)
+		ao.Xor(RAX, RAX)
+		ao.CallPrintf()
+		return nil
 	}
-	gen.println(rax)
-	return nil
+
+	return fmt.Errorf("println only supports numbers and booleans")
 }
 
-func (stmt StmtReturn) Generate(gen *AssemblyGenerator) error {
-	kind, err := stmt.Expression.Generate(gen)
+func (stmt StmtReturn) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
+	kind, _, err := stmt.Expression.Generate(ao, mm)
 	if err != nil {
 		return fmt.Errorf("failed to evaluate expression when returning: %w", err)
 	}
-	procedure := gen.contexts.GetTopProcedure()
 
-	if procedure == nil {
-		return fmt.Errorf("cant return outside a procedure")
+	procedure := ao.CurrentProcedure()
+	for i := 0; i < mm.CurrentStackSize - procedure.StackSizeBeforeFunctionGeneration; i++ {
+		ao.Pop(RBX)
 	}
 
-	if kind == EmptyExp {
-		return fmt.Errorf("empty returns not allowed")
+	ao.Ret()
+
+	if memorymodel.IsStackKind(kind) {
+		return nil
 	}
 
-	if !(procedure.ReturnType == "bool" && kind == StackBoolExp) && !(procedure.ReturnType == "int" && kind == StackNumExp) {
-		return fmt.Errorf("mismatching types between function and return")
-	}
-
-	gen.jmp(fmt.Sprintf("%send", procedure.Name))
-	return nil
+	return fmt.Errorf("only bools and ints are supported return types")
 }
 
-func (exp ExpFunction) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	newContext, operations, pushes := gen.contexts.NewContext(true, gen.stackSize)
-	gen.AddOperations(operations)
-	gen.stackSize += pushes
-	gen.contexts.Push(newContext)
+func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	mm.PushNewContext(false)
+	name := ao.PushProcedure(len(exp.Args), mm.CurrentStackSize)
 
-	context := gen.contexts.Peek()
-	context.Procedure.ReturnType = exp.ReturnType
-	context.Procedure.NumberOfArgs = len(exp.Args)
+	initialStackSize := mm.CurrentStackSize
 
-	if len(exp.Args) != 0 {
-		initStackSize := newContext.Procedure.StackSizeWhenInitialized
-		for i := 1; i <= len(exp.Args); i++ {
-			arg := exp.Args[i-1]
-			gen.contexts.Peek().Stack[arg.Identifier] = initStackSize + i
-		}
-		gen.stackSize += len(exp.Args) + 1
+	for _, arg := range exp.Args {
+		mm.CurrentStackSize++
+		mm.AddNameToCurrentStackElement(arg.Identifier, memorymodel.GetKindFromType(arg.Type))
 	}
 
-	err := exp.Body.Generate(gen)
+	mm.CurrentStackSize++ // Return pointer is pushed to stack when calling procedure
+
+	err := exp.Body.Generate(ao, mm)
 	if err != nil {
-		return InvalidExp, fmt.Errorf("failed to generate function body: %w", err)
+		return KindInvalid, "", fmt.Errorf("failed to generate function body: %w", err)
 	}
 
-	if len(exp.Args) != 0 {
-		gen.stackSize -= len(exp.Args) + 1
+	for i := 0; i < mm.CurrentStackSize - initialStackSize; i++ {
+		ao.Pop(RBX)
 	}
 
-	pops, context := gen.contexts.Pop(gen.stackSize)
-	gen.stackSize -= pops
-	gen.PushNamelessProcedure(context.Procedure)
+	mm.CurrentStackSize = initialStackSize
 
-	return ProcExp, nil
+	mm.PopCurrentContext()
+	ao.PopProcedure()
+
+	return KindProcedure, name, nil
 }
 
-// TODO : require returns for typed functions
-// TODO : check argument types
-func (stmt FunctionCall) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	// Bind arguments
+func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	for _, arg := range stmt.Arguments {
-		arg.Generate(gen)
-		gen.push(rax)
-	}
-	gen.stackSize -= len(stmt.Arguments)
-
-	kind, actualName, err := gen.contexts.Get(stmt.Name, gen.stackSize)
-	if kind != assembly.ProcedureElem || err != nil {
-		return InvalidExp, fmt.Errorf("failed to call procedure with name: %s", stmt.Name)
-	}
-
-	var procedure *assembly.Procedure
-	for i := range gen.AllProcedures {
-		p := gen.AllProcedures[i]
-		if p.Name == actualName {
-			procedure = p
+		kind, _, err := arg.Generate(ao, mm)
+		if !memorymodel.IsStackKind(kind) {
+			return KindInvalid, "", fmt.Errorf("only ints and bools are supported as argument types")
 		}
-	}
-	if procedure == nil {
-		return InvalidExp, fmt.Errorf("failed to find procedure with name: %s", actualName)
-	}
-
-	if procedure.NumberOfArgs != len(stmt.Arguments) {
-		return InvalidExp, fmt.Errorf("mismatching number of arguments")
+		if err != nil {
+			return KindInvalid, "", fmt.Errorf("failed to evaluate function argument: %w", err)
+		}
+		ao.Push(RAX)
 	}
 
-	gen.mov(rcx, strconv.Itoa(gen.stackSize))
-	gen.addOperation(fmt.Sprintf("call %s", actualName))
-
-	// Pop bound arguments
-	for range stmt.Arguments {
-		gen.popWithoutDecreasingStackSize(rbx)
+	procedureElement := mm.GetProcedureElement(stmt.Name)
+	if procedureElement == nil {
+		return KindInvalid, "", fmt.Errorf("no procedure with name '%s'", stmt.Name)
 	}
 
+	if procedureElement.NumberOfArgs != len(stmt.Arguments) {
+		// TODO : also check types
+		return KindInvalid, "", fmt.Errorf("mismatching number of arguments")
+	}
+
+	ao.Call(procedureElement.Name)
+
+	return procedureElement.ReturnKind, "", nil
+}
+
+func (stmt StmtIf) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
+	// TODO : implement
+	return fmt.Errorf("not implemented")
+}
+
+func (expr ExpEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	kind, _, err := expr.Left.Generate(ao, mm)
 	if err != nil {
-		return InvalidExp, fmt.Errorf("failed to call function: %w", err)
+		return KindInvalid, "", fmt.Errorf("failed to generate left expression of equals: %w", err)
+	}
+	if kind != KindNumber && kind != KindBool {
+		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
 	}
 
-	if procedure.ReturnType == "empty" {
-		return EmptyExp, nil
-	}
+	mm.CurrentStackSize++
+	ao.Push(RAX)
 
-	if procedure.ReturnType == "bool" {
-		return StackBoolExp, nil
-	}
-
-	return StackNumExp, nil
-}
-
-func (stmt StmtIf) Generate(gen *AssemblyGenerator) error {
-	// TODO
-	return nil
-}
-
-func (expr ExpEquals) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	kind, err := expr.Left.Generate(gen)
+	kind, _, err = expr.Right.Generate(ao, mm)
 	if err != nil {
-		return InvalidExp, fmt.Errorf("failed to generate left expression of equals: %w", err)
+		return KindInvalid, "", fmt.Errorf("failed to generate right expression of equals: %w", err)
 	}
-	if kind != StackNumExp && kind != StackBoolExp {
-		return InvalidExp, fmt.Errorf("equals only supported for numns and bools")
-	}
-	gen.push(rax)
-
-	kind, err = expr.Right.Generate(gen)
-	if err != nil {
-		return InvalidExp, fmt.Errorf("failed to generate right expression of equals: %w", err)
-	}
-	if kind != StackNumExp && kind != StackBoolExp {
-		return InvalidExp, fmt.Errorf("equals only supported for numns and bools")
+	if kind != KindNumber && kind != KindBool {
+		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
 	}
 
-	gen.pop(rbx)
-	gen.cmp(rbx, rax)
-	equal := gen.generateUniqueAlias()
-	notEqual := gen.generateUniqueAlias()
-	done := gen.generateUniqueAlias()
-	gen.je(equal)
-	gen.jne(notEqual)
-	gen.addOperation(fmt.Sprintf("%s:", equal))
-	gen.mov(rax, "1")
-	gen.jmp(done);
-	gen.addOperation(fmt.Sprintf("%s:", notEqual))
-	gen.mov(rax, "0")
-	gen.addOperation(fmt.Sprintf("%s:", done))
+	mm.CurrentStackSize--
+	ao.Pop(RBX)
 
-	return StackBoolExp, nil
+	ao.Cmp(RBX, RAX)
+	equal := ao.GenerateUniqueName()
+	notEqual := ao.GenerateUniqueName()
+	done := ao.GenerateUniqueName()
+	ao.Je(equal)
+	ao.Jne(notEqual)
+	ao.NewSection(equal)
+	ao.Mov(RAX, "1")
+	ao.Jmp(done)
+	ao.NewSection(notEqual)
+	ao.Mov(RAX, "0")
+	ao.NewSection(done)
+
+	return KindBool, "", nil
 }
 
-func (expr ExpLess) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	// TODO
-	return InvalidExp, nil
+func (expr ExpLess) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	// TODO : implement
+	return KindInvalid, "", fmt.Errorf("not implemented")
 }
 
-func (expr ExpGreater) Generate(gen *AssemblyGenerator) (ExpKind, error) {
-	// TODO
-	return InvalidExp, nil
+func (expr ExpGreater) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	// TODO : implement
+	return KindInvalid, "", fmt.Errorf("not implemented")
 }
 
-func (expr ExpBool) Generate(gen *AssemblyGenerator) (ExpKind, error) {
+func (expr ExpBool) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	var val string
 	if expr.Value {
 		val = "1"
 	} else {
 		val = "0"
 	}
-	gen.mov(rax, fmt.Sprintf("%s", val))
-	return StackBoolExp, nil
+	ao.Mov(RAX, val)
+	return KindBool, "", nil
 }

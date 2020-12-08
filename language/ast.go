@@ -1,5 +1,10 @@
 package language
 
+import (
+	"lang/language/assemblyoutput"
+	"lang/language/memorymodel"
+)
+
 type ExpKind int
 
 const (
@@ -11,7 +16,7 @@ const (
 )
 
 type Exp interface {
-	Generate(gen *AssemblyGenerator) (ExpKind, error)
+	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error)
 }
 
 type ExpPlus struct {
@@ -72,7 +77,7 @@ type FunctionCall struct {
 }
 
 type Stmt interface {
-	Generate(gen *AssemblyGenerator) error
+	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error
 }
 
 type StmtSeq struct {

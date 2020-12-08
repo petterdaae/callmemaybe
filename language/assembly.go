@@ -24,10 +24,6 @@ type AssemblyGenerator struct {
 	aliasCounter       int
 }
 
-type Context struct {
-	fields     map[string]int
-	procedures map[string]string
-}
 
 func NewAssemblyGenerator() AssemblyGenerator {
 	return AssemblyGenerator{
