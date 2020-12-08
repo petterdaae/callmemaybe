@@ -1,6 +1,9 @@
 package assemblyoutput
 
-import "fmt"
+import (
+	"fmt"
+	"lang/language/memorymodel"
+)
 
 type AssemblyOutput struct {
 	procedureStack       *ProcedureStack
@@ -82,12 +85,13 @@ func (ao *AssemblyOutput) addOperation(operation string) {
 	}
 }
 
-func (ao *AssemblyOutput) PushProcedure(numberOfArgs int, initialStackSize int) string {
+func (ao *AssemblyOutput) PushProcedure(numberOfArgs int, initialStackSize int, returnKind memorymodel.ContextElementKind) string {
 	name := ao.GenerateUniqueName()
 	ao.procedureStack.Push(&procedure{
 		Name:                              name,
 		NumberOfArgs:                      numberOfArgs,
 		StackSizeBeforeFunctionGeneration: initialStackSize,
+		ReturnKind:                        returnKind,
 	})
 	return name
 }
@@ -105,6 +109,15 @@ func (ao *AssemblyOutput) GenerateUniqueName() string {
 
 func (ao *AssemblyOutput) CurrentProcedure() *procedure {
 	return ao.procedureStack.Peek()
+}
+
+func (ao *AssemblyOutput) GetProcedureByName(name string) *procedure {
+	for _, procedure := range ao.EvaluatedProcedures {
+		if name == procedure.Name {
+			return procedure
+		}
+	}
+	return nil
 }
 
 func (ao *AssemblyOutput) Start() {
@@ -125,5 +138,3 @@ func (ao *AssemblyOutput) End(stackSize int) {
 	ao.addOperation("mov rax, 0")
 	ao.addOperation("ret")
 }
-
-

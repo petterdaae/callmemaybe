@@ -16,24 +16,14 @@ func (mm *MemoryModel) PushNewContext(copyCurrentContext bool) {
 	newContext := EmptyContext()
 	if copyCurrentContext {
 		for k, v := range newContext.members {
-			newContext.members[k] = v
+			newContext.members[k] = v // .Copy()
 		}
 	}
 	mm.ContextStack.Push(newContext)
 }
 
-func (mm *MemoryModel) PopCurrentContext() []*ContextElement {
-	popped := mm.ContextStack.Peek()
+func (mm *MemoryModel) PopCurrentContext() {
 	mm.ContextStack.Pop()
-	current := mm.ContextStack.Peek()
-	var unavailableStackElements []*ContextElement
-	for k, v := range popped.members {
-		_, ok := current.members[k]
-		if !ok {
-			unavailableStackElements = append(unavailableStackElements, v)
-		}
-	}
-	return unavailableStackElements
 }
 
 func (mm *MemoryModel) AddNameToCurrentStackElement(name string, kind ContextElementKind) {

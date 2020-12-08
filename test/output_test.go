@@ -30,19 +30,19 @@ func TestCase006(t *testing.T) {
 }
 
 func TestCase007(t *testing.T) {
-	utils.AssertProgramOutput("testcases/007.lang", "43\n", t)
+	utils.AssertCompilerFails("testcases/007.lang", t)
 }
 
 func TestCase008(t *testing.T) {
-	utils.AssertProgramOutput("testcases/008.lang", "43\n", t)
+	utils.AssertCompilerFails("testcases/008.lang", t)
 }
 
 func TestCase009(t *testing.T) {
-	utils.AssertProgramOutput("testcases/009.lang", "43\n43\n45\n45\n", t)
+	utils.AssertCompilerFails("testcases/009.lang", t)
 }
 
 func TestCase010(t *testing.T) {
-	utils.AssertProgramOutput("testcases/010.lang", "43\n", t)
+	utils.AssertCompilerFails("testcases/010.lang", t)
 }
 
 func TestCase011(t *testing.T) {
@@ -50,7 +50,7 @@ func TestCase011(t *testing.T) {
 }
 
 func TestCase012(t *testing.T) {
-	utils.AssertProgramOutput("testcases/012.lang", "5\n", t)
+	utils.AssertCompilerFails("testcases/012.lang", t)
 }
 
 func TestCase013(t *testing.T) {
@@ -98,7 +98,7 @@ func TestCase023(t *testing.T) {
 }
 
 func TestCase024(t *testing.T) {
-	utils.AssertProgramOutput("testcases/024.lang", "100\n", t)
+	utils.AssertCompilerFails("testcases/024.lang", t)
 }
 
 func TestCase025(t *testing.T) {
@@ -146,5 +146,5 @@ func TestCase035(t *testing.T) {
 }
 
 func TestCase036(t *testing.T) {
-	utils.AssertProgramOutput("testcases/036.lang", "2\n", t)
+	utils.AssertCompilerFails("testcases/036.lang", t)
 }

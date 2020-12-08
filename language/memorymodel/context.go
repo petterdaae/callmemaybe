@@ -22,6 +22,16 @@ type ContextElement struct {
 	ReturnKind         ContextElementKind
 }
 
+func (ce *ContextElement) Copy() *ContextElement {
+	return &ContextElement{
+		StackSizeAfterPush: ce.StackSizeAfterPush,
+		Kind:               ce.Kind,
+		Name:               ce.Name,
+		NumberOfArgs:       ce.NumberOfArgs,
+		ReturnKind:         ce.ReturnKind,
+	}
+}
+
 func EmptyContext() *Context {
 	return &Context{
 		members: make(map[string]*ContextElement),

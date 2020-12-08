@@ -86,7 +86,7 @@ func (exp ExpNum) Generate(ao *assemblyoutput.AssemblyOutput, _ *memorymodel.Mem
 func (exp ExpIdentifier) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	stackElement := mm.GetStackElement(exp.Name)
 	if stackElement != nil {
-		address := fmt.Sprintf("[rsp+%d]", mm.CurrentStackSize-stackElement.StackSizeAfterPush)
+		address := fmt.Sprintf("[rsp+%d]", (mm.CurrentStackSize-stackElement.StackSizeAfterPush)*8)
 		ao.Mov(RAX, address)
 		return stackElement.Kind, "", nil
 	}
@@ -126,10 +126,9 @@ func (stmt StmtAssign) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 		mm.AddNameToCurrentStackElement(stmt.Identifier, kind)
 	}
 
-
 	if kind == KindProcedure {
-		procedureElement := mm.GetProcedureElement(name)
-		mm.AddProcedureAlias(name, stmt.Identifier, procedureElement.NumberOfArgs, procedureElement.ReturnKind)
+		procedure := ao.GetProcedureByName(name)
+		mm.AddProcedureAlias(name, stmt.Identifier, procedure.NumberOfArgs, procedure.ReturnKind)
 	}
 
 	return nil
@@ -159,7 +158,7 @@ func (stmt StmtReturn) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 	}
 
 	procedure := ao.CurrentProcedure()
-	for i := 0; i < mm.CurrentStackSize - procedure.StackSizeBeforeFunctionGeneration; i++ {
+	for i := 0; i < mm.CurrentStackSize-procedure.StackSizeBeforeFunctionGeneration-1-procedure.NumberOfArgs; i++ {
 		ao.Pop(RBX)
 	}
 
@@ -174,7 +173,7 @@ func (stmt StmtReturn) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 
 func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	mm.PushNewContext(false)
-	name := ao.PushProcedure(len(exp.Args), mm.CurrentStackSize)
+	name := ao.PushProcedure(len(exp.Args), mm.CurrentStackSize, memorymodel.GetKindFromType(exp.ReturnType))
 
 	initialStackSize := mm.CurrentStackSize
 
@@ -190,11 +189,15 @@ func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 		return KindInvalid, "", fmt.Errorf("failed to generate function body: %w", err)
 	}
 
-	for i := 0; i < mm.CurrentStackSize - initialStackSize; i++ {
+	mm.CurrentStackSize--
+
+	for i := 0; i < mm.CurrentStackSize-initialStackSize-len(exp.Args); i++ {
 		ao.Pop(RBX)
 	}
 
 	mm.CurrentStackSize = initialStackSize
+
+	ao.Ret()
 
 	mm.PopCurrentContext()
 	ao.PopProcedure()
@@ -211,6 +214,7 @@ func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorym
 		if err != nil {
 			return KindInvalid, "", fmt.Errorf("failed to evaluate function argument: %w", err)
 		}
+		mm.CurrentStackSize++
 		ao.Push(RAX)
 	}
 
@@ -225,6 +229,11 @@ func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorym
 	}
 
 	ao.Call(procedureElement.Name)
+
+	for i := 0; i < len(stmt.Arguments); i++ {
+		mm.CurrentStackSize--
+		ao.Pop(RBX)
+	}
 
 	return procedureElement.ReturnKind, "", nil
 }
