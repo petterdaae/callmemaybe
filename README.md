@@ -11,26 +11,24 @@ A simple compiler.
 
 <expr>        := <calculation> | <function> | <call>
 <calculation> := <val> { <bop> <val> }
-<val>         := "(" <calulation> ")" | <num> | <identifier> | <bool>
-<bop>         := "+" | "*" | "<" | ">" | "=="
+<val>         := "(" <calulation> ")" | <num> | <identifier> | <bool> | <uop> <num>
+<bop>         := "+" | "*" | "<" | ">" | "==" | "-" | "/"
+<uop>         := "-"
 <num>         := sequence of digits
-<identifier>  := simple words, only letters
+<identifier>  := words consisting og letters, digits and underscores, starting with a letter
 
-<if>          := "if" <expr> "{" <seq> "}" // Typecheck this later
+<if>          := "if" <expr> "{" <seq> "}" 
+<loop>        := "loop" <expr> "{" <seq> "}"
 <bool>        := "true" | "false"
 
 <function>    := <argList> "=>" [ <type> ] "{" <seq> "}"
-<argList>     := "<" ">" | "<" { <arg> "," } <arg> ">"
+<argList>     := "<" <recurse> ">" | "<" <recurse>, { <arg> "," } <arg> ">"
 <arg>         := <identifier> <type>
+<recurse>     := <identifier> | "_"
 
 <call>        := "call" <identifier> [ "with" { <expr> "," } <expr> ]
 
 <type>        := "int" | "empty" | "bool"
-
---------------------------------------------------------------
-
-Current terminals: letters, digits, "{", "}", "(", ")", "<", ">", "+", "*", ",", "=", 
-    "call", "with", "int", "empty", "println", "=>"
 ```
 
 - `{ _ }` means zero or more
@@ -40,13 +38,13 @@ Current terminals: letters, digits, "{", "}", "(", ")", "<", ">", "+", "*", ",",
 - Should not be possible to ignore function return types
 
 ### TODO
-- Make it possible to return functions and pass functions as arguments
-- Booleans
-- If
+- Negative numbers, subtraction and division
+- Add an extra parameter to functions to make recursion possible
 - Loop
-- Refactor  
-- Strings & IO
-- Typechecking  
+- Refactor
+- Characters, lists and strings
+- IO
+- Make it possible to return functions and pass functions as arguments
 - Structs
 
 ### Resources
