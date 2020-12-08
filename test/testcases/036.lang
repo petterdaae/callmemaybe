@@ -1,0 +1,8 @@
+a = 1
+b = 2
+
+f = <x int> => {
+    println b
+}
+
+_ = call f with 0
