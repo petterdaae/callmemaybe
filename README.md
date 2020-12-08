@@ -40,6 +40,7 @@ Current terminals: letters, digits, "{", "}", "(", ")", "<", ">", "+", "*", ",",
 - Should not be possible to ignore function return types
 
 ### TODO
+- Make it possible to return functions and pass functions as arguments
 - Booleans
 - If
 - Loop

@@ -68,6 +68,22 @@ func (ao *AssemblyOutput) Jne(name string) {
 	ao.addOperation(fmt.Sprintf("jne %s", name))
 }
 
+func (ao *AssemblyOutput) Jg(name string) {
+	ao.addOperation(fmt.Sprintf("jg %s", name))
+}
+
+func (ao *AssemblyOutput) Jl(name string) {
+	ao.addOperation(fmt.Sprintf("jl %s", name))
+}
+
+func (ao *AssemblyOutput) Jle(name string) {
+	ao.addOperation(fmt.Sprintf("jle %s", name))
+}
+
+func (ao *AssemblyOutput) Jge(name string) {
+	ao.addOperation(fmt.Sprintf("jge %s", name))
+}
+
 func (ao *AssemblyOutput) Jmp(name string) {
 	ao.addOperation(fmt.Sprintf("jmp %s", name))
 }

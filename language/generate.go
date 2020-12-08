@@ -283,12 +283,81 @@ func (expr ExpEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymode
 }
 
 func (expr ExpLess) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
-	// TODO : implement
-	return KindInvalid, "", fmt.Errorf("not implemented")
+	kind, _, err := expr.Left.Generate(ao, mm)
+	if err != nil {
+		return KindInvalid, "", fmt.Errorf("failed to generate left expression of less: %w", err)
+	}
+	if kind != KindNumber && kind != KindBool {
+		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
+	}
+
+	mm.CurrentStackSize++
+	ao.Push(RAX)
+
+	kind, _, err = expr.Right.Generate(ao, mm)
+	if err != nil {
+		return KindInvalid, "", fmt.Errorf("failed to generate right expression of less: %w", err)
+	}
+	if kind != KindNumber && kind != KindBool {
+		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
+	}
+
+	mm.CurrentStackSize--
+	ao.Pop(RBX)
+
+	ao.Cmp(RBX, RAX)
+	less := ao.GenerateUniqueName()
+	greaterThanOrEqual := ao.GenerateUniqueName()
+	done := ao.GenerateUniqueName()
+	ao.Jl(less)
+	ao.Jge(greaterThanOrEqual)
+	ao.NewSection(less)
+	ao.Mov(RAX, "1")
+	ao.Jmp(done)
+	ao.NewSection(greaterThanOrEqual)
+	ao.Mov(RAX, "0")
+	ao.NewSection(done)
+
+	return KindBool, "", nil
 }
 
 func (expr ExpGreater) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
-	// TODO : implement
+	kind, _, err := expr.Left.Generate(ao, mm)
+	if err != nil {
+		return KindInvalid, "", fmt.Errorf("failed to generate left expression of greater: %w", err)
+	}
+	if kind != KindNumber && kind != KindBool {
+		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
+	}
+
+	mm.CurrentStackSize++
+	ao.Push(RAX)
+
+	kind, _, err = expr.Right.Generate(ao, mm)
+	if err != nil {
+		return KindInvalid, "", fmt.Errorf("failed to generate right expression of greater: %w", err)
+	}
+	if kind != KindNumber && kind != KindBool {
+		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
+	}
+
+	mm.CurrentStackSize--
+	ao.Pop(RBX)
+
+	ao.Cmp(RBX, RAX)
+	greater := ao.GenerateUniqueName()
+	lessThanOrEqual := ao.GenerateUniqueName()
+	done := ao.GenerateUniqueName()
+	ao.Jg(greater)
+	ao.Jle(lessThanOrEqual)
+	ao.NewSection(greater)
+	ao.Mov(RAX, "1")
+	ao.Jmp(done)
+	ao.NewSection(lessThanOrEqual)
+	ao.Mov(RAX, "0")
+	ao.NewSection(done)
+
+	return KindBool, "", nil
 	return KindInvalid, "", fmt.Errorf("not implemented")
 }
 
