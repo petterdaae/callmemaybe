@@ -1,8 +1,8 @@
 package assemblyoutput
 
 type procedure struct {
-	name                              string
+	Name                              string
 	NumberOfArgs                      int
 	StackSizeBeforeFunctionGeneration int
-	operations                        []string
+	Operations                        []string
 }

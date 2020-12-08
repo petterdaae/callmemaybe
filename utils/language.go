@@ -2,6 +2,8 @@ package utils
 
 import (
 	"lang/language"
+	"lang/language/assemblyoutput"
+	"lang/language/memorymodel"
 	"os/exec"
 	"strings"
 )
@@ -13,20 +15,22 @@ func Compile(program string) (string, error) {
 		return "", err
 	}
 
-	gen := language.NewAssemblyGenerator()
-	gen.Start()
-	err = ast.Generate(&gen)
-	gen.End()
+	ao := assemblyoutput.NewAssemblyOutput()
+	mm := memorymodel.NewMemoryModel()
+	ao.Start()
+	err = ast.Generate(ao, mm)
+	ao.End(mm.CurrentStackSize)
+
 	if err != nil {
 		return "", err
 	}
 	assembly := ""
-	for i := range gen.Operations {
-		assembly += "\t" + gen.Operations[i] + "\n"
+	for i := range ao.MainOperations {
+		assembly += "\t" + ao.MainOperations[i] + "\n"
 	}
 
-	for i := range gen.AllProcedures {
-		proc := gen.AllProcedures[i]
+	for i := range ao.EvaluatedProcedures {
+		proc := ao.EvaluatedProcedures[i]
 		assembly += proc.Name + ":\n"
 		for j := range proc.Operations {
 			assembly += "\t" + proc.Operations[j] + "\n"

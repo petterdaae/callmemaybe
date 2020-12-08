@@ -3,17 +3,17 @@ package assemblyoutput
 import "fmt"
 
 type AssemblyOutput struct {
-	procedureStack *ProcedureStack
+	procedureStack       *ProcedureStack
 	nameGeneratorCounter int
-	evaluatedProcedures []*procedure
-	mainOperations []string
+	EvaluatedProcedures  []*procedure
+	MainOperations       []string
 }
 
 func NewAssemblyOutput() *AssemblyOutput {
 	return &AssemblyOutput{
-		procedureStack: NewProcedureStack(),
+		procedureStack:       NewProcedureStack(),
 		nameGeneratorCounter: 0,
-		evaluatedProcedures: []*procedure{},
+		EvaluatedProcedures:  []*procedure{},
 	}
 }
 
@@ -76,16 +76,16 @@ func (ao *AssemblyOutput) NewSection(name string) {
 func (ao *AssemblyOutput) addOperation(operation string) {
 	procedure := ao.procedureStack.Peek()
 	if procedure == nil {
-		ao.mainOperations = append(ao.mainOperations, operation)
+		ao.MainOperations = append(ao.MainOperations, operation)
 	} else {
-		procedure.operations = append(procedure.operations, operation)
+		procedure.Operations = append(procedure.Operations, operation)
 	}
 }
 
 func (ao *AssemblyOutput) PushProcedure(numberOfArgs int, initialStackSize int) string {
 	name := ao.GenerateUniqueName()
 	ao.procedureStack.Push(&procedure{
-		name:                              name,
+		Name:                              name,
 		NumberOfArgs:                      numberOfArgs,
 		StackSizeBeforeFunctionGeneration: initialStackSize,
 	})
@@ -95,7 +95,7 @@ func (ao *AssemblyOutput) PushProcedure(numberOfArgs int, initialStackSize int) 
 func (ao *AssemblyOutput) PopProcedure() {
 	current := ao.procedureStack.Peek()
 	ao.procedureStack.Pop()
-	ao.evaluatedProcedures = append(ao.evaluatedProcedures, current)
+	ao.EvaluatedProcedures = append(ao.EvaluatedProcedures, current)
 }
 
 func (ao *AssemblyOutput) GenerateUniqueName() string {
@@ -105,6 +105,25 @@ func (ao *AssemblyOutput) GenerateUniqueName() string {
 
 func (ao *AssemblyOutput) CurrentProcedure() *procedure {
 	return ao.procedureStack.Peek()
+}
+
+func (ao *AssemblyOutput) Start() {
+	ao.addOperation("extern printf")
+	ao.addOperation("global main")
+	ao.addOperation("section .date")
+	ao.addOperation("format: db '%d', 10, 0")
+	ao.addOperation("section .text")
+	ao.addOperation("main:")
+	ao.addOperation("push rbx")
+}
+
+func (ao *AssemblyOutput) End(stackSize int) {
+	ao.addOperation("pop rbx")
+	for i := 0; i < stackSize; i++ {
+		ao.addOperation("pop rbx")
+	}
+	ao.addOperation("mov rax, 0")
+	ao.addOperation("ret")
 }
 
 
