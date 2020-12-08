@@ -8,7 +8,7 @@ type ContextStack struct {
 
 func NewContextStack() *ContextStack {
 	return &ContextStack{
-		stack: []*Context{},
+		stack: []*Context{EmptyContext()},
 	}
 }
 
