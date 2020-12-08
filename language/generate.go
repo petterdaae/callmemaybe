@@ -239,8 +239,35 @@ func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorym
 }
 
 func (stmt StmtIf) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
-	// TODO : implement
-	return fmt.Errorf("not implemented")
+	mm.PushNewContext(true)
+
+	kind, _, err := stmt.Expression.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("failed to generate condition of id: %w", err)
+	}
+	if kind != KindBool {
+		return fmt.Errorf("if conditions can only be booleans")
+	}
+
+	bodyStart := ao.GenerateUniqueName()
+	bodyEnd := ao.GenerateUniqueName()
+
+	ao.Cmp(RAX, "1")
+	ao.Je(bodyStart)
+	ao.Jne(bodyEnd)
+
+	ao.NewSection(bodyStart)
+
+	err = stmt.Body.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("failed to generate if body: %w", err)
+	}
+
+	ao.NewSection(bodyEnd)
+
+	mm.PopCurrentContext()
+
+	return nil
 }
 
 func (expr ExpEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
