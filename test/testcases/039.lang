@@ -1,0 +1,9 @@
+bigger = <x int, y int> => bool {
+    return x > y
+}
+
+answer = call bigger with 5, 6
+println answer
+
+answer = call bigger with 6, 5
+println answer

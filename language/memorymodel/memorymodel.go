@@ -13,9 +13,10 @@ func NewMemoryModel() *MemoryModel {
 }
 
 func (mm *MemoryModel) PushNewContext(copyCurrentContext bool) {
+	current := mm.ContextStack.Peek()
 	newContext := EmptyContext()
 	if copyCurrentContext {
-		for k, v := range newContext.members {
+		for k, v := range current.members {
 			newContext.members[k] = v // .Copy()
 		}
 	}

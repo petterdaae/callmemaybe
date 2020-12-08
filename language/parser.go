@@ -236,6 +236,12 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 		}
 		if nextKind == If {
 			parser.unread()
+			statement, err := parser.parseIf()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse if statement: %w", err)
+			}
+			statements = append(statements, statement)
+			continue
 		}
 		parser.unread()
 		break
