@@ -5,16 +5,6 @@ import (
 	"lang/language/memorymodel"
 )
 
-type ExpKind int
-
-const (
-	StackNumExp ExpKind = iota
-	StackBoolExp
-	EmptyExp
-	ProcExp
-	InvalidExp
-)
-
 type Exp interface {
 	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error)
 }

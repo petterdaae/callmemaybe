@@ -10,6 +10,9 @@ import (
 const (
 	Number Token = iota
 	Plus
+	Minus
+	Modulo
+	Divide
 	Multiply
 	Assign
 	RoundBracketStart
@@ -121,6 +124,12 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return Comma, string(character)
 	case '_':
 		return Placeholder, string(character)
+	case '-':
+		return Minus, string(character)
+	case '/':
+		return Divide, string(character)
+	case '%':
+		return Modulo, string(character)
 	}
 	
 	return Error, ""
