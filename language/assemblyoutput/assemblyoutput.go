@@ -88,6 +88,14 @@ func (ao *AssemblyOutput) Jmp(name string) {
 	ao.addOperation(fmt.Sprintf("jmp %s", name))
 }
 
+func (ao *AssemblyOutput) Sub(r1, r2 string) {
+	ao.addOperation(fmt.Sprintf("sub %s, %s", r1, r2))
+}
+
+func (ao *AssemblyOutput) Div(r string) {
+	ao.addOperation(fmt.Sprintf("div %s", r))
+}
+
 func (ao *AssemblyOutput) NewSection(name string) {
 	ao.addOperation(fmt.Sprintf("%s:", name))
 }

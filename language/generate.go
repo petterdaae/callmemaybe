@@ -16,6 +16,8 @@ const (
 	RBX           = assemblyoutput.RBX
 	RDI           = assemblyoutput.RDI
 	RSI           = assemblyoutput.RSI
+	RDX           = assemblyoutput.RDX
+	RCX           = assemblyoutput.RCX
 	PRINTFORMAT64 = assemblyoutput.PRINTFORMAT64
 )
 

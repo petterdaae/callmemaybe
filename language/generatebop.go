@@ -75,18 +75,29 @@ func (exp ExpMultiply) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 }
 
 func (exp ExpMinus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
-	// TODO : implement
-	return KindInvalid, "", fmt.Errorf("not implemented")
+	operation := func(ao *assemblyoutput.AssemblyOutput) {
+		ao.Sub(RAX, RBX)
+	}
+	return HelpGenerateStackBop(ao, mm, exp, "multiply", operation, KindNumber)
 }
 
 func (exp ExpDivide) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
-	// TODO : implement
-	return KindInvalid, "", fmt.Errorf("not implemented")
+	operation := func(ao *assemblyoutput.AssemblyOutput) {
+		ao.Mov(RDX, "0")
+		ao.Mov(RCX, RBX)
+		ao.Div(RCX)
+	}
+	return HelpGenerateStackBop(ao, mm, exp, "divide", operation, KindNumber)
 }
 
 func (exp ExpModulo) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
-	// TODO : implement
-	return KindInvalid, "", fmt.Errorf("not implemented")
+	operation := func(ao *assemblyoutput.AssemblyOutput) {
+		ao.Mov(RDX, "0")
+		ao.Mov(RCX, RBX)
+		ao.Div(RCX)
+		ao.Mov(RAX, RDX)
+	}
+	return HelpGenerateStackBop(ao, mm, exp, "modulo", operation, KindNumber)
 }
 
 func HelpGenerateStackBop(

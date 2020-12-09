@@ -5,5 +5,7 @@ const (
 	RBX = "rbx"
 	RDI = "rdi"
 	RSI = "rsi"
+	RDX = "rdx"
+	RCX = "rcx"
 	PRINTFORMAT64 = "format"
 )
