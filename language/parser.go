@@ -97,6 +97,39 @@ func (parser *Parser) ParseCalculation() (Exp, error) {
 			}
 			continue
 		}
+		if nextKind == Divide {
+			right, err := parser.parseVal()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse right side of divide exp: %w", err)
+			}
+			left = ExpDivide{
+				Left:  left,
+				Right: right,
+			}
+			continue
+		}
+		if nextKind == Modulo {
+			right, err := parser.parseVal()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse right side of modulo exp: %w", err)
+			}
+			left = ExpModulo{
+				Left:  left,
+				Right: right,
+			}
+			continue
+		}
+		if nextKind == Minus {
+			right, err := parser.parseVal()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse right side of minus exp: %w", err)
+			}
+			left = ExpMinus{
+				Left:  left,
+				Right: right,
+			}
+			continue
+		}
 		if nextKind == AngleBracketStart {
 			right, err := parser.parseVal()
 			if err != nil {
@@ -170,6 +203,15 @@ func (parser *Parser) parseVal() (Exp, error) {
 	if nextKind == Identifier {
 		return ExpIdentifier{
 			Name: nextToken,
+		}, nil
+	}
+	if nextKind == Minus {
+		inside, err := parser.ParseExp()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse exp in negative expression: %w", err)
+		}
+		return ExpNegative{
+			Inside: inside,
 		}, nil
 	}
 	return nil, fmt.Errorf("unexpected token while parsing val")

@@ -19,60 +19,6 @@ const (
 	PRINTFORMAT64 = assemblyoutput.PRINTFORMAT64
 )
 
-func (exp ExpPlus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
-	kind, _, err := exp.Left.Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate code for left side of plus exp: %w", err)
-	}
-	if kind != KindNumber {
-		return KindInvalid, "", fmt.Errorf("can only add numbers")
-	}
-
-	mm.CurrentStackSize++
-	ao.Push(RAX)
-
-	kind, _, err = exp.Right.Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate code for right side of plus exp: %w", err)
-	}
-	if kind != KindNumber {
-		return KindInvalid, "", fmt.Errorf("can only add numbers")
-	}
-
-	mm.CurrentStackSize--
-	ao.Pop(RBX)
-	ao.Add(RAX, RBX)
-
-	return KindNumber, "", nil
-}
-
-func (exp ExpMultiply) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
-	kind, _, err := exp.Left.Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate code for left side of multiply exp: %w", err)
-	}
-	if kind != KindNumber {
-		return KindInvalid, "", fmt.Errorf("can only multiply numbers")
-	}
-
-	mm.CurrentStackSize++
-	ao.Push(RAX)
-
-	kind, _, err = exp.Right.Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate code for right side of multiply exp: %w ", err)
-	}
-	if kind != KindNumber {
-		return KindInvalid, "", fmt.Errorf("can only multiply numbers")
-	}
-
-	mm.CurrentStackSize--
-	ao.Pop(RBX)
-	ao.Imul(RAX, RBX)
-
-	return KindNumber, "", nil
-}
-
 func (exp ExpParentheses) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	return exp.Inside.Generate(ao, mm)
 }
@@ -245,8 +191,8 @@ func (stmt StmtIf) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.M
 	if err != nil {
 		return fmt.Errorf("failed to generate condition of id: %w", err)
 	}
-	if kind != KindBool {
-		return fmt.Errorf("if conditions can only be booleans")
+	if !memorymodel.IsStackKind(kind) {
+		return fmt.Errorf("if conditions can only be stack kinds")
 	}
 
 	bodyStart := ao.GenerateUniqueName()
@@ -270,124 +216,6 @@ func (stmt StmtIf) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.M
 	return nil
 }
 
-func (expr ExpEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
-	kind, _, err := expr.Left.Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate left expression of equals: %w", err)
-	}
-	if kind != KindNumber && kind != KindBool {
-		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
-	}
-
-	mm.CurrentStackSize++
-	ao.Push(RAX)
-
-	kind, _, err = expr.Right.Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate right expression of equals: %w", err)
-	}
-	if kind != KindNumber && kind != KindBool {
-		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
-	}
-
-	mm.CurrentStackSize--
-	ao.Pop(RBX)
-
-	ao.Cmp(RBX, RAX)
-	equal := ao.GenerateUniqueName()
-	notEqual := ao.GenerateUniqueName()
-	done := ao.GenerateUniqueName()
-	ao.Je(equal)
-	ao.Jne(notEqual)
-	ao.NewSection(equal)
-	ao.Mov(RAX, "1")
-	ao.Jmp(done)
-	ao.NewSection(notEqual)
-	ao.Mov(RAX, "0")
-	ao.NewSection(done)
-
-	return KindBool, "", nil
-}
-
-func (expr ExpLess) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
-	kind, _, err := expr.Left.Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate left expression of less: %w", err)
-	}
-	if kind != KindNumber && kind != KindBool {
-		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
-	}
-
-	mm.CurrentStackSize++
-	ao.Push(RAX)
-
-	kind, _, err = expr.Right.Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate right expression of less: %w", err)
-	}
-	if kind != KindNumber && kind != KindBool {
-		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
-	}
-
-	mm.CurrentStackSize--
-	ao.Pop(RBX)
-
-	ao.Cmp(RBX, RAX)
-	less := ao.GenerateUniqueName()
-	greaterThanOrEqual := ao.GenerateUniqueName()
-	done := ao.GenerateUniqueName()
-	ao.Jl(less)
-	ao.Jge(greaterThanOrEqual)
-	ao.NewSection(less)
-	ao.Mov(RAX, "1")
-	ao.Jmp(done)
-	ao.NewSection(greaterThanOrEqual)
-	ao.Mov(RAX, "0")
-	ao.NewSection(done)
-
-	return KindBool, "", nil
-}
-
-func (expr ExpGreater) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
-	kind, _, err := expr.Left.Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate left expression of greater: %w", err)
-	}
-	if kind != KindNumber && kind != KindBool {
-		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
-	}
-
-	mm.CurrentStackSize++
-	ao.Push(RAX)
-
-	kind, _, err = expr.Right.Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate right expression of greater: %w", err)
-	}
-	if kind != KindNumber && kind != KindBool {
-		return KindInvalid, "", fmt.Errorf("equals only supported for numns and bools")
-	}
-
-	mm.CurrentStackSize--
-	ao.Pop(RBX)
-
-	ao.Cmp(RBX, RAX)
-	greater := ao.GenerateUniqueName()
-	lessThanOrEqual := ao.GenerateUniqueName()
-	done := ao.GenerateUniqueName()
-	ao.Jg(greater)
-	ao.Jle(lessThanOrEqual)
-	ao.NewSection(greater)
-	ao.Mov(RAX, "1")
-	ao.Jmp(done)
-	ao.NewSection(lessThanOrEqual)
-	ao.Mov(RAX, "0")
-	ao.NewSection(done)
-
-	return KindBool, "", nil
-	return KindInvalid, "", fmt.Errorf("not implemented")
-}
-
 func (expr ExpBool) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	var val string
 	if expr.Value {
@@ -397,4 +225,9 @@ func (expr ExpBool) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.
 	}
 	ao.Mov(RAX, val)
 	return KindBool, "", nil
+}
+
+func (expr ExpNegative) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	// TODO : implement
+	return KindInvalid, "", fmt.Errorf("not implemented")
 }

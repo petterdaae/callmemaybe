@@ -9,9 +9,65 @@ type Exp interface {
 	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error)
 }
 
+type ExpBop interface {
+	LeftExp() Exp
+	RightExp() Exp
+}
+
 type ExpPlus struct {
 	Left  Exp
 	Right Exp
+}
+
+func (exp ExpPlus) LeftExp() Exp {
+	return exp.Left
+}
+
+func (exp ExpPlus) RightExp() Exp {
+	return exp.Right
+}
+
+type ExpMinus struct {
+	Left Exp
+	Right Exp
+}
+
+func (exp ExpMinus) LeftExp() Exp {
+	return exp.Left
+}
+
+func (exp ExpMinus) RightExp() Exp {
+	return exp.Right
+}
+
+type ExpDivide struct {
+	Left Exp
+	Right Exp
+}
+
+func (exp ExpDivide) LeftExp() Exp {
+	return exp.Left
+}
+
+func (exp ExpDivide) RightExp() Exp {
+	return exp.Right
+}
+
+type ExpModulo struct {
+	Left Exp
+	Right Exp
+}
+
+func (exp ExpModulo) LeftExp() Exp {
+	return exp.Left
+}
+
+func (exp ExpModulo) RightExp() Exp {
+	return exp.Right
+}
+
+type ExpNegative struct {
+	Inside Exp
 }
 
 type ExpMultiply struct {
@@ -19,9 +75,25 @@ type ExpMultiply struct {
 	Right Exp
 }
 
+func (exp ExpMultiply) LeftExp() Exp {
+	return exp.Left
+}
+
+func (exp ExpMultiply) RightExp() Exp {
+	return exp.Right
+}
+
 type ExpLess struct {
 	Left  Exp
 	Right Exp
+}
+
+func (exp ExpLess) LeftExp() Exp {
+	return exp.Left
+}
+
+func (exp ExpLess) RightExp() Exp {
+	return exp.Right
 }
 
 type ExpGreater struct {
@@ -29,9 +101,25 @@ type ExpGreater struct {
 	Right Exp
 }
 
+func (exp ExpGreater) LeftExp() Exp {
+	return exp.Left
+}
+
+func (exp ExpGreater) RightExp() Exp {
+	return exp.Right
+}
+
 type ExpEquals struct {
 	Left  Exp
 	Right Exp
+}
+
+func (exp ExpEquals) LeftExp() Exp {
+	return exp.Left
+}
+
+func (exp ExpEquals) RightExp() Exp {
+	return exp.Right
 }
 
 type ExpParentheses struct {
