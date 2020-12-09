@@ -29,13 +29,12 @@ A simple compiler.
 ```
 
 ### TODO
-- Loop
-- Refactor
 - Characters, lists and strings
-- IO
+- Loop
 - Make it possible to return functions and pass functions as arguments
 - Structs
-- Exit program more gracefully when dividing with 0
+- Input
+- Handle division-by-zero and out-of-bounds errors
 
 ### Resources
 - The structure of the tokenizer and parser is inspired by this blog post: https://blog.gopheracademy.com/advent-2014/parsers-lexers/.
