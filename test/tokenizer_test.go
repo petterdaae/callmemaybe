@@ -55,3 +55,35 @@ func TestArrowWithSpace(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestCharacterSimple(t *testing.T) {
+	tokenizer := language.NewTokenizer(strings.NewReader("'a'"))
+	first, value := tokenizer.NextToken()
+	if first != language.Character || value != "a" {
+		t.Error()
+	}
+}
+
+func TestEscapedCharacter(t *testing.T) {
+	tokenizer := language.NewTokenizer(strings.NewReader("'\\''"))
+	first, value := tokenizer.NextToken()
+	if first != language.Character || value != "'" {
+		t.Error()
+	}
+}
+
+func TestEscapedCharacterBackslash(t *testing.T) {
+	tokenizer := language.NewTokenizer(strings.NewReader("'\\\\'"))
+	first, value := tokenizer.NextToken()
+	if first != language.Character || value != "\\" {
+		t.Error()
+	}
+}
+
+func TestMissingQuoteFails(t *testing.T) {
+	tokenizer := language.NewTokenizer(strings.NewReader("'\\\\"))
+	first, _ := tokenizer.NextToken()
+	if first != language.Error {
+		t.Error()
+	}
+}

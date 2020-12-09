@@ -9,6 +9,7 @@ import (
 
 const (
 	Number Token = iota
+	Character
 	Plus
 	Minus
 	Modulo
@@ -87,6 +88,11 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return tokenizer.identifier()
 	}
 
+	if character == '\'' {
+		tokenizer.unread()
+		return tokenizer.character()
+	}
+
 	switch character {
 	case eof:
 		return EOF, ""
@@ -133,6 +139,33 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 	}
 	
 	return Error, ""
+}
+
+func (tokenizer *Tokenizer) character() (Token, string) {
+	character := tokenizer.read()
+	if character != '\'' {
+		return Error, ""
+	}
+
+	character = tokenizer.read()
+
+	if character == '\'' {
+		return Error, ""
+	}
+
+	if character == '\\' {
+		character = tokenizer.read()
+		if character != '\'' && character != '\\' {
+			return Error, ""
+		}
+	}
+
+	end := tokenizer.read()
+	if end != '\'' {
+		return Error, ""
+	}
+
+	return Character, string(character)
 }
 
 func (tokenizer *Tokenizer) whitespace() (Token, string) {

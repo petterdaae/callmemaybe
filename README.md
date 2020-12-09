@@ -14,7 +14,7 @@ A simple compiler.
 
 <expr>        := <calculation> | <function> | <call>
 <calculation> := <val> (<bop> <val>)*
-<val>         := "(" <calulation> ")" | <num> | <identifier> | <bool> | <uop> <num>
+<val>         := "(" <calulation> ")" | <num> | <identifier> | <bool> | <uop> <num> | <char>
 <bop>         := "+" | "*" | "<" | ">" | "==" | "-" | "/" | "%"
 <uop>         := "-"
 <num>         := sequence of digits
@@ -22,6 +22,7 @@ A simple compiler.
 <function>    := <argList> "=>" <type>? "{" <seq> "}"
 <identifier>  := words consisting og letters, digits and underscores, 
                  starting with a letter or underscore
+<char>        := "'" (a symbol | an escaped symbol) "'"
 
 <argList>     := "<" <identifier>? ">" | "<" (<recurse>,)? (<arg> ",")* <arg> ">"
 <arg>         := <identifier> <type>
