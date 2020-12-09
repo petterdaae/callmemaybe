@@ -230,6 +230,15 @@ func (expr ExpBool) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.
 }
 
 func (expr ExpNegative) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
-	// TODO : implement
-	return KindInvalid, "", fmt.Errorf("not implemented")
+	kind, _, err := expr.Inside.Generate(ao, mm)
+	if err != nil {
+		return KindInvalid, "", fmt.Errorf("failed to generate expression inside negative: %w", err)
+	}
+	if !memorymodel.IsStackKind(kind) {
+		return KindInvalid, "", fmt.Errorf("negative expressions only support stack kinds")
+	}
+	ao.Mov(RBX, RAX)
+	ao.Mov(RAX, "0")
+	ao.Sub(RAX, RBX)
+	return KindNumber, "", nil
 }

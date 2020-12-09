@@ -181,3 +181,6 @@ func TestCase044(t *testing.T) {
 	utils.AssertProgramCrashes("testcases/044.lang", t)
 }
 
+func TestCase045(t *testing.T) {
+	utils.AssertProgramOutput("testcases/045.lang", "-1\n-2\n", t)
+}
