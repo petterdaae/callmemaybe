@@ -1,0 +1,11 @@
+a = 5
+b = 6
+c = 7
+
+f = <x int> => int {
+    return x - 10
+}
+
+println call f with a
+println call f with b
+println call f with c

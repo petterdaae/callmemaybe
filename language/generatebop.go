@@ -76,7 +76,8 @@ func (exp ExpMultiply) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 
 func (exp ExpMinus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
-		ao.Sub(RAX, RBX)
+		ao.Sub(RBX, RAX)
+		ao.Mov(RAX, RBX)
 	}
 	return HelpGenerateStackBop(ao, mm, exp, "multiply", operation, KindNumber)
 }
@@ -84,7 +85,8 @@ func (exp ExpMinus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.
 func (exp ExpDivide) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Mov(RDX, "0")
-		ao.Mov(RCX, RBX)
+		ao.Mov(RCX, RAX)
+		ao.Mov(RAX, RBX)
 		ao.Div(RCX)
 	}
 	return HelpGenerateStackBop(ao, mm, exp, "divide", operation, KindNumber)
@@ -93,7 +95,8 @@ func (exp ExpDivide) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel
 func (exp ExpModulo) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Mov(RDX, "0")
-		ao.Mov(RCX, RBX)
+		ao.Mov(RCX, RAX)
+		ao.Mov(RAX, RBX)
 		ao.Div(RCX)
 		ao.Mov(RAX, RDX)
 	}

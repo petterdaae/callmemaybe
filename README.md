@@ -37,6 +37,7 @@ A simple compiler.
 - IO
 - Make it possible to return functions and pass functions as arguments
 - Structs
+- Exit program more gracefully when dividing with 0
 
 ### Resources
 - The structure of the tokenizer and parser is inspired by this blog post: https://blog.gopheracademy.com/advent-2014/parsers-lexers/.

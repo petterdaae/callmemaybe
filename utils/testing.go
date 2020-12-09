@@ -64,3 +64,47 @@ func AssertCompilerFails(path string, t *testing.T) {
 		return
 	}
 }
+
+
+
+func AssertProgramCrashes(path string, t *testing.T) {
+	defer os.Remove("out")
+	defer os.Remove("out.nasm")
+	defer os.Remove("out.o")
+
+	program, err := ReadFile(path)
+	if err != nil {
+		t.Errorf("failed to read file: %v", err)
+		return
+	}
+
+	nasm, err := Compile(program)
+	if err != nil {
+		t.Errorf("failed to compile: %v", err)
+		return
+	}
+
+	err = WriteFile("out.nasm", nasm)
+	if err != nil {
+		t.Errorf("failed to write file: %v", err)
+		return
+	}
+
+	err = Assemble("out.nasm")
+	if err != nil {
+		t.Errorf("failed to assemble: %v", err)
+		return
+	}
+
+	err = Link("./out.o")
+	if err != nil {
+		t.Errorf("failed to link: %v", err)
+		return
+	}
+
+	_, err = RunExecutable("out")
+	if err == nil {
+		t.Errorf("program should crash")
+		return
+	}
+}
