@@ -3,42 +3,33 @@ A simple compiler.
 
 ### The current grammar that I am trying to implement
 ```
-<seq>         := { <stmt> }
+<seq>         := <stmt>*
 <stmt>        := <assign> | <prinln> | <call> | <return> | <if>
-<assign>      := <identifier> "=" <exp> | "_" "=" <exp>
+<assign>      := <identifier> "=" <exp>
 <println>     := "println" <exp>
 <return>      := "return" <exp>
+<loop>        := "loop" <expr> "{" <seq> "}"
+<if>          := "if" <expr> "{" <seq> "}" 
+<call>        := "call" <identifier> [ "with" (<expr> ",")* <expr> ]
 
 <expr>        := <calculation> | <function> | <call>
-<calculation> := <val> { <bop> <val> }
+<calculation> := <val> (<bop> <val>)*
 <val>         := "(" <calulation> ")" | <num> | <identifier> | <bool> | <uop> <num>
-<bop>         := "+" | "*" | "<" | ">" | "==" | "-" | "/"
+<bop>         := "+" | "*" | "<" | ">" | "==" | "-" | "/" | "%"
 <uop>         := "-"
 <num>         := sequence of digits
-<identifier>  := words consisting og letters, digits and underscores, starting with a letter
-
-<if>          := "if" <expr> "{" <seq> "}" 
-<loop>        := "loop" <expr> "{" <seq> "}"
 <bool>        := "true" | "false"
+<function>    := <argList> "=>" <type>? "{" <seq> "}"
+<identifier>  := words consisting og letters, digits and underscores, 
+                 starting with a letter or underscore
 
-<function>    := <argList> "=>" [ <type> ] "{" <seq> "}"
-<argList>     := "<" <recurse> ">" | "<" <recurse>, { <arg> "," } <arg> ">"
+<argList>     := "<" <identifier>? ">" | "<" (<recurse>,)? (<arg> ",")* <arg> ">"
 <arg>         := <identifier> <type>
-<recurse>     := <identifier> | "_"
-
-<call>        := "call" <identifier> [ "with" { <expr> "," } <expr> ]
-
 <type>        := "int" | "empty" | "bool"
 ```
 
-- `{ _ }` means zero or more
-- `[ _ ]` means zero or one
-- `|` means or  
-- Operators are left-associative
-- Should not be possible to ignore function return types
-
 ### TODO
-- Negative numbers, subtraction and division
+- Negative numbers, subtraction, division and modulo
 - Add an extra parameter to functions to make recursion possible
 - Loop
 - Refactor
