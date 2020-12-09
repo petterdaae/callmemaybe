@@ -365,6 +365,7 @@ func (parser *Parser) parseFunction() (Exp, error) {
 		return nil, fmt.Errorf("expected < at start of function expression")
 	}
 
+	first := true
 	for {
 		kind, identifier := parser.readIgnoreWhiteSpace()
 		if kind == AngleBracketEnd {
@@ -380,7 +381,13 @@ func (parser *Parser) parseFunction() (Exp, error) {
 			return nil, fmt.Errorf("only non-empty types allowed in function arguments")
 		}
 
-		if kind != TypeInt {
+		if kind == Comma && first {
+			function.Recurse = identifier
+			continue
+		}
+		first = false
+
+		if kind != TypeInt && kind != TypeBool {
 			return nil, fmt.Errorf("expected non-empty type as argument type when parsing argument list")
 		}
 

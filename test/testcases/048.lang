@@ -1,0 +1,19 @@
+isPrime = <recurse, x int, current int> => bool {
+    if current < 3 {
+        return true
+    }
+
+    mod = x % current
+
+    if mod == 0 {
+        return false
+    }
+
+    return call recurse with x, current - 1
+}
+
+println call isPrime with 3, 2
+println call isPrime with 7, 6
+println call isPrime with 8, 7
+println call isPrime with 1001, 1000
+println call isPrime with 1193, 1192

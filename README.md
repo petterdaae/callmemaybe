@@ -29,8 +29,6 @@ A simple compiler.
 ```
 
 ### TODO
-- Negative numbers, subtraction, division and modulo
-- Add an extra parameter to functions to make recursion possible
 - Loop
 - Refactor
 - Characters, lists and strings

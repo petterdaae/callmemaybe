@@ -123,6 +123,8 @@ func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 	mm.PushNewContext(false)
 	name := ao.PushProcedure(len(exp.Args), mm.CurrentStackSize, memorymodel.GetKindFromType(exp.ReturnType))
 
+	mm.AddProcedureAlias(name, exp.Recurse, len(exp.Args), memorymodel.GetKindFromType(exp.ReturnType))
+
 	initialStackSize := mm.CurrentStackSize
 
 	for _, arg := range exp.Args {

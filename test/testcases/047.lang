@@ -1,0 +1,10 @@
+f = <recurse, times int> => int {
+    if times == 0 {
+        return 42
+    }
+    println times
+    return call recurse with times - 1
+}
+
+result = call f with 10 / 2
+println result

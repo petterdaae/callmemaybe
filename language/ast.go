@@ -28,7 +28,7 @@ func (exp ExpPlus) RightExp() Exp {
 }
 
 type ExpMinus struct {
-	Left Exp
+	Left  Exp
 	Right Exp
 }
 
@@ -41,7 +41,7 @@ func (exp ExpMinus) RightExp() Exp {
 }
 
 type ExpDivide struct {
-	Left Exp
+	Left  Exp
 	Right Exp
 }
 
@@ -54,7 +54,7 @@ func (exp ExpDivide) RightExp() Exp {
 }
 
 type ExpModulo struct {
-	Left Exp
+	Left  Exp
 	Right Exp
 }
 
@@ -139,6 +139,7 @@ type ExpIdentifier struct {
 }
 
 type ExpFunction struct {
+	Recurse    string
 	Args       []Arg
 	Body       Stmt
 	ReturnType string
