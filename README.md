@@ -52,15 +52,16 @@ A simple compiler.
 ```
 
 ### TODO
-- Lists and strings
+- Refactor and more tests
+- Comparison for characters
+- Expand type signatures to handle lists
+- Strings (syntactic sugar for lists of characters)
+- Print lists
+- Input
 - Loop
+- Syntax highlighting  
 - Make it possible to return functions and pass functions as arguments
 - Structs
-- Input
 - Handle division-by-zero and out-of-bounds errors
-- Make grammar more formal
-
-### Resources
-- The structure of the tokenizer and parser is inspired by this blog post: https://blog.gopheracademy.com/advent-2014/parsers-lexers/.
-- This site was very helpful when constructing the grammar: http://www.engr.mun.ca/~theo/Misc/exp_parsing.htm.
-- Nice x86 assembly reference: http://www.cs.virginia.edu/~evans/cs216/guides/x86.html.
+- Free heap allocated memory when out of scope (?)
+- Module system (github?)
