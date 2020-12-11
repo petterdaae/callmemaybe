@@ -1,0 +1,9 @@
+printN = <me, c char, n int> => int {
+    if n == 0 {
+        return 0
+    }
+    println c
+    return call me with c, n - 1
+}
+
+_ = call printN with 'p', 10

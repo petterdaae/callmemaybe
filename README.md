@@ -20,13 +20,13 @@ A simple compiler.
 <num>         := sequence of digits
 <bool>        := "true" | "false"
 <function>    := <argList> "=>" <type>? "{" <seq> "}"
+<char>        := "'" (a symbol | an escaped symbol) "'"
 <identifier>  := words consisting og letters, digits and underscores, 
                  starting with a letter or underscore
-<char>        := "'" (a symbol | an escaped symbol) "'"
 
 <argList>     := "<" <identifier>? ">" | "<" (<recurse>,)? (<arg> ",")* <arg> ">"
 <arg>         := <identifier> <type>
-<type>        := "int" | "empty" | "bool"
+<type>        := "int" | "empty" | "bool" | "char"
 ```
 
 ### TODO
@@ -36,6 +36,7 @@ A simple compiler.
 - Structs
 - Input
 - Handle division-by-zero and out-of-bounds errors
+- Make grammar more formal
 
 ### Resources
 - The structure of the tokenizer and parser is inspired by this blog post: https://blog.gopheracademy.com/advent-2014/parsers-lexers/.

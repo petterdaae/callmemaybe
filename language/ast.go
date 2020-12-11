@@ -130,6 +130,10 @@ type ExpNum struct {
 	Value int
 }
 
+type ExpChar struct {
+	Value string
+}
+
 type ExpBool struct {
 	Value bool
 }

@@ -196,3 +196,15 @@ func TestCase047(t *testing.T) {
 func TestCase048(t *testing.T) {
 	utils.AssertProgramOutput("testcases/048.lang", "1\n1\n0\n0\n1\n", t)
 }
+
+func TestCase049(t *testing.T) {
+	utils.AssertProgramOutput("testcases/049.lang", "a\n", t)
+}
+
+func TestCase050(t *testing.T) {
+	utils.AssertProgramOutput("testcases/050.lang", "H\ne\nl\nl\no\n \nw\no\nr\nl\nd\n!\n", t)
+}
+
+func TestCase051(t *testing.T) {
+	utils.AssertProgramOutput("testcases/051.lang", "p\np\np\np\np\np\np\np\np\np\n", t)
+}

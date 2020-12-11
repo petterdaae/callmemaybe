@@ -8,4 +8,5 @@ const (
 	RDX = "rdx"
 	RCX = "rcx"
 	PRINTFORMAT64 = "format"
+	PRINTCHARFORMAT = "formatchar"
 )

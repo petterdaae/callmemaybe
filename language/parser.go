@@ -214,6 +214,11 @@ func (parser *Parser) parseVal() (Exp, error) {
 			Inside: inside,
 		}, nil
 	}
+	if nextKind == Character {
+		return ExpChar{
+			Value: nextToken,
+		}, nil
+	}
 	return nil, fmt.Errorf("unexpected token while parsing val")
 }
 
@@ -387,7 +392,7 @@ func (parser *Parser) parseFunction() (Exp, error) {
 		}
 		first = false
 
-		if kind != TypeInt && kind != TypeBool {
+		if kind != TypeInt && kind != TypeBool && kind != TypeChar {
 			return nil, fmt.Errorf("expected non-empty type as argument type when parsing argument list")
 		}
 

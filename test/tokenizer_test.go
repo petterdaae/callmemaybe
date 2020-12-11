@@ -81,7 +81,7 @@ func TestEscapedCharacterBackslash(t *testing.T) {
 }
 
 func TestMissingQuoteFails(t *testing.T) {
-	tokenizer := language.NewTokenizer(strings.NewReader("'\\\\"))
+	tokenizer := language.NewTokenizer(strings.NewReader("'\\"))
 	first, _ := tokenizer.NextToken()
 	if first != language.Error {
 		t.Error()

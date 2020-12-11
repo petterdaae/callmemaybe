@@ -115,7 +115,7 @@ func HelpGenerateStackBop(
 	if err != nil {
 		return KindInvalid, "", fmt.Errorf("failed to generate left expression of %s: %w", name, err)
 	}
-	if !memorymodel.IsStackKind(kind) {
+	if !memorymodel.IsIntOrBool(kind) {
 		return KindInvalid, "", fmt.Errorf("%s only supports stack kinds", name)
 	}
 
@@ -126,7 +126,7 @@ func HelpGenerateStackBop(
 	if err != nil {
 		return KindInvalid, "", fmt.Errorf("failed to generate right expression of %s: %w", name, err)
 	}
-	if !memorymodel.IsStackKind(kind) {
+	if !memorymodel.IsIntOrBool(kind) {
 		return KindInvalid, "", fmt.Errorf("%s only supports stack kinds", name)
 	}
 

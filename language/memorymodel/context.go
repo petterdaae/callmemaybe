@@ -5,6 +5,7 @@ type ContextElementKind int
 const (
 	ContextElementKindNumber ContextElementKind = iota
 	ContextElementKindBoolean
+	ContextElementKindChar
 	ContextElementKindInvalid
 	ContextElementKindProcedure
 	ContextElementKindEmpty
@@ -48,7 +49,7 @@ func NewContextElement(stackSizeAfterPush int, kind ContextElementKind, name str
 	}
 }
 
-func IsStackKind(kind ContextElementKind) bool {
+func IsIntOrBool(kind ContextElementKind) bool {
 	return kind != ContextElementKindInvalid && kind != ContextElementKindProcedure
 }
 
@@ -58,6 +59,8 @@ func GetKindFromType(_type string) ContextElementKind {
 		return ContextElementKindBoolean
 	case "int":
 		return ContextElementKindNumber
+	case "char":
+		return ContextElementKindChar
 	default:
 		return ContextElementKindInvalid
 	}

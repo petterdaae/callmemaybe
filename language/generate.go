@@ -10,6 +10,7 @@ import (
 const (
 	KindNumber    = memorymodel.ContextElementKindNumber
 	KindBool      = memorymodel.ContextElementKindBoolean
+	KindChar      = memorymodel.ContextElementKindChar
 	KindInvalid   = memorymodel.ContextElementKindInvalid
 	KindProcedure = memorymodel.ContextElementKindProcedure
 	RAX           = assemblyoutput.RAX
@@ -19,6 +20,7 @@ const (
 	RDX           = assemblyoutput.RDX
 	RCX           = assemblyoutput.RCX
 	PRINTFORMAT64 = assemblyoutput.PRINTFORMAT64
+	PRINTCHARFORMAT = assemblyoutput.PRINTCHARFORMAT
 )
 
 func (exp ExpParentheses) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
@@ -29,6 +31,12 @@ func (exp ExpNum) Generate(ao *assemblyoutput.AssemblyOutput, _ *memorymodel.Mem
 	val := strconv.Itoa(exp.Value)
 	ao.Mov(RAX, val)
 	return KindNumber, "", nil
+}
+
+func (exp ExpChar) Generate(ao *assemblyoutput.AssemblyOutput, _ *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	rune := exp.Value[0]
+	ao.Mov(RAX, fmt.Sprintf("%d", rune))
+	return KindChar, "", nil
 }
 
 func (exp ExpIdentifier) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
@@ -68,7 +76,7 @@ func (stmt StmtAssign) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 		return nil
 	}
 
-	if kind == KindNumber || kind == KindBool {
+	if kind == KindNumber || kind == KindBool || kind == KindChar {
 		mm.CurrentStackSize++
 		ao.Push(RAX)
 		mm.AddNameToCurrentStackElement(stmt.Identifier, kind)
@@ -88,7 +96,15 @@ func (stmt StmtPrintln) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymo
 		return fmt.Errorf("failed to generate code for expression in println: %w", err)
 	}
 
-	if memorymodel.IsStackKind(kind) {
+	if kind == KindChar {
+		ao.Mov(RDI, PRINTCHARFORMAT)
+		ao.Mov(RSI, RAX)
+		ao.Xor(RAX, RAX)
+		ao.CallPrintf()
+		return nil
+	}
+
+	if memorymodel.IsIntOrBool(kind) {
 		ao.Mov(RDI, PRINTFORMAT64)
 		ao.Mov(RSI, RAX)
 		ao.Xor(RAX, RAX)
@@ -112,7 +128,7 @@ func (stmt StmtReturn) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 
 	ao.Ret()
 
-	if memorymodel.IsStackKind(kind) {
+	if memorymodel.IsIntOrBool(kind) {
 		return nil
 	}
 
@@ -158,7 +174,7 @@ func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	for _, arg := range stmt.Arguments {
 		kind, _, err := arg.Generate(ao, mm)
-		if !memorymodel.IsStackKind(kind) {
+		if !memorymodel.IsIntOrBool(kind) {
 			return KindInvalid, "", fmt.Errorf("only ints and bools are supported as argument types")
 		}
 		if err != nil {
@@ -195,7 +211,7 @@ func (stmt StmtIf) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.M
 	if err != nil {
 		return fmt.Errorf("failed to generate condition of id: %w", err)
 	}
-	if !memorymodel.IsStackKind(kind) {
+	if !memorymodel.IsIntOrBool(kind) {
 		return fmt.Errorf("if conditions can only be stack kinds")
 	}
 
@@ -236,7 +252,7 @@ func (expr ExpNegative) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymo
 	if err != nil {
 		return KindInvalid, "", fmt.Errorf("failed to generate expression inside negative: %w", err)
 	}
-	if !memorymodel.IsStackKind(kind) {
+	if !memorymodel.IsIntOrBool(kind) {
 		return KindInvalid, "", fmt.Errorf("negative expressions only support stack kinds")
 	}
 	ao.Mov(RBX, RAX)

@@ -39,7 +39,7 @@ func (mm *MemoryModel) AddNameToStackElement(name string, kind ContextElementKin
 
 func (mm *MemoryModel) GetStackElement(name string) *ContextElement {
 	value, ok := mm.ContextStack.Peek().members[name]
-	if !ok || !IsStackKind(value.Kind) {
+	if !ok || !IsIntOrBool(value.Kind) {
 		return nil
 	}
 	return value
