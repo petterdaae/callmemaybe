@@ -1,0 +1,6 @@
+almostAString = ['H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!'] : char : 11
+
+o = get 4 from almostAString
+d = get 9 from almostAString
+println o
+println d

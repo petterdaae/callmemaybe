@@ -22,6 +22,7 @@ type ContextElement struct {
 	Name               string
 	NumberOfArgs       int
 	ReturnKind         ContextElementKind
+	ListElementKind    ContextElementKind
 }
 
 func (ce *ContextElement) Copy() *ContextElement {
@@ -31,6 +32,7 @@ func (ce *ContextElement) Copy() *ContextElement {
 		Name:               ce.Name,
 		NumberOfArgs:       ce.NumberOfArgs,
 		ReturnKind:         ce.ReturnKind,
+		ListElementKind:    ce.ListElementKind,
 	}
 }
 
@@ -40,13 +42,14 @@ func EmptyContext() *Context {
 	}
 }
 
-func NewContextElement(stackSizeAfterPush int, kind ContextElementKind, name string, numberOfArgs int, returnKind ContextElementKind) *ContextElement {
+func NewContextElement(stackSizeAfterPush int, kind ContextElementKind, name string, numberOfArgs int, returnKind ContextElementKind, elementKind ContextElementKind) *ContextElement {
 	return &ContextElement{
 		StackSizeAfterPush: stackSizeAfterPush,
 		Kind:               kind,
 		Name:               name,
 		NumberOfArgs:       numberOfArgs,
 		ReturnKind:         returnKind,
+		ListElementKind:    elementKind,
 	}
 }
 

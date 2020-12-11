@@ -45,7 +45,7 @@ func (exp ExpIdentifier) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorym
 	if stackElement != nil {
 		address := fmt.Sprintf("[rsp+%d]", (mm.CurrentStackSize-stackElement.StackSizeAfterPush)*8)
 		ao.Mov(RAX, address)
-		return CustomKind(stackElement.Kind, "", nil)
+		return CustomKind(stackElement.Kind, stackElement.ListElementKind, "", nil)
 	}
 
 	procedureElement := mm.GetProcedureElement(exp.Name)
@@ -80,7 +80,7 @@ func (stmt StmtAssign) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 	if result.Kind == KindNumber || result.Kind == KindBool || result.Kind == KindChar || result.Kind == KindList {
 		mm.CurrentStackSize++
 		ao.Push(RAX)
-		mm.AddNameToCurrentStackElement(stmt.Identifier, result.Kind)
+		mm.AddNameToCurrentStackElement(stmt.Identifier, result.Kind, result.ListElementKind)
 	}
 
 	if result.Kind == KindProcedure {
@@ -146,7 +146,7 @@ func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 
 	for _, arg := range exp.Args {
 		mm.CurrentStackSize++
-		mm.AddNameToCurrentStackElement(arg.Identifier, arg.Type)
+		mm.AddNameToCurrentStackElement(arg.Identifier, arg.Type, KindInvalid)
 	}
 
 	mm.CurrentStackSize++ // Return pointer is pushed to stack when calling procedure
@@ -202,7 +202,7 @@ func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorym
 		ao.Pop(RBX)
 	}
 
-	return CustomKind(procedureElement.ReturnKind, "", nil)
+	return CustomKind(procedureElement.ReturnKind, KindInvalid, "", nil)
 }
 
 func (stmt StmtIf) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
@@ -315,5 +315,5 @@ func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memor
 	ao.Mov(RDX, RAX)
 	ao.Mov(RAX, fmt.Sprintf("[rdx+8*%s]", RCX))
 
-	return CustomKind(result.ListElementKind, "", nil)
+	return CustomKind(result.ListElementKind, KindInvalid, "", nil)
 }

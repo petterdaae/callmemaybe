@@ -48,10 +48,11 @@ func ListKind(elements memorymodel.ContextElementKind) GenerationResult {
 	}
 }
 
-func CustomKind(kind memorymodel.ContextElementKind, name string, err error) GenerationResult {
+func CustomKind(kind memorymodel.ContextElementKind, listElementKind memorymodel.ContextElementKind, name string, err error) GenerationResult {
 	return GenerationResult{
 		Kind: kind,
 		Error: err,
 		ProcedureName: name,
+		ListElementKind: listElementKind,
 	}
 }
