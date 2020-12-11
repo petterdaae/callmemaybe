@@ -499,7 +499,7 @@ func (parser *Parser) parseList() (Exp, error) {
 	}
 
 	kind, _ = parser.readIgnoreWhiteSpace()
-	if kind != Comma {
+	if kind != Colon {
 		return nil, fmt.Errorf("expected comma when parsing list declaration")
 	}
 
@@ -509,7 +509,20 @@ func (parser *Parser) parseList() (Exp, error) {
 		return nil, fmt.Errorf("invalid list type")
 	}
 
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != Colon {
+		return nil, fmt.Errorf("expected comma when parsing list declaration")
+	}
+
+	kind, number := parser.readIgnoreWhiteSpace()
+	if kind != Number {
+		return nil, fmt.Errorf("expected number as list size")
+	}
+
+	parsed, _ := strconv.Atoi(number)
+
 	list.Type = contextKind
+	list.Size = parsed
 
 	return list, nil
 }
@@ -519,11 +532,11 @@ func (parser *Parser) parseGetFromList() (Exp, error) {
 	if kind != Get {
 		return nil, fmt.Errorf("expected get when parsing get from list")
 	}
-	kind, _ := parser.readIgnoreWhiteSpace()
-	if kind != Number {
-		return nil, fmt.Errorf("expected number when parsing get from list")
+	numExp, err := parser.ParseExp()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse index expression in get from list")
 	}
-	kind, number := parser.readIgnoreWhiteSpace()
+	kind, _ = parser.readIgnoreWhiteSpace()
 	if kind != From {
 		return nil, fmt.Errorf("expected from keyword when parsing get from list")
 	}
@@ -531,12 +544,9 @@ func (parser *Parser) parseGetFromList() (Exp, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse expression in get from list: %w", err)
 	}
-
-	parsed, _ := strconv.Atoi(number)
-
 	return ExpGetFromList{
 		List: exp,
-		Index: parsed,
+		Index: numExp,
 	}, nil
 }
 

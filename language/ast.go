@@ -145,11 +145,12 @@ type ExpIdentifier struct {
 type ExpList struct {
 	Elements []Exp
 	Type     memorymodel.ContextElementKind
+	Size     int
 }
 
 type ExpGetFromList struct {
 	List  Exp
-	Index int
+	Index Exp
 }
 
 type StmtAppendToList struct {

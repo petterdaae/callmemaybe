@@ -32,7 +32,7 @@ A simple compiler.
 <val>         := <bool>
 <val>         := <uop> <num>
 <val>         := <char>
-<val>         := "get" <num> "from" <expr>
+<val>         := "get" <exp> "from" <expr>
 
 <bop>         := "+" | "*" | "<" | ">" | "==" | "-" | "/" | "%"
 <uop>         := "-"
@@ -44,7 +44,7 @@ A simple compiler.
 <argList>     := "<" <identifier>? ">" | "<" (<recurse>,)? (<arg> ",")* <arg> ">"
 <arg>         := <identifier> <type>
 
-<list>        := "[" (<expr> ",") <expr> "]" : <type> | "[" "]" : <type>
+<list>        := "[" (<expr> ",") <expr> "]" ":" <type> ":" <num> | "[" "]" ":" <type> ":" <num>
 
 <identifier>  := (letter|_)[letter|[0-9]|_]*
 

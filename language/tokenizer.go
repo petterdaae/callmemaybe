@@ -20,6 +20,7 @@ const (
 	Question
 	Append
 	From
+	Colon
 	To
 	RoundBracketStart
 	RoundBracketEnd
@@ -144,6 +145,8 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return Modulo, string(character)
 	case '?':
 		return Question, string(character)
+	case ':':
+		return Colon, string(character)
 	}
 	
 	return Error, ""
