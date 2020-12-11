@@ -301,6 +301,7 @@ func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memor
 	if result.Kind != KindNumber {
 		return ErrorKind(fmt.Errorf("only integers are valid indexes"))
 	}
+	mm.CurrentStackSize++
 	ao.Push(RAX)
 	result = expr.List.Generate(ao, mm)
 	if result.Error != nil {
@@ -309,9 +310,10 @@ func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memor
 	if result.Kind != KindList {
 		return ErrorKind(fmt.Errorf("can only get from lists by index"))
 	}
+	mm.CurrentStackSize--
 	ao.Pop(RCX)
 	ao.Mov(RDX, RAX)
-	ao.Mov(RAX, fmt.Sprintf("[RDX+8*%s]", RCX))
+	ao.Mov(RAX, fmt.Sprintf("[rdx+8*%s]", RCX))
 
 	return CustomKind(result.ListElementKind, "", nil)
 }

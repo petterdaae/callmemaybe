@@ -146,6 +146,8 @@ func (ao *AssemblyOutput) GetProcedureByName(name string) *procedure {
 
 func (ao *AssemblyOutput) Start() {
 	ao.addOperation("extern printf")
+	ao.addOperation("extern malloc")
+	ao.addOperation("extern free")
 	ao.addOperation("global main")
 	ao.addOperation("section .date")
 	ao.addOperation("format: db '%d', 10, 0")
