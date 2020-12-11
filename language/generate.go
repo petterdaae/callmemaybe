@@ -260,3 +260,13 @@ func (expr ExpNegative) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymo
 	ao.Sub(RAX, RBX)
 	return KindNumber, "", nil
 }
+
+func (expr ExpList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	// TODO : implement
+	return KindInvalid, "", fmt.Errorf("not implemented")
+}
+
+func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+	// TODO : implement
+	return KindInvalid, "", fmt.Errorf("not implemented")
+}
