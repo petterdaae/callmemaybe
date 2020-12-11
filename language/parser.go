@@ -66,6 +66,10 @@ func (parser *Parser) ParseExp() (Exp, error) {
 		return parser.parseFunction()
 	}
 
+	if nextKind == BoxBracketStart {
+		return parser.parseList()
+	}
+
 	return parser.ParseCalculation()
 }
 
@@ -220,6 +224,10 @@ func (parser *Parser) parseVal() (Exp, error) {
 			Value: nextToken,
 		}, nil
 	}
+	if nextKind == Get {
+		parser.unread()
+		return parser.parseGetFromList()
+	}
 	return nil, fmt.Errorf("unexpected token while parsing val")
 }
 
@@ -287,6 +295,15 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 			statement, err := parser.parseIf()
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse if statement: %w", err)
+			}
+			statements = append(statements, statement)
+			continue
+		}
+		if nextKind == Append {
+			parser.unread()
+			statement, err := parser.parseAppendToList()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse append statement: %w", err)
 			}
 			statements = append(statements, statement)
 			continue
@@ -448,6 +465,21 @@ func (parser *Parser) parseFunction() (Exp, error) {
 	}
 
 	return function, nil
+}
+
+func (parser *Parser) parseList() (Exp, error) {
+	// TODO : implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (parser *Parser) parseGetFromList() (Exp, error) {
+	// TODO : implement
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (parser *Parser) parseAppendToList() (Stmt, error) {
+	// TODO : implement
+	return nil, fmt.Errorf("not implemented")
 }
 
 func kindFromType(token Token) memorymodel.ContextElementKind {

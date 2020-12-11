@@ -142,6 +142,21 @@ type ExpIdentifier struct {
 	Name string
 }
 
+type ExpList struct {
+	Elements []Exp
+	Type     memorymodel.ContextElementKind
+}
+
+type ExpGetFromList struct {
+	List  Exp
+	Index int
+}
+
+type StmtAppendToList struct {
+	List       Exp
+	NewElement Exp
+}
+
 type ExpFunction struct {
 	Recurse    string
 	Args       []Arg

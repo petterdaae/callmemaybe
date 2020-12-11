@@ -14,8 +14,12 @@ const (
 	Minus
 	Modulo
 	Divide
+	Get
 	Multiply
 	Assign
+	Question
+	Append
+	To
 	RoundBracketStart
 	RoundBracketEnd
 	BoxBracketStart
@@ -137,6 +141,8 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return Divide, string(character)
 	case '%':
 		return Modulo, string(character)
+	case '?':
+		return Question, string(character)
 	}
 	
 	return Error, ""
@@ -238,6 +244,12 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return False, word
 	case "bool":
 		return TypeBool, word
+	case "append":
+		return Append, word
+	case "to":
+		return To, word
+	case "get":
+		return Get, word
 	}
 
 	return Identifier, word

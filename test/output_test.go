@@ -208,3 +208,7 @@ func TestCase050(t *testing.T) {
 func TestCase051(t *testing.T) {
 	utils.AssertProgramOutput("testcases/051.lang", "p\np\np\np\np\np\np\np\np\np\n", t)
 }
+
+func TestCase052(t *testing.T) {
+	utils.AssertProgramOutput("testcases/052.lang", "2\n", t)
+}

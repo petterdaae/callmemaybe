@@ -22,6 +22,7 @@ A simple compiler.
 <expr>        := <calculation>
 <expr>        := <function>
 <expr>        := <call>
+<expr>        := <list>
 
 <calculation> := <val> (<bop> <val>)*
 
@@ -31,12 +32,11 @@ A simple compiler.
 <val>         := <bool>
 <val>         := <uop> <num>
 <val>         := <char>
-<val>         := <list>
-<val>         := <list> ? <num>
+<val>         := "get" <num> "from" <expr>
 
 <bop>         := "+" | "*" | "<" | ">" | "==" | "-" | "/" | "%"
 <uop>         := "-"
-<num>         := [1-9][0-9]+
+<num>         := [0-9]+
 <bool>        := "true" | "false"
 <char>        := [^\'] | "\" "'" | "\" "\"
 
