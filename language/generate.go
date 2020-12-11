@@ -137,15 +137,15 @@ func (stmt StmtReturn) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 
 func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
 	mm.PushNewContext(false)
-	name := ao.PushProcedure(len(exp.Args), mm.CurrentStackSize, memorymodel.GetKindFromType(exp.ReturnType))
+	name := ao.PushProcedure(len(exp.Args), mm.CurrentStackSize, exp.ReturnType)
 
-	mm.AddProcedureAlias(name, exp.Recurse, len(exp.Args), memorymodel.GetKindFromType(exp.ReturnType))
+	mm.AddProcedureAlias(name, exp.Recurse, len(exp.Args), exp.ReturnType)
 
 	initialStackSize := mm.CurrentStackSize
 
 	for _, arg := range exp.Args {
 		mm.CurrentStackSize++
-		mm.AddNameToCurrentStackElement(arg.Identifier, memorymodel.GetKindFromType(arg.Type))
+		mm.AddNameToCurrentStackElement(arg.Identifier, arg.Type)
 	}
 
 	mm.CurrentStackSize++ // Return pointer is pushed to stack when calling procedure

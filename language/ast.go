@@ -146,12 +146,12 @@ type ExpFunction struct {
 	Recurse    string
 	Args       []Arg
 	Body       Stmt
-	ReturnType string
+	ReturnType memorymodel.ContextElementKind
 }
 
 type Arg struct {
 	Identifier string
-	Type       string
+	Type       memorymodel.ContextElementKind
 }
 
 type FunctionCall struct {

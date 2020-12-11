@@ -2,6 +2,7 @@ package test
 
 import (
 	"lang/language"
+	"lang/language/memorymodel"
 	"reflect"
 	"strings"
 	"testing"
@@ -122,7 +123,7 @@ func TestFunctionAssign(t *testing.T) {
 				Identifier: "f",
 				Expression: language.ExpFunction{
 					Args: []language.Arg{
-						language.Arg{Identifier: "a", Type: "int"},
+						language.Arg{Identifier: "a", Type: memorymodel.ContextElementKindNumber},
 					},
 					Body: language.StmtSeq{
 						Statements: []language.Stmt{
@@ -133,7 +134,7 @@ func TestFunctionAssign(t *testing.T) {
 							},
 						},
 					},
-					ReturnType: "empty",
+					ReturnType: memorymodel.ContextElementKindEmpty,
 				},
 			},
 		},
@@ -149,7 +150,7 @@ func TestFunctionAssignWithType(t *testing.T) {
 				Identifier: "f",
 				Expression: language.ExpFunction{
 					Args: []language.Arg{
-						language.Arg{Identifier: "a", Type: "int"},
+						language.Arg{Identifier: "a", Type: memorymodel.ContextElementKindNumber},
 					},
 					Body: language.StmtSeq{
 						Statements: []language.Stmt{
@@ -160,7 +161,7 @@ func TestFunctionAssignWithType(t *testing.T) {
 							},
 						},
 					},
-					ReturnType: "int",
+					ReturnType: memorymodel.ContextElementKindNumber,
 				},
 			},
 		},

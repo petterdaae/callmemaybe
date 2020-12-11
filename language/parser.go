@@ -3,6 +3,7 @@ package language
 import (
 	"fmt"
 	"io"
+	"lang/language/memorymodel"
 	"strconv"
 )
 
@@ -381,7 +382,7 @@ func (parser *Parser) parseFunction() (Exp, error) {
 			return nil, fmt.Errorf("expected identifier when parsing argument list, but got %s", identifier)
 		}
 
-		kind, typeName := parser.readIgnoreWhiteSpace()
+		kind, _ = parser.readIgnoreWhiteSpace()
 		if kind == TypeEmpty {
 			return nil, fmt.Errorf("only non-empty types allowed in function arguments")
 		}
@@ -392,13 +393,15 @@ func (parser *Parser) parseFunction() (Exp, error) {
 		}
 		first = false
 
-		if kind != TypeInt && kind != TypeBool && kind != TypeChar {
-			return nil, fmt.Errorf("expected non-empty type as argument type when parsing argument list")
+
+		contextKind := kindFromType(kind)
+		if contextKind == memorymodel.ContextElementKindInvalid {
+			return nil, fmt.Errorf("expected valid type when parsing argument in argument list")
 		}
 
 		kind, _ = parser.readIgnoreWhiteSpace()
 
-		function.Args = append(function.Args, Arg{Identifier: identifier, Type: typeName})
+		function.Args = append(function.Args, Arg{Identifier: identifier, Type: contextKind})
 
 		if kind == AngleBracketEnd {
 			break
@@ -416,13 +419,17 @@ func (parser *Parser) parseFunction() (Exp, error) {
 		return nil, fmt.Errorf("expected arrow after argument list when parsing function")
 	}
 
-	kind, typeName := parser.readIgnoreWhiteSpace()
-	if kind == TypeInt || kind == TypeBool {
-		function.ReturnType = typeName
-		kind, _ = parser.readIgnoreWhiteSpace()
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind == CurlyBracketStart {
+		function.ReturnType = memorymodel.ContextElementKindEmpty
 	} else {
-		function.ReturnType = "empty"
+		function.ReturnType = kindFromType(kind)
+		if function.ReturnType == memorymodel.ContextElementKindInvalid {
+			return nil, fmt.Errorf("invalid return type while parsing function definition")
+		}
+		kind, _ = parser.readIgnoreWhiteSpace()
 	}
+
 
 	if kind != CurlyBracketStart {
 		return nil, fmt.Errorf("expected opening curly bracket when parsing function")
@@ -441,4 +448,19 @@ func (parser *Parser) parseFunction() (Exp, error) {
 	}
 
 	return function, nil
+}
+
+func kindFromType(token Token) memorymodel.ContextElementKind {
+	switch token {
+	case TypeInt:
+		return memorymodel.ContextElementKindNumber
+	case TypeChar:
+		return memorymodel.ContextElementKindChar
+	case TypeBool:
+		return memorymodel.ContextElementKindBoolean
+	case TypeEmpty:
+		return memorymodel.ContextElementKindEmpty
+	default:
+		return memorymodel.ContextElementKindInvalid
+	}
 }
