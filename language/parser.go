@@ -468,13 +468,76 @@ func (parser *Parser) parseFunction() (Exp, error) {
 }
 
 func (parser *Parser) parseList() (Exp, error) {
-	// TODO : implement
-	return nil, fmt.Errorf("not implemented")
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != BoxBracketStart {
+		return nil, fmt.Errorf("expected box bracket at start of list declaration")
+	}
+
+	list := ExpList{}
+	first := true
+
+	for {
+		kind, _ = parser.readIgnoreWhiteSpace()
+		if first && kind == BoxBracketEnd {
+			break
+		}
+		first = false
+		parser.unread()
+		expr, err := parser.ParseExp()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse expression in list declaration: %w", err)
+		}
+		list.Elements = append(list.Elements, expr)
+		kind, _ = parser.readIgnoreWhiteSpace()
+		if kind == Comma {
+			continue
+		}
+		if kind == BoxBracketEnd {
+			break
+		}
+		return nil, fmt.Errorf("unexpected token when parsing list declareation")
+	}
+
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != Comma {
+		return nil, fmt.Errorf("expected comma when parsing list declaration")
+	}
+
+	kind, _ = parser.readIgnoreWhiteSpace()
+	contextKind := kindFromType(kind)
+	if contextKind == memorymodel.ContextElementKindInvalid || contextKind == memorymodel.ContextElementKindEmpty {
+		return nil, fmt.Errorf("invalid list type")
+	}
+
+	list.Type = contextKind
+
+	return list, nil
 }
 
 func (parser *Parser) parseGetFromList() (Exp, error) {
-	// TODO : implement
-	return nil, fmt.Errorf("not implemented")
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != Get {
+		return nil, fmt.Errorf("expected get when parsing get from list")
+	}
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != Number {
+		return nil, fmt.Errorf("expected number when parsing get from list")
+	}
+	kind, number := parser.readIgnoreWhiteSpace()
+	if kind != From {
+		return nil, fmt.Errorf("expected from keyword when parsing get from list")
+	}
+	exp, err := parser.ParseExp()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse expression in get from list: %w", err)
+	}
+
+	parsed, _ := strconv.Atoi(number)
+
+	return ExpGetFromList{
+		List: exp,
+		Index: parsed,
+	}, nil
 }
 
 func (parser *Parser) parseAppendToList() (Stmt, error) {

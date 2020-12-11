@@ -19,6 +19,7 @@ const (
 	Assign
 	Question
 	Append
+	From
 	To
 	RoundBracketStart
 	RoundBracketEnd
@@ -250,6 +251,8 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return To, word
 	case "get":
 		return Get, word
+	case "from":
+		return From, word
 	}
 
 	return Identifier, word
