@@ -9,6 +9,7 @@ const (
 	ContextElementKindInvalid
 	ContextElementKindProcedure
 	ContextElementKindEmpty
+	ContextElementKindListReference
 )
 
 type Context struct {

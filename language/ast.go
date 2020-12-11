@@ -6,7 +6,7 @@ import (
 )
 
 type Exp interface {
-	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error)
+	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerationResult
 }
 
 type ExpBop interface {

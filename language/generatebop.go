@@ -6,7 +6,7 @@ import (
 	"lang/language/memorymodel"
 )
 
-func (exp ExpGreater) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+func (exp ExpGreater) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerationResult {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Cmp(RBX, RAX)
 		greater := ao.GenerateUniqueName()
@@ -24,7 +24,7 @@ func (exp ExpGreater) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymode
 	return HelpGenerateStackBop(ao, mm, exp, "greater", operation, KindBool)
 }
 
-func (exp ExpLess) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+func (exp ExpLess) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerationResult {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Cmp(RBX, RAX)
 		less := ao.GenerateUniqueName()
@@ -42,7 +42,7 @@ func (exp ExpLess) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.M
 	return HelpGenerateStackBop(ao, mm, exp, "less", operation, KindBool)
 }
 
-func (exp ExpEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+func (exp ExpEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerationResult {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Cmp(RBX, RAX)
 		equal := ao.GenerateUniqueName()
@@ -60,21 +60,21 @@ func (exp ExpEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel
 	return HelpGenerateStackBop(ao, mm, exp, "equals", operation, KindBool)
 }
 
-func (exp ExpPlus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+func (exp ExpPlus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerationResult {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Add(RAX, RBX)
 	}
 	return HelpGenerateStackBop(ao, mm, exp, "plus", operation, KindNumber)
 }
 
-func (exp ExpMultiply) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+func (exp ExpMultiply) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerationResult {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Imul(RAX, RBX)
 	}
 	return HelpGenerateStackBop(ao, mm, exp, "multiply", operation, KindNumber)
 }
 
-func (exp ExpMinus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+func (exp ExpMinus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerationResult {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Sub(RBX, RAX)
 		ao.Mov(RAX, RBX)
@@ -82,7 +82,7 @@ func (exp ExpMinus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.
 	return HelpGenerateStackBop(ao, mm, exp, "multiply", operation, KindNumber)
 }
 
-func (exp ExpDivide) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+func (exp ExpDivide) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerationResult {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Mov(RDX, "0")
 		ao.Mov(RCX, RAX)
@@ -92,7 +92,7 @@ func (exp ExpDivide) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel
 	return HelpGenerateStackBop(ao, mm, exp, "divide", operation, KindNumber)
 }
 
-func (exp ExpModulo) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (memorymodel.ContextElementKind, string, error) {
+func (exp ExpModulo) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerationResult {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Mov(RDX, "0")
 		ao.Mov(RCX, RAX)
@@ -110,24 +110,24 @@ func HelpGenerateStackBop(
 	name string,
 	operation func(ao *assemblyoutput.AssemblyOutput),
 	kind memorymodel.ContextElementKind,
-) (memorymodel.ContextElementKind, string, error) {
-	kind, _, err := exp.LeftExp().Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate left expression of %s: %w", name, err)
+) GenerationResult {
+	result := exp.LeftExp().Generate(ao, mm)
+	if result.Error != nil {
+		return ErrorKind(fmt.Errorf("failed to generate left expression of %s: %w", name, result.Error))
 	}
 	if !memorymodel.IsIntOrBool(kind) {
-		return KindInvalid, "", fmt.Errorf("%s only supports stack kinds", name)
+		return ErrorKind(fmt.Errorf("%s only supports stack kinds", name))
 	}
 
 	mm.CurrentStackSize++
 	ao.Push(RAX)
 
-	kind, _, err = exp.RightExp().Generate(ao, mm)
-	if err != nil {
-		return KindInvalid, "", fmt.Errorf("failed to generate right expression of %s: %w", name, err)
+	result = exp.RightExp().Generate(ao, mm)
+	if result.Error != nil {
+		return ErrorKind(fmt.Errorf("failed to generate right expression of %s: %w", name, result.Error))
 	}
 	if !memorymodel.IsIntOrBool(kind) {
-		return KindInvalid, "", fmt.Errorf("%s only supports stack kinds", name)
+		return ErrorKind(fmt.Errorf("%s only supports stack kinds", name))
 	}
 
 	mm.CurrentStackSize--
@@ -135,5 +135,5 @@ func HelpGenerateStackBop(
 
 	operation(ao)
 
-	return kind, "", nil
+	return NumberKind()
 }

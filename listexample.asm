@@ -14,7 +14,8 @@ main:
     mov rdx, rax
     mov qword [rdx], 1
     mov qword [rdx+8], 2
-    mov qword [rdx+16], 3
+    mov qword [rdx+8*2], 3
+    mov qword [rdx+8*3], 4
 
     mov rax, [rdx]
     call printit
