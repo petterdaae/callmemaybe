@@ -1,7 +1,7 @@
 package assemblyoutput
 
 import (
-	"lang/language/common"
+	"callmemaybe/language/common"
 )
 
 type procedure struct {

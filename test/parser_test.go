@@ -1,8 +1,8 @@
 package test
 
 import (
-	"lang/language"
-	"lang/language/common"
+	"callmemaybe/language"
+	"callmemaybe/language/common"
 	"reflect"
 	"strings"
 	"testing"

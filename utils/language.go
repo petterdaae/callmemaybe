@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"lang/language"
-	"lang/language/assemblyoutput"
-	"lang/language/memorymodel"
+	"callmemaybe/language"
+	"callmemaybe/language/assemblyoutput"
+	"callmemaybe/language/memorymodel"
 	"os/exec"
 	"strings"
 )

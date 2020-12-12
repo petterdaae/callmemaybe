@@ -1,0 +1,7 @@
+if 'a' == 'a' {
+    println 3
+}
+
+if 'a' == 'b' {
+    println 2
+}

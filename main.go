@@ -5,7 +5,7 @@ import (
 	"github.com/alecthomas/kong"
 	"os"
 	"os/exec"
-	"lang/utils"
+	"callmemaybe/utils"
 )
 
 type Arguments struct {
@@ -22,7 +22,7 @@ type Nasm struct {
 }
 
 func (build *Build) Run() error {
-	println("🔨 Building your executable with lang 1.0\n")
+	println("🔨 Building your executable with callmemaybe 1.0\n")
 
 	nasmTemp := "out.nasm"
 	oTemp := "out.o"

@@ -1,9 +1,9 @@
 package language
 
 import (
-	"lang/language/assemblyoutput"
-	"lang/language/common"
-	"lang/language/memorymodel"
+	"callmemaybe/language/assemblyoutput"
+	"callmemaybe/language/common"
+	"callmemaybe/language/memorymodel"
 )
 
 type Exp interface {

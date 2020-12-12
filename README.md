@@ -1,4 +1,4 @@
-# lang
+# callmemaybe
 A simple compiler.
 
 ### The current grammar that I am trying to implement
@@ -52,13 +52,11 @@ A simple compiler.
 ```
 
 ### TODO
-- Comparison for characters
 - Expand type signatures to handle lists
 - Strings (syntactic sugar for lists of characters)
 - Print lists
 - Input
 - Loop
-- Syntax highlighting  
 - Make it possible to return functions and pass functions as arguments
 - Structs
 - Handle division-by-zero and out-of-bounds errors

@@ -1,8 +1,8 @@
 package language
 
 import (
+	"callmemaybe/language/common"
 	"fmt"
-	"lang/language/common"
 )
 
 type GenerateResult struct {

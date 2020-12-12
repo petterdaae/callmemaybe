@@ -1,9 +1,9 @@
 package language
 
 import (
+	"callmemaybe/language/assemblyoutput"
+	"callmemaybe/language/memorymodel"
 	"fmt"
-	"lang/language/assemblyoutput"
-	"lang/language/memorymodel"
 	"strconv"
 )
 

@@ -1,4 +1,4 @@
-module lang
+module callmemaybe
 
 go 1.14
 

@@ -1,10 +1,10 @@
 package language
 
 import (
+	"callmemaybe/language/assemblyoutput"
+	"callmemaybe/language/common"
+	"callmemaybe/language/memorymodel"
 	"fmt"
-	"lang/language/assemblyoutput"
-	"lang/language/common"
-	"lang/language/memorymodel"
 )
 
 func (exp ExpGreater) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {

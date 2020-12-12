@@ -1,6 +1,6 @@
 .idea/
 *.swp
-lang
+callmemaybe
 out
 *.o
 temp.asm

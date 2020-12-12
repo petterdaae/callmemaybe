@@ -1,7 +1,7 @@
 package test
 
 import (
-	"lang/language"
+	"callmemaybe/language"
 	"strings"
 	"testing"
 )
