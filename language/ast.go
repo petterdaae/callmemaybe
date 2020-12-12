@@ -2,11 +2,16 @@ package language
 
 import (
 	"lang/language/assemblyoutput"
+	"lang/language/common"
 	"lang/language/memorymodel"
 )
 
 type Exp interface {
-	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerationResult
+	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult
+}
+
+type Stmt interface {
+	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error
 }
 
 type ExpBop interface {
@@ -144,7 +149,7 @@ type ExpIdentifier struct {
 
 type ExpList struct {
 	Elements []Exp
-	Type     memorymodel.ContextElementKind
+	Type     common.ContextElementKind
 	Size     int
 }
 
@@ -160,23 +165,14 @@ type StmtAppendToList struct {
 
 type ExpFunction struct {
 	Recurse    string
-	Args       []Arg
+	Args       []common.Arg
 	Body       Stmt
-	ReturnType memorymodel.ContextElementKind
-}
-
-type Arg struct {
-	Identifier string
-	Type       memorymodel.ContextElementKind
+	ReturnType common.ContextElementKind
 }
 
 type FunctionCall struct {
 	Name      string
 	Arguments []Exp
-}
-
-type Stmt interface {
-	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error
 }
 
 type StmtSeq struct {

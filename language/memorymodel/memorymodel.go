@@ -1,5 +1,9 @@
 package memorymodel
 
+import (
+	"lang/language/common"
+)
+
 type MemoryModel struct {
 	CurrentStackSize int
 	ContextStack     *ContextStack
@@ -17,7 +21,7 @@ func (mm *MemoryModel) PushNewContext(copyCurrentContext bool) {
 	newContext := EmptyContext()
 	if copyCurrentContext {
 		for k, v := range current.members {
-			newContext.members[k] = v // .Copy()
+			newContext.members[k] = v
 		}
 	}
 	mm.ContextStack.Push(newContext)
@@ -27,19 +31,14 @@ func (mm *MemoryModel) PopCurrentContext() {
 	mm.ContextStack.Pop()
 }
 
-func (mm *MemoryModel) AddNameToCurrentStackElement(name string, kind ContextElementKind, elementKind ContextElementKind) {
+func (mm *MemoryModel) AddNameToCurrentStackElement(name string, kind common.ContextElementKind, listElementKind common.ContextElementKind) {
 	currentContext := mm.ContextStack.Peek()
-	currentContext.members[name] = NewContextElement(mm.CurrentStackSize, kind, "", 0, ContextElementKindInvalid, elementKind)
+	currentContext.members[name] = NewContextElement(mm.CurrentStackSize, kind, "", 0, common.ContextElementKindInvalid, listElementKind, []common.Arg{})
 }
-
-//func (mm *MemoryModel) AddNameToStackElement(name string, kind ContextElementKind, stackSizeWhenPushed int) {
-//	currentContext := mm.ContextStack.Peek()
-//	currentContext.members[name] = NewContextElement(stackSizeWhenPushed, kind, "", 0, ContextElementKindInvalid)
-//}
 
 func (mm *MemoryModel) GetStackElement(name string) *ContextElement {
 	value, ok := mm.ContextStack.Peek().members[name]
-	if !ok || !IsIntOrBool(value.Kind) {
+	if !ok {
 		return nil
 	}
 	return value
@@ -47,14 +46,14 @@ func (mm *MemoryModel) GetStackElement(name string) *ContextElement {
 
 func (mm *MemoryModel) GetProcedureElement(name string) *ContextElement {
 	value, ok := mm.ContextStack.Peek().members[name]
-	if !ok || value.Kind != ContextElementKindProcedure {
+	if !ok || value.Kind != common.ContextElementKindProcedure {
 		return nil
 	}
 	return value
 }
 
-func (mm *MemoryModel) AddProcedureAlias(name string, alias string, numberOfArgs int, returnType ContextElementKind) {
+func (mm *MemoryModel) AddProcedureAlias(name string, alias string, numberOfArgs int, returnType common.ContextElementKind, args []common.Arg) {
 	currentContext := mm.ContextStack.Peek()
-	currentContext.members[alias] = NewContextElement(0, ContextElementKindProcedure, name, numberOfArgs, returnType, ContextElementKindInvalid)
+	currentContext.members[alias] = NewContextElement(0, common.ContextElementKindProcedure, name, numberOfArgs, returnType, common.ContextElementKindInvalid, args)
 }
 

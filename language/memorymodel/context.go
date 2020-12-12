@@ -1,15 +1,7 @@
 package memorymodel
 
-type ContextElementKind int
-
-const (
-	ContextElementKindNumber ContextElementKind = iota
-	ContextElementKindBoolean
-	ContextElementKindChar
-	ContextElementKindInvalid
-	ContextElementKindProcedure
-	ContextElementKindEmpty
-	ContextElementKindListReference
+import (
+	"lang/language/common"
 )
 
 type Context struct {
@@ -17,23 +9,13 @@ type Context struct {
 }
 
 type ContextElement struct {
-	StackSizeAfterPush int
-	Kind               ContextElementKind
-	Name               string
-	NumberOfArgs       int
-	ReturnKind         ContextElementKind
-	ListElementKind    ContextElementKind
-}
-
-func (ce *ContextElement) Copy() *ContextElement {
-	return &ContextElement{
-		StackSizeAfterPush: ce.StackSizeAfterPush,
-		Kind:               ce.Kind,
-		Name:               ce.Name,
-		NumberOfArgs:       ce.NumberOfArgs,
-		ReturnKind:         ce.ReturnKind,
-		ListElementKind:    ce.ListElementKind,
-	}
+	Kind                 common.ContextElementKind
+	Name                 string
+	StackSizeAfterPush   int
+	FunctionNumberOfArgs int
+	FunctionReturnKind   common.ContextElementKind
+	FunctionArguments    []common.Arg
+	ListElementKind      common.ContextElementKind
 }
 
 func EmptyContext() *Context {
@@ -42,30 +24,22 @@ func EmptyContext() *Context {
 	}
 }
 
-func NewContextElement(stackSizeAfterPush int, kind ContextElementKind, name string, numberOfArgs int, returnKind ContextElementKind, elementKind ContextElementKind) *ContextElement {
+func NewContextElement(
+	stackSizeAfterPush int,
+	kind common.ContextElementKind,
+	name string,
+	numberOfArgs int,
+	returnKind common.ContextElementKind,
+	elementKind common.ContextElementKind,
+	functionArguments []common.Arg,
+) *ContextElement {
 	return &ContextElement{
-		StackSizeAfterPush: stackSizeAfterPush,
-		Kind:               kind,
-		Name:               name,
-		NumberOfArgs:       numberOfArgs,
-		ReturnKind:         returnKind,
-		ListElementKind:    elementKind,
-	}
-}
-
-func IsIntOrBool(kind ContextElementKind) bool {
-	return kind != ContextElementKindInvalid && kind != ContextElementKindProcedure
-}
-
-func GetKindFromType(_type string) ContextElementKind {
-	switch _type {
-	case "bool":
-		return ContextElementKindBoolean
-	case "int":
-		return ContextElementKindNumber
-	case "char":
-		return ContextElementKindChar
-	default:
-		return ContextElementKindInvalid
+		StackSizeAfterPush:   stackSizeAfterPush,
+		Kind:                 kind,
+		Name:                 name,
+		FunctionNumberOfArgs: numberOfArgs,
+		FunctionReturnKind:   returnKind,
+		ListElementKind:      elementKind,
+		FunctionArguments:    functionArguments,
 	}
 }

@@ -3,7 +3,7 @@ package language
 import (
 	"fmt"
 	"io"
-	"lang/language/memorymodel"
+	"lang/language/common"
 	"strconv"
 )
 
@@ -412,13 +412,13 @@ func (parser *Parser) parseFunction() (Exp, error) {
 
 
 		contextKind := kindFromType(kind)
-		if contextKind == memorymodel.ContextElementKindInvalid {
+		if contextKind == common.ContextElementKindInvalid {
 			return nil, fmt.Errorf("expected valid type when parsing argument in argument list")
 		}
 
 		kind, _ = parser.readIgnoreWhiteSpace()
 
-		function.Args = append(function.Args, Arg{Identifier: identifier, Type: contextKind})
+		function.Args = append(function.Args, common.Arg{Identifier: identifier, Type: contextKind})
 
 		if kind == AngleBracketEnd {
 			break
@@ -438,10 +438,10 @@ func (parser *Parser) parseFunction() (Exp, error) {
 
 	kind, _ = parser.readIgnoreWhiteSpace()
 	if kind == CurlyBracketStart {
-		function.ReturnType = memorymodel.ContextElementKindEmpty
+		function.ReturnType = common.ContextElementKindEmpty
 	} else {
 		function.ReturnType = kindFromType(kind)
-		if function.ReturnType == memorymodel.ContextElementKindInvalid {
+		if function.ReturnType == common.ContextElementKindInvalid {
 			return nil, fmt.Errorf("invalid return type while parsing function definition")
 		}
 		kind, _ = parser.readIgnoreWhiteSpace()
@@ -505,7 +505,7 @@ func (parser *Parser) parseList() (Exp, error) {
 
 	kind, _ = parser.readIgnoreWhiteSpace()
 	contextKind := kindFromType(kind)
-	if contextKind == memorymodel.ContextElementKindInvalid || contextKind == memorymodel.ContextElementKindEmpty {
+	if contextKind == common.ContextElementKindInvalid || contextKind == common.ContextElementKindEmpty {
 		return nil, fmt.Errorf("invalid list type")
 	}
 
@@ -555,17 +555,17 @@ func (parser *Parser) parseAppendToList() (Stmt, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func kindFromType(token Token) memorymodel.ContextElementKind {
+func kindFromType(token Token) common.ContextElementKind {
 	switch token {
 	case TypeInt:
-		return memorymodel.ContextElementKindNumber
+		return common.ContextElementKindNumber
 	case TypeChar:
-		return memorymodel.ContextElementKindChar
+		return common.ContextElementKindChar
 	case TypeBool:
-		return memorymodel.ContextElementKindBoolean
+		return common.ContextElementKindBoolean
 	case TypeEmpty:
-		return memorymodel.ContextElementKindEmpty
+		return common.ContextElementKindEmpty
 	default:
-		return memorymodel.ContextElementKindInvalid
+		return common.ContextElementKindInvalid
 	}
 }

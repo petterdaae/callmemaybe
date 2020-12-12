@@ -216,3 +216,11 @@ func TestCase052(t *testing.T) {
 func TestCase053(t *testing.T) {
 	utils.AssertProgramOutput("testcases/053.lang", "o\nd\n", t)
 }
+
+func TestCase054(t *testing.T) {
+	utils.AssertCompilerFails("testcases/054.lang", t)
+}
+
+func TestCase055(t *testing.T) {
+	utils.AssertCompilerFails("testcases/055.lang", t)
+}

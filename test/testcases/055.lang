@@ -1,0 +1,5 @@
+f = <a char> => {
+    println a
+}
+
+_ = call f with 111

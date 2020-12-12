@@ -2,7 +2,7 @@ package test
 
 import (
 	"lang/language"
-	"lang/language/memorymodel"
+	"lang/language/common"
 	"reflect"
 	"strings"
 	"testing"
@@ -122,8 +122,8 @@ func TestFunctionAssign(t *testing.T) {
 			language.StmtAssign{
 				Identifier: "f",
 				Expression: language.ExpFunction{
-					Args: []language.Arg{
-						language.Arg{Identifier: "a", Type: memorymodel.ContextElementKindNumber},
+					Args: []common.Arg{
+						common.Arg{Identifier: "a", Type: common.ContextElementKindNumber},
 					},
 					Body: language.StmtSeq{
 						Statements: []language.Stmt{
@@ -134,7 +134,7 @@ func TestFunctionAssign(t *testing.T) {
 							},
 						},
 					},
-					ReturnType: memorymodel.ContextElementKindEmpty,
+					ReturnType: common.ContextElementKindEmpty,
 				},
 			},
 		},
@@ -149,8 +149,8 @@ func TestFunctionAssignWithType(t *testing.T) {
 			language.StmtAssign{
 				Identifier: "f",
 				Expression: language.ExpFunction{
-					Args: []language.Arg{
-						language.Arg{Identifier: "a", Type: memorymodel.ContextElementKindNumber},
+					Args: []common.Arg{
+						common.Arg{Identifier: "a", Type: common.ContextElementKindNumber},
 					},
 					Body: language.StmtSeq{
 						Statements: []language.Stmt{
@@ -161,7 +161,7 @@ func TestFunctionAssignWithType(t *testing.T) {
 							},
 						},
 					},
-					ReturnType: memorymodel.ContextElementKindNumber,
+					ReturnType: common.ContextElementKindNumber,
 				},
 			},
 		},

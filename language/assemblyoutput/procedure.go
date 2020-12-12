@@ -1,11 +1,14 @@
 package assemblyoutput
 
-import "lang/language/memorymodel"
+import (
+	"lang/language/common"
+)
 
 type procedure struct {
 	Name                              string
 	NumberOfArgs                      int
 	StackSizeBeforeFunctionGeneration int
 	Operations                        []string
-	ReturnKind                        memorymodel.ContextElementKind
+	ReturnKind                        common.ContextElementKind
+	Args                              []common.Arg
 }

@@ -2,7 +2,7 @@ package assemblyoutput
 
 import (
 	"fmt"
-	"lang/language/memorymodel"
+	"lang/language/common"
 )
 
 type AssemblyOutput struct {
@@ -109,13 +109,14 @@ func (ao *AssemblyOutput) addOperation(operation string) {
 	}
 }
 
-func (ao *AssemblyOutput) PushProcedure(numberOfArgs int, initialStackSize int, returnKind memorymodel.ContextElementKind) string {
+func (ao *AssemblyOutput) PushProcedure(numberOfArgs int, initialStackSize int, returnKind common.ContextElementKind, args []common.Arg) string {
 	name := ao.GenerateUniqueName()
 	ao.procedureStack.Push(&procedure{
 		Name:                              name,
 		NumberOfArgs:                      numberOfArgs,
 		StackSizeBeforeFunctionGeneration: initialStackSize,
 		ReturnKind:                        returnKind,
+		Args:                              args,
 	})
 	return name
 }
