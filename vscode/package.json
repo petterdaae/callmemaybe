@@ -1,0 +1,43 @@
+{
+    "name": "callmemaybe",
+    "displayName": "Call Me Maybe",
+    "description": "Syntax highlighting for the Call Me Maybe language",
+    "version": "0.0.1",
+    "publisher": "petterdaae",
+    "engines": {
+        "vscode": "^1.52.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "callmemaybe",
+                "aliases": [
+                    "Call Me Maybe",
+                    "callmemaybe"
+                ],
+                "extensions": [
+                    ".cmm"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "callmemaybe",
+                "scopeName": "source.cmm",
+                "path": "./syntaxes/callmemaybe.tmLanguage.json"
+            }
+        ],
+        "themes": [
+            {
+                "label": "callmemaybe",
+                "id": "callmemaybe",
+                "uiThem": "vs-dark",
+                "path": "themes/callmemaybe.theme.json"
+            }
+        ]
+    }
+}

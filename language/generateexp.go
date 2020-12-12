@@ -141,6 +141,7 @@ func (expr ExpNegative) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymo
 	ao.Sub(RAX, RBX)
 	return NumberResult()
 }
+
 func (expr ExpList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
 	if !expr.Type.IsStoredOnStack() {
 		return ErrorResult(fmt.Errorf("list currently only support ints, bools and chars"))

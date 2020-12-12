@@ -1,0 +1,39 @@
+{
+    "$schema": "vscode://schemas/color-theme",
+    "name": "Call Me Maybe Theme",
+    "tokenColors": [
+        {
+            "scope": "cmm.punctuation",
+            "settings": {
+                "foreground": "#FF0000"
+            }
+        },
+        {
+            "scope": "cmm.identifier",
+            "settings": {
+                "foreground": "#add8e6"
+            }
+        },
+        {
+            "scope": "cmm.type",
+            "settings": {
+                "foreground": "#90ee90",
+                "fontStyle": "bold"
+            }
+        },
+        {
+            "scope": "cmm.keyword",
+            "settings": {
+                "foreground": "#ffff1a",
+                "fontStyle": "italic"
+            }
+        },
+        {
+            "scope": "cmm.number",
+            "settings": {
+                "foreground": "#8d1aff",
+                "fontStyle": "italic"
+            }
+        }
+    ]
+}

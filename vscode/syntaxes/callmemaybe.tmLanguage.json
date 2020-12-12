@@ -1,0 +1,77 @@
+{
+    "patterns": [
+        {
+            "match": "call",
+            "name": "cmm.keyword"
+        },
+        {
+            "match": "println",
+            "name": "cmm.keyword"
+        },
+        {
+            "match": "with",
+            "name": "cmm.keyword"
+        },
+        {
+            "match": "bool",
+            "name": "cmm.type"
+        },
+        {
+            "match": "int",
+            "name": "cmm.type"
+        },
+        {
+            "match": "char",
+            "name": "cmm.type"
+        },
+        {
+            "match": "empty",
+            "name": "cmm.keyword.println"
+        },
+        {
+            "match": "<",
+            "name": "cmm.punctuation"
+        },
+        {
+            "match": ">",
+            "name": "cmm.punctuation"
+        },
+        {
+            "match": "%",
+            "name": "cmm.punctuation"
+        },
+        {
+            "match": ",",
+            "name": "cmm.punctuation"
+        },
+        {
+            "match": "=>",
+            "name": "cmm.punctuation"
+        },
+        {
+            "match": "{",
+            "name": "cmm.punctuation"
+        },
+        {
+            "match": "}",
+            "name": "cmm.punctuation"
+        },
+        {
+            "match": "-",
+            "name": "cmm.punctuation"
+        },
+        {
+            "match": "=",
+            "name": "cmm.punctuation"
+        },
+        {
+            "match": "[a-zA-Z]+",
+            "name": "cmm.identifier"
+        },
+        {
+            "match": "[0-9]+",
+            "name": "cmm.number"
+        }
+    ],
+    "scopeName": "source.cmm"
+}

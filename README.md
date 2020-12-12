@@ -52,7 +52,6 @@ A simple compiler.
 ```
 
 ### TODO
-- Refactor and more tests
 - Comparison for characters
 - Expand type signatures to handle lists
 - Strings (syntactic sugar for lists of characters)
