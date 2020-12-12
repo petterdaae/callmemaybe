@@ -52,13 +52,14 @@ A simple compiler.
 ```
 
 ### TODO
-- Expand type signatures to handle lists
+- Me
 - Strings (syntactic sugar for lists of characters)
 - Print lists
+- Expand type signatures to handle lists
 - Input
 - Loop
-- Make it possible to return functions and pass functions as arguments
-- Structs
-- Handle division-by-zero and out-of-bounds errors
 - Free heap allocated memory when out of scope (?)
 - Module system (github?)
+- Make it possible to return functions and pass functions as arguments
+- Handle division-by-zero and out-of-bounds errors
+- Structs
