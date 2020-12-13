@@ -4,6 +4,7 @@ type RawType int
 
 const (
 	Invalid RawType = iota
+	Void
 	Int
 	Char
 	Bool
@@ -11,15 +12,20 @@ const (
 	Function
 )
 
-var passable = []RawType{ Int, Char, Bool, List, Function }
-var comparable = []RawType{ Int, Char, Bool }
+var passable = []RawType{Int, Char, Bool, List, Function}
+var comparable = []RawType{Int, Char, Bool}
 
 type Type struct {
 	RawType               RawType
 	ListElementType       *Type
 	ListSize              int
-	FunctionArgumentTypes []Type
+	FunctionArgumentTypes []FunctionArgument
 	FunctionReturnType    *Type
+}
+
+type FunctionArgument struct {
+	Name string
+	Type Type
 }
 
 func (t Type) IsPassable() bool {

@@ -1,7 +1,7 @@
 package memorymodel
 
 import (
-	"callmemaybe/language/common"
+	"callmemaybe/language/typesystem"
 )
 
 type MemoryModel struct {
@@ -31,9 +31,9 @@ func (mm *MemoryModel) PopCurrentContext() {
 	mm.ContextStack.Pop()
 }
 
-func (mm *MemoryModel) AddNameToCurrentStackElement(name string, kind common.ContextElementKind, listElementKind common.ContextElementKind, listSize int) {
+func (mm *MemoryModel) AddNameToCurrentStackElement(name string, _type typesystem.Type) {
 	currentContext := mm.ContextStack.Peek()
-	currentContext.members[name] = NewContextElement(mm.CurrentStackSize, kind, "", 0, common.ContextElementKindInvalid, listElementKind, []common.Arg{}, listSize)
+	currentContext.members[name] = NewContextElement(_type, mm.CurrentStackSize, name)
 }
 
 func (mm *MemoryModel) GetStackElement(name string) *ContextElement {
@@ -43,17 +43,3 @@ func (mm *MemoryModel) GetStackElement(name string) *ContextElement {
 	}
 	return value
 }
-
-func (mm *MemoryModel) GetProcedureElement(name string) *ContextElement {
-	value, ok := mm.ContextStack.Peek().members[name]
-	if !ok || value.Kind != common.ContextElementKindProcedure {
-		return nil
-	}
-	return value
-}
-
-func (mm *MemoryModel) AddProcedureAlias(name string, alias string, numberOfArgs int, returnType common.ContextElementKind, args []common.Arg) {
-	currentContext := mm.ContextStack.Peek()
-	currentContext.members[alias] = NewContextElement(0, common.ContextElementKindProcedure, name, numberOfArgs, returnType, common.ContextElementKindInvalid, args, 0)
-}
-

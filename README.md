@@ -43,14 +43,15 @@ A simple compiler.
 <rawChar>     := "\"" | "\\" | [^"\]
 
 <function>    := <argList> <type>? "{" <seq> "}"
-<argList>     := "<" "me"? ">" | "<" (<recurse>,)? (<arg> ",")* <arg> ">"
+<argList>     := "|" "me"? "|" | "|" "me,"? (<arg> ",")* <arg> "|"
 <arg>         := <identifier> <type>
 
-<list>        := "[" (<expr> ",") <expr> "]" ":" <type> ":" <num> | "[" "]" ":" <type> ":" <num>
+<list>        := "<" <type> "," <num> ">" "[" (<expr> ",") <expr> "]"
+<list>        := "<" <type> ">" "[" "]"
 
 <identifier>  := (letter|_)[letter|[0-9]|_]*
 
-<type>        := <rawType> | "list" <type>
+<type>        := <rawType> | "list" "<" <type> "," <num> "> 
 <rawType>     := "int" | "char" | "bool"
 ```
 

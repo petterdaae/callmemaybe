@@ -1,7 +1,7 @@
 package language
 
 import (
-	"callmemaybe/language/common"
+	"callmemaybe/language/typesystem"
 	"fmt"
 	"io"
 	"strconv"
@@ -62,7 +62,7 @@ func (parser *Parser) ParseExp() (Exp, error) {
 		return parser.parseCall()
 	}
 
-	if nextKind == AngleBracketStart {
+	if nextKind == Pipe {
 		return parser.parseFunction()
 	}
 
@@ -84,8 +84,13 @@ func (parser *Parser) parseString() (Exp, error) {
 	}
 
 	list := ExpList{
-		Size: len(value),
-		Type: KindChar,
+		Type: typesystem.Type{
+			RawType: typesystem.List,
+			ListElementType: &typesystem.Type{
+				RawType: typesystem.Char,
+			},
+			ListSize: len(value),
+		},
 	}
 
 	for i := range value {
@@ -166,7 +171,7 @@ func (parser *Parser) ParseCalculation() (Exp, error) {
 				return nil, fmt.Errorf("failed to parse right side of less expression")
 			}
 			left = ExpLess{
-				Left: left,
+				Left:  left,
 				Right: right,
 			}
 			continue
@@ -177,7 +182,7 @@ func (parser *Parser) ParseCalculation() (Exp, error) {
 				return nil, fmt.Errorf("failed to parse right side of greater expression")
 			}
 			left = ExpGreater{
-				Left: left,
+				Left:  left,
 				Right: right,
 			}
 			continue
@@ -188,11 +193,11 @@ func (parser *Parser) ParseCalculation() (Exp, error) {
 				return nil, fmt.Errorf("failed to parse right side of equals expression")
 			}
 			left = ExpEquals{
-				Left: left,
+				Left:  left,
 				Right: right,
 			}
 			continue
-	}
+		}
 		parser.unread()
 		break
 	}
@@ -367,7 +372,7 @@ func (parser *Parser) parseIf() (Stmt, error) {
 
 	return StmtIf{
 		Expression: expr,
-		Body: seq,
+		Body:       seq,
 	}, nil
 }
 
@@ -407,96 +412,110 @@ func (parser *Parser) parseCall() (Exp, error) {
 }
 
 func (parser *Parser) parseFunction() (Exp, error) {
-	function := ExpFunction{}
-	kind, _ := parser.readIgnoreWhiteSpace()
-	if kind != AngleBracketStart {
-		return nil, fmt.Errorf("expected < at start of function expression")
+	function := ExpFunction{
+		Type: typesystem.Type{},
 	}
-
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != Pipe {
+		return nil, fmt.Errorf("expected |")
+	}
 	first := true
 	for {
 		kind, identifier := parser.readIgnoreWhiteSpace()
-		if kind == AngleBracketEnd {
+		if kind == Pipe {
 			break
 		}
-
 		if kind != Identifier {
-			return nil, fmt.Errorf("expected identifier when parsing argument list, but got %s", identifier)
+			return nil, fmt.Errorf("expected identifier")
 		}
-
 		kind, _ = parser.readIgnoreWhiteSpace()
-		if kind == TypeEmpty {
-			return nil, fmt.Errorf("only non-empty types allowed in function arguments")
-		}
-
 		if kind == Comma && first {
 			function.Recurse = identifier
 			if identifier != "me" {
 				return nil, fmt.Errorf("the first recurse argument in a function has to be named me")
 			}
 			continue
+		} else {
+			parser.unread()
 		}
 		first = false
 
-
-		contextKind := kindFromType(kind)
-		if contextKind == common.ContextElementKindInvalid {
-			return nil, fmt.Errorf("expected valid type when parsing argument in argument list")
+		argType, err := parser.parseType()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse type: %w", err)
 		}
-
+		if !argType.IsPassable() {
+			return nil, fmt.Errorf("expected passable type when parsing function arguments")
+		}
+		function.Type.FunctionArgumentTypes = append(function.Type.FunctionArgumentTypes, typesystem.FunctionArgument{
+			Name: identifier,
+			Type: argType,
+		})
 		kind, _ = parser.readIgnoreWhiteSpace()
-
-		function.Args = append(function.Args, common.Arg{Identifier: identifier, Type: contextKind})
-
-		if kind == AngleBracketEnd {
+		if kind == Pipe {
 			break
 		}
-
 		if kind == Comma {
 			continue
 		}
-
-		return nil, fmt.Errorf("expected comma or end of arguemnt list")
-	}
-
-	kind, _ = parser.readIgnoreWhiteSpace()
-	if kind != Arrow {
-		return nil, fmt.Errorf("expected arrow after argument list when parsing function")
+		return nil, fmt.Errorf("expected comma or end of argument list")
 	}
 
 	kind, _ = parser.readIgnoreWhiteSpace()
 	if kind == CurlyBracketStart {
-		function.ReturnType = common.ContextElementKindEmpty
-	} else {
-		function.ReturnType = kindFromType(kind)
-		if function.ReturnType == common.ContextElementKindInvalid {
-			return nil, fmt.Errorf("invalid return type while parsing function definition")
+		function.Type.FunctionReturnType = &typesystem.Type{
+			RawType: typesystem.Void,
 		}
+	} else {
+		parser.unread()
+		returnType, err := parser.parseType()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse function return type")
+		}
+		if !returnType.IsPassable() {
+			return nil, fmt.Errorf("expected passable type when parsing function return type")
+		}
+		function.Type.FunctionReturnType = &returnType
 		kind, _ = parser.readIgnoreWhiteSpace()
 	}
-
-
 	if kind != CurlyBracketStart {
 		return nil, fmt.Errorf("expected opening curly bracket when parsing function")
 	}
-
 	seq, err := parser.parseSeq()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse statements in function: %w", err)
 	}
-
 	function.Body = seq
-
 	kind, _ = parser.readIgnoreWhiteSpace()
 	if kind != CurlyBracketEnd {
 		return nil, fmt.Errorf("expected closing curly bracker when parsing function")
 	}
-
 	return function, nil
 }
 
 func (parser *Parser) parseList() (Exp, error) {
 	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != AngleBracketStart {
+		return nil, fmt.Errorf("expected angle bracket when parsing list")
+	}
+	_type, err := parser.parseType()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse list type: %w", err)
+	}
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != Comma {
+		return nil, fmt.Errorf("expected comma when parsing list type")
+	}
+	kind, numberStr := parser.readIgnoreWhiteSpace()
+	if kind != Number {
+		return nil, fmt.Errorf("list size should be a number")
+	}
+	number, _ := strconv.Atoi(numberStr)
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != AngleBracketEnd {
+		return nil, fmt.Errorf("expected closing angle bracket")
+	}
+
 	if kind != BoxBracketStart {
 		return nil, fmt.Errorf("expected box bracket at start of list declaration")
 	}
@@ -526,31 +545,11 @@ func (parser *Parser) parseList() (Exp, error) {
 		return nil, fmt.Errorf("unexpected token when parsing list declareation")
 	}
 
-	kind, _ = parser.readIgnoreWhiteSpace()
-	if kind != Colon {
-		return nil, fmt.Errorf("expected comma when parsing list declaration")
+	list.Type = typesystem.Type{
+		RawType:         typesystem.List,
+		ListElementType: &_type,
+		ListSize:        number,
 	}
-
-	kind, _ = parser.readIgnoreWhiteSpace()
-	contextKind := kindFromType(kind)
-	if contextKind == common.ContextElementKindInvalid || contextKind == common.ContextElementKindEmpty {
-		return nil, fmt.Errorf("invalid list type")
-	}
-
-	kind, _ = parser.readIgnoreWhiteSpace()
-	if kind != Colon {
-		return nil, fmt.Errorf("expected comma when parsing list declaration")
-	}
-
-	kind, number := parser.readIgnoreWhiteSpace()
-	if kind != Number {
-		return nil, fmt.Errorf("expected number as list size")
-	}
-
-	parsed, _ := strconv.Atoi(number)
-
-	list.Type = contextKind
-	list.Size = parsed
 
 	return list, nil
 }
@@ -573,7 +572,7 @@ func (parser *Parser) parseGetFromList() (Exp, error) {
 		return nil, fmt.Errorf("failed to parse expression in get from list: %w", err)
 	}
 	return ExpGetFromList{
-		List: exp,
+		List:  exp,
 		Index: numExp,
 	}, nil
 }
@@ -583,17 +582,49 @@ func (parser *Parser) parseAppendToList() (Stmt, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func kindFromType(token Token) common.ContextElementKind {
-	switch token {
+func (parser *Parser) parseType() (typesystem.Type, error) {
+	kind, _ := parser.readIgnoreWhiteSpace()
+	switch kind {
 	case TypeInt:
-		return common.ContextElementKindNumber
-	case TypeChar:
-		return common.ContextElementKindChar
+		return typesystem.Type{
+			RawType: typesystem.Int,
+		}, nil
 	case TypeBool:
-		return common.ContextElementKindBoolean
-	case TypeEmpty:
-		return common.ContextElementKindEmpty
+		return typesystem.Type{
+			RawType: typesystem.Bool,
+		}, nil
+	case TypeChar:
+		return typesystem.Type{
+			RawType: typesystem.Char,
+		}, nil
+	case TypeList:
+		kind, _ = parser.readIgnoreWhiteSpace()
+		if kind != AngleBracketStart {
+			return typesystem.Type{}, fmt.Errorf("expected opening angle bracket")
+		}
+		elementType, err := parser.parseType()
+		if err != nil {
+			return typesystem.Type{}, fmt.Errorf("failed to parse list element type: %w", err)
+		}
+		kind, _ = parser.readIgnoreWhiteSpace()
+		if kind != Comma {
+			return typesystem.Type{}, fmt.Errorf("expected comma when parsing list type")
+		}
+		kind, val := parser.readIgnoreWhiteSpace()
+		if kind != Number {
+			return typesystem.Type{}, fmt.Errorf("expected number when parsing list type")
+		}
+		size, _ := strconv.Atoi(val)
+		kind, _ = parser.readIgnoreWhiteSpace()
+		if kind != AngleBracketEnd {
+			return typesystem.Type{}, fmt.Errorf("expected closing angle bracket when parsing list type")
+		}
+		return typesystem.Type{
+			RawType:               typesystem.List,
+			ListElementType:       &elementType,
+			ListSize:              size,
+		}, nil
 	default:
-		return common.ContextElementKindInvalid
+		return typesystem.Type{}, fmt.Errorf("unsupported type")
 	}
 }

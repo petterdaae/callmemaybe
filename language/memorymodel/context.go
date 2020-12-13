@@ -1,7 +1,7 @@
 package memorymodel
 
 import (
-	"callmemaybe/language/common"
+	"callmemaybe/language/typesystem"
 )
 
 type Context struct {
@@ -9,14 +9,9 @@ type Context struct {
 }
 
 type ContextElement struct {
-	Kind                 common.ContextElementKind
+	Type                 typesystem.Type
 	Name                 string
 	StackSizeAfterPush   int
-	FunctionNumberOfArgs int
-	FunctionReturnKind   common.ContextElementKind
-	FunctionArguments    []common.Arg
-	ListElementKind      common.ContextElementKind
-	ListSize             int
 }
 
 func EmptyContext() *Context {
@@ -26,23 +21,13 @@ func EmptyContext() *Context {
 }
 
 func NewContextElement(
+	_type typesystem.Type,
 	stackSizeAfterPush int,
-	kind common.ContextElementKind,
 	name string,
-	numberOfArgs int,
-	returnKind common.ContextElementKind,
-	elementKind common.ContextElementKind,
-	functionArguments []common.Arg,
-	listSize int,
 ) *ContextElement {
 	return &ContextElement{
+		Type: _type,
 		StackSizeAfterPush:   stackSizeAfterPush,
-		Kind:                 kind,
 		Name:                 name,
-		FunctionNumberOfArgs: numberOfArgs,
-		FunctionReturnKind:   returnKind,
-		ListElementKind:      elementKind,
-		FunctionArguments:    functionArguments,
-		ListSize:             listSize,
 	}
 }

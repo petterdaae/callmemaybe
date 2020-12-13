@@ -2,8 +2,8 @@ package language
 
 import (
 	"callmemaybe/language/assemblyoutput"
-	"callmemaybe/language/common"
 	"callmemaybe/language/memorymodel"
+	"callmemaybe/language/typesystem"
 )
 
 type Exp interface {
@@ -149,8 +149,7 @@ type ExpIdentifier struct {
 
 type ExpList struct {
 	Elements []Exp
-	Type     common.ContextElementKind
-	Size     int
+	Type     typesystem.Type
 }
 
 type ExpGetFromList struct {
@@ -165,9 +164,8 @@ type StmtAppendToList struct {
 
 type ExpFunction struct {
 	Recurse    string
-	Args       []common.Arg
 	Body       Stmt
-	ReturnType common.ContextElementKind
+	Type       typesystem.Type
 }
 
 type FunctionCall struct {

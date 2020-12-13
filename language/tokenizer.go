@@ -21,6 +21,7 @@ const (
 	Append
 	From
 	Colon
+	Pipe
 	To
 	String
 	RoundBracketStart
@@ -38,7 +39,7 @@ const (
 	TypeInt
 	TypeBool
 	TypeChar
-	TypeEmpty
+	TypeList
 	Whitespace
 	PrintLn
 	Return
@@ -153,6 +154,8 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return Question, string(character)
 	case ':':
 		return Colon, string(character)
+	case '|':
+		return Pipe, string(character)
 	}
 	
 	return Error, ""
@@ -269,8 +272,8 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return TypeInt, word
 	case "char":
 		return TypeChar, word
-	case "empty":
-		return TypeEmpty, word
+	case "list":
+		return TypeList, word
 	case "return":
 		return Return, word
 	case "if":
