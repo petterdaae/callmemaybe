@@ -22,6 +22,7 @@ const (
 	From
 	Colon
 	To
+	String
 	RoundBracketStart
 	RoundBracketEnd
 	BoxBracketStart
@@ -100,6 +101,11 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return tokenizer.character()
 	}
 
+	if character == '"' {
+		tokenizer.unread()
+		return tokenizer.string()
+	}
+
 	switch character {
 	case eof:
 		return EOF, ""
@@ -150,6 +156,33 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 	}
 	
 	return Error, ""
+}
+
+func (tokenizer *Tokenizer) string() (Token, string) {
+	result := ""
+
+	character := tokenizer.read()
+	if character != '"' {
+		return Error, ""
+	}
+
+	for {
+		character = tokenizer.read()
+		if character == '"' {
+			break
+		}
+
+		if character == '\\' {
+			character = tokenizer.read()
+			if character != '\'' && character != '\\' {
+				return Error, ""
+			}
+		}
+
+		result = result + string(character)
+	}
+
+	return String, result
 }
 
 func (tokenizer *Tokenizer) character() (Token, string) {

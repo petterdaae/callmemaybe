@@ -87,3 +87,19 @@ func TestMissingQuoteFails(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestSimpleString(t *testing.T) {
+	tokenizer := language.NewTokenizer(strings.NewReader("\"petter er kul\""))
+	first, value := tokenizer.NextToken()
+	if first != language.String && value != "petter er kul" {
+		t.Error()
+	}
+}
+
+func TestMessyString(t *testing.T) {
+	tokenizer := language.NewTokenizer(strings.NewReader("\"\\\\\\\\lalalalala\"\"\""))
+	first, value := tokenizer.NextToken()
+	if first != language.String && value != "\"\\\\\\\\lalalalala\"\"" {
+		t.Error()
+	}
+}
