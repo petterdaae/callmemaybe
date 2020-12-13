@@ -39,6 +39,8 @@ A simple compiler.
 <num>         := [0-9]+
 <bool>        := "true" | "false"
 <char>        := [^\'] | "\" "'" | "\" "\"
+<string>      := "\"" <stringChar>* "\""
+<rawChar>     := "\"" | "\\" | [^"\]
 
 <function>    := <argList> "=>" <type>? "{" <seq> "}"
 <argList>     := "<" "me"? ">" | "<" (<recurse>,)? (<arg> ",")* <arg> ">"
