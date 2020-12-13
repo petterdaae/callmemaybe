@@ -9,4 +9,5 @@ const (
 	RCX = "rcx"
 	PRINTFORMAT64 = "format"
 	PRINTCHARFORMAT = "formatchar"
+	PRINTCHARNONEWLINEFORMAT = "formatcharnonewline"
 )

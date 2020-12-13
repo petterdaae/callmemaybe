@@ -54,9 +54,8 @@ A simple compiler.
 ```
 
 ### TODO
-- Strings (syntactic sugar for lists of characters)
 - Print lists
-- Expand type signatures to handle lists
+- Expand type system
 - Input
 - Loop
 - Free heap allocated memory when out of scope (?)

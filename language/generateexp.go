@@ -28,7 +28,7 @@ func (exp ExpIdentifier) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorym
 	if stackElement != nil {
 		address := fmt.Sprintf("[rsp+%d]", (mm.CurrentStackSize-stackElement.StackSizeAfterPush)*8)
 		ao.Mov(RAX, address)
-		return CustomResult(stackElement.Kind, stackElement.ListElementKind, "", nil)
+		return CustomResult(stackElement.Kind, stackElement.ListElementKind, "", nil, stackElement.ListSize)
 	}
 
 	procedureElement := mm.GetProcedureElement(exp.Name)
@@ -52,7 +52,7 @@ func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 
 	for _, arg := range exp.Args {
 		mm.CurrentStackSize++
-		mm.AddNameToCurrentStackElement(arg.Identifier, arg.Type, KindInvalid)
+		mm.AddNameToCurrentStackElement(arg.Identifier, arg.Type, KindInvalid, 0)
 		argNames[arg.Identifier] = true
 	}
 
@@ -114,7 +114,7 @@ func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorym
 		ao.Pop(RBX)
 	}
 
-	return CustomResult(procedureElement.FunctionReturnKind, KindInvalid, "", nil)
+	return CustomResult(procedureElement.FunctionReturnKind, KindInvalid, "", nil, 0)
 }
 
 func (expr ExpBool) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
@@ -170,7 +170,7 @@ func (expr ExpList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.
 
 	ao.Mov(RAX, RDX)
 
-	return ListResult(expr.Type)
+	return ListResult(expr.Type, expr.Size)
 }
 
 func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
@@ -195,5 +195,5 @@ func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memor
 	ao.Mov(RDX, RAX)
 	ao.Mov(RAX, fmt.Sprintf("[rdx+8*%s]", RCX))
 
-	return CustomResult(result.ListElementKind, KindInvalid, "", nil)
+	return CustomResult(result.ListElementKind, KindInvalid, "", nil, result.ListSize)
 }

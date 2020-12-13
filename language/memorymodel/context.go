@@ -16,6 +16,7 @@ type ContextElement struct {
 	FunctionReturnKind   common.ContextElementKind
 	FunctionArguments    []common.Arg
 	ListElementKind      common.ContextElementKind
+	ListSize             int
 }
 
 func EmptyContext() *Context {
@@ -32,6 +33,7 @@ func NewContextElement(
 	returnKind common.ContextElementKind,
 	elementKind common.ContextElementKind,
 	functionArguments []common.Arg,
+	listSize int,
 ) *ContextElement {
 	return &ContextElement{
 		StackSizeAfterPush:   stackSizeAfterPush,
@@ -41,5 +43,6 @@ func NewContextElement(
 		FunctionReturnKind:   returnKind,
 		ListElementKind:      elementKind,
 		FunctionArguments:    functionArguments,
+		ListSize:             listSize,
 	}
 }

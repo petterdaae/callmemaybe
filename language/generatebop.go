@@ -162,5 +162,5 @@ func HelpGenerateStackBop(
 	mm.CurrentStackSize--
 	ao.Pop(RBX)
 	operation(ao)
-	return CustomResult(kind, KindInvalid, "", nil)
+	return CustomResult(kind, KindInvalid, "", nil, 0)
 }

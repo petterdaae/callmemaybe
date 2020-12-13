@@ -4,3 +4,4 @@ callmemaybe
 out
 *.o
 temp.asm
+cmm

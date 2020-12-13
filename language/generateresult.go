@@ -8,6 +8,7 @@ import (
 type GenerateResult struct {
 	Kind            common.ContextElementKind
 	ListElementKind common.ContextElementKind
+	ListSize        int
 	ProcedureName   string
 	Error           error
 }
@@ -18,7 +19,7 @@ func (gr GenerateResult) IsError() bool {
 
 func (gr GenerateResult) WrapError(message string) GenerateResult {
 	return GenerateResult{
-		Kind: common.ContextElementKindInvalid,
+		Kind:  common.ContextElementKindInvalid,
 		Error: fmt.Errorf("%s: %w", message, gr.Error),
 	}
 }
@@ -64,18 +65,20 @@ func ProcedureResult(name string) GenerateResult {
 	}
 }
 
-func ListResult(elements common.ContextElementKind) GenerateResult {
+func ListResult(elements common.ContextElementKind, size int) GenerateResult {
 	return GenerateResult{
 		ListElementKind: elements,
 		Kind:            common.ContextElementKindListReference,
+		ListSize:        size,
 	}
 }
 
-func CustomResult(kind common.ContextElementKind, listElementKind common.ContextElementKind, name string, err error) GenerateResult {
+func CustomResult(kind common.ContextElementKind, listElementKind common.ContextElementKind, name string, err error, listSize int) GenerateResult {
 	return GenerateResult{
 		Kind:            kind,
 		ListElementKind: listElementKind,
 		ProcedureName:   name,
 		Error:           err,
+		ListSize:        listSize,
 	}
 }

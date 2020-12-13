@@ -153,6 +153,7 @@ func (ao *AssemblyOutput) Start() {
 	ao.addOperation("section .date")
 	ao.addOperation("format: db '%d', 10, 0")
 	ao.addOperation("formatchar: db '%c', 10, 0")
+	ao.addOperation("formatcharnonewline: db '%c', 0")
 	ao.addOperation("section .text")
 	ao.addOperation("main:")
 	ao.addOperation("push rbx")

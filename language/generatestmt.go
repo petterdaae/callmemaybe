@@ -8,25 +8,22 @@ import (
 )
 
 const (
-	KindNumber    = common.ContextElementKindNumber
-	KindBool      = common.ContextElementKindBoolean
-	KindChar      = common.ContextElementKindChar
-	KindInvalid   = common.ContextElementKindInvalid
-	KindList      = common.ContextElementKindListReference
-	KindProcedure = common.ContextElementKindProcedure
-	RAX           = assemblyoutput.RAX
-	RBX           = assemblyoutput.RBX
-	RDI           = assemblyoutput.RDI
-	RSI           = assemblyoutput.RSI
-	RDX           = assemblyoutput.RDX
-	RCX           = assemblyoutput.RCX
-	PRINTFORMAT64 = assemblyoutput.PRINTFORMAT64
-	PRINTCHARFORMAT = assemblyoutput.PRINTCHARFORMAT
+	KindNumber         = common.ContextElementKindNumber
+	KindBool           = common.ContextElementKindBoolean
+	KindChar           = common.ContextElementKindChar
+	KindInvalid        = common.ContextElementKindInvalid
+	KindList           = common.ContextElementKindListReference
+	KindProcedure      = common.ContextElementKindProcedure
+	RAX                = assemblyoutput.RAX
+	RBX                = assemblyoutput.RBX
+	RDI                = assemblyoutput.RDI
+	RSI                = assemblyoutput.RSI
+	RDX                = assemblyoutput.RDX
+	RCX                = assemblyoutput.RCX
+	PRINTFORMAT64      = assemblyoutput.PRINTFORMAT64
+	PRINTCHARFORMAT    = assemblyoutput.PRINTCHARFORMAT
+	PRINTCHARNONEWLINE = assemblyoutput.PRINTCHARNONEWLINEFORMAT
 )
-
-
-
-
 
 func (stmt StmtSeq) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
 	for i := range stmt.Statements {
@@ -52,7 +49,7 @@ func (stmt StmtAssign) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 	if result.Kind == KindNumber || result.Kind == KindBool || result.Kind == KindChar || result.Kind == KindList {
 		mm.CurrentStackSize++
 		ao.Push(RAX)
-		mm.AddNameToCurrentStackElement(stmt.Identifier, result.Kind, result.ListElementKind)
+		mm.AddNameToCurrentStackElement(stmt.Identifier, result.Kind, result.ListElementKind, result.ListSize)
 	}
 
 	if result.Kind == KindProcedure {
@@ -82,6 +79,28 @@ func (stmt StmtPrintln) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymo
 		ao.Mov(RSI, RAX)
 		ao.Xor(RAX, RAX)
 		ao.CallPrintf()
+		return nil
+	}
+
+	if result.Kind == KindList && result.ListElementKind == KindChar {
+		ao.Mov(RDX, RAX)
+
+		for i := 0; i < result.ListSize; i++ {
+			ao.Mov(RAX, fmt.Sprintf("[%s+%d]", RDX, i*8))
+			ao.Push(RDX)
+			ao.Mov(RDI, PRINTCHARNONEWLINE)
+			ao.Mov(RSI, RAX)
+			ao.Xor(RAX, RAX)
+			ao.CallPrintf()
+			ao.Pop(RDX)
+		}
+
+		ao.Mov(RAX, "10")
+		ao.Mov(RDI, PRINTCHARNONEWLINE)
+		ao.Mov(RSI, RAX)
+		ao.Xor(RAX, RAX)
+		ao.CallPrintf()
+
 		return nil
 	}
 
@@ -139,4 +158,3 @@ func (stmt StmtIf) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.M
 
 	return nil
 }
-

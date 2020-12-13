@@ -31,9 +31,9 @@ func (mm *MemoryModel) PopCurrentContext() {
 	mm.ContextStack.Pop()
 }
 
-func (mm *MemoryModel) AddNameToCurrentStackElement(name string, kind common.ContextElementKind, listElementKind common.ContextElementKind) {
+func (mm *MemoryModel) AddNameToCurrentStackElement(name string, kind common.ContextElementKind, listElementKind common.ContextElementKind, listSize int) {
 	currentContext := mm.ContextStack.Peek()
-	currentContext.members[name] = NewContextElement(mm.CurrentStackSize, kind, "", 0, common.ContextElementKindInvalid, listElementKind, []common.Arg{})
+	currentContext.members[name] = NewContextElement(mm.CurrentStackSize, kind, "", 0, common.ContextElementKindInvalid, listElementKind, []common.Arg{}, listSize)
 }
 
 func (mm *MemoryModel) GetStackElement(name string) *ContextElement {
@@ -54,6 +54,6 @@ func (mm *MemoryModel) GetProcedureElement(name string) *ContextElement {
 
 func (mm *MemoryModel) AddProcedureAlias(name string, alias string, numberOfArgs int, returnType common.ContextElementKind, args []common.Arg) {
 	currentContext := mm.ContextStack.Peek()
-	currentContext.members[alias] = NewContextElement(0, common.ContextElementKindProcedure, name, numberOfArgs, returnType, common.ContextElementKindInvalid, args)
+	currentContext.members[alias] = NewContextElement(0, common.ContextElementKindProcedure, name, numberOfArgs, returnType, common.ContextElementKindInvalid, args, 0)
 }
 
