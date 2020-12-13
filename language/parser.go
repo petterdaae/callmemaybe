@@ -70,7 +70,32 @@ func (parser *Parser) ParseExp() (Exp, error) {
 		return parser.parseList()
 	}
 
+	if nextKind == String {
+		return parser.parseString()
+	}
+
 	return parser.ParseCalculation()
+}
+
+func (parser *Parser) parseString() (Exp, error) {
+	kind, value := parser.readIgnoreWhiteSpace()
+	if kind != String {
+		return nil, fmt.Errorf("exptected strings kind when parsing string")
+	}
+
+	list := ExpList{
+		Size: len(value),
+		Type: KindChar,
+	}
+
+	for i := range value {
+		char := ExpChar{
+			Value: string(value[i]),
+		}
+		list.Elements = append(list.Elements, char)
+	}
+
+	return list, nil
 }
 
 func (parser *Parser) ParseCalculation() (Exp, error) {

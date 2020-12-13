@@ -17,12 +17,12 @@ A simple compiler.
 <loop>        := "loop" <expr> "{" <seq> "}"
 <if>          := "if" <expr> "{" <seq> "}" 
 <call>        := "call" <identifier> [ "with" (<expr> ",")* <expr> ]
-<append>      := "append" <expr> "to" <list>
 
 <expr>        := <calculation>
 <expr>        := <function>
 <expr>        := <call>
 <expr>        := <list>
+<expr>        := <string>
 
 <calculation> := <val> (<bop> <val>)*
 
