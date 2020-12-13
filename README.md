@@ -42,7 +42,7 @@ A simple compiler.
 <string>      := "\"" <stringChar>* "\""
 <rawChar>     := "\"" | "\\" | [^"\]
 
-<function>    := <argList> "=>" <type>? "{" <seq> "}"
+<function>    := <argList> <type>? "{" <seq> "}"
 <argList>     := "<" "me"? ">" | "<" (<recurse>,)? (<arg> ",")* <arg> ">"
 <arg>         := <identifier> <type>
 
@@ -50,11 +50,11 @@ A simple compiler.
 
 <identifier>  := (letter|_)[letter|[0-9]|_]*
 
-<type>        := "int" | "empty" | "bool" | "char"
+<type>        := <rawType> | "list" <type>
+<rawType>     := "int" | "char" | "bool"
 ```
 
 ### TODO
-- Print lists
 - Expand type system
 - Input
 - Loop
