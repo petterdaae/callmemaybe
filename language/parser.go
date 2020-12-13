@@ -406,6 +406,9 @@ func (parser *Parser) parseFunction() (Exp, error) {
 
 		if kind == Comma && first {
 			function.Recurse = identifier
+			if identifier != "me" {
+				return nil, fmt.Errorf("the first recurse argument in a function has to be named me")
+			}
 			continue
 		}
 		first = false

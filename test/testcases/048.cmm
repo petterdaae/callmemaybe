@@ -1,4 +1,4 @@
-isPrime = <recurse, x int, current int> => bool {
+isPrime = <me, x int, current int> => bool {
     if current < 3 {
         return true
     }
@@ -9,7 +9,7 @@ isPrime = <recurse, x int, current int> => bool {
         return false
     }
 
-    return call recurse with x, current - 1
+    return call me with x, current - 1
 }
 
 println call isPrime with 3, 2

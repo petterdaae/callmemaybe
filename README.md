@@ -41,7 +41,7 @@ A simple compiler.
 <char>        := [^\'] | "\" "'" | "\" "\"
 
 <function>    := <argList> "=>" <type>? "{" <seq> "}"
-<argList>     := "<" <identifier>? ">" | "<" (<recurse>,)? (<arg> ",")* <arg> ">"
+<argList>     := "<" "me"? ">" | "<" (<recurse>,)? (<arg> ",")* <arg> ">"
 <arg>         := <identifier> <type>
 
 <list>        := "[" (<expr> ",") <expr> "]" ":" <type> ":" <num> | "[" "]" ":" <type> ":" <num>
@@ -52,7 +52,6 @@ A simple compiler.
 ```
 
 ### TODO
-- Me
 - Strings (syntactic sugar for lists of characters)
 - Print lists
 - Expand type signatures to handle lists
