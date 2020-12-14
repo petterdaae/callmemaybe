@@ -1,76 +1,43 @@
 {
     "patterns": [
         {
-            "match": "call",
-            "name": "cmm.keyword"
+            "match": "'(([^\\\\'])|(\\\\')|(\\\\\\\\))'",
+            "name": "string.quoted.single.ts"
+        },
+        {
+            "match": "\\\"(([^\\\\'])|(\\\\')|(\\\\\\\\))*\\\"",
+            "name": "string.quoted.double.ts"
+        },
+        {
+            "match": "true",
+            "name": "constant.language.boolean.true.ts"
+        },
+        {
+            "match": "false",
+            "name": "constant.language.boolean.false.ts"
+        },
+        {
+            "match": "return|call|with|if",
+            "name": "keyword.control.flow.ts"
         },
         {
             "match": "println",
-            "name": "cmm.keyword"
+            "name": "entity.name.function.ts"
         },
         {
-            "match": "with",
-            "name": "cmm.keyword"
+            "match": "bool|int|char|list|func",
+            "name": "support.type.primitive.ts"
         },
         {
-            "match": "bool",
-            "name": "cmm.type"
-        },
-        {
-            "match": "int",
-            "name": "cmm.type"
-        },
-        {
-            "match": "char",
-            "name": "cmm.type"
-        },
-        {
-            "match": "empty",
-            "name": "cmm.keyword.println"
-        },
-        {
-            "match": "<",
-            "name": "cmm.punctuation"
-        },
-        {
-            "match": ">",
-            "name": "cmm.punctuation"
-        },
-        {
-            "match": "%",
-            "name": "cmm.punctuation"
-        },
-        {
-            "match": ",",
-            "name": "cmm.punctuation"
-        },
-        {
-            "match": "=>",
-            "name": "cmm.punctuation"
-        },
-        {
-            "match": "{",
-            "name": "cmm.punctuation"
-        },
-        {
-            "match": "}",
-            "name": "cmm.punctuation"
-        },
-        {
-            "match": "-",
-            "name": "cmm.punctuation"
-        },
-        {
-            "match": "=",
-            "name": "cmm.punctuation"
-        },
-        {
-            "match": "[a-zA-Z]+",
-            "name": "cmm.identifier"
+            "match": "[a-zA-Z_][a-zA-Z0-9_]*",
+            "name": "variable.other.readwrite.ts"
         },
         {
             "match": "[0-9]+",
-            "name": "cmm.number"
+            "name": "constant.numeric.decimal.ts"
+        },
+        {
+            "include": "#expression"
         }
     ],
     "scopeName": "source.cmm"
