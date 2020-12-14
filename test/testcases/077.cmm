@@ -1,0 +1,8 @@
+i = 0
+loop i < 3 {
+    printit = | a int | {
+        println a
+    }
+    _ = call printit with i
+    i = i + 1
+}

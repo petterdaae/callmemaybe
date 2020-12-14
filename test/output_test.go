@@ -308,3 +308,11 @@ func TestCase075(t *testing.T) {
 func TestCase076(t *testing.T) {
 	utils.AssertProgramOutput("testcases/076.cmm", "1\n3\n", t)
 }
+
+func TestCase077(t *testing.T) {
+	utils.AssertProgramOutput("testcases/077.cmm", "0\n1\n2\n", t)
+}
+
+func TestCase078(t *testing.T) {
+	utils.AssertProgramOutput("testcases/078.cmm", "2\n3\n5\n8\n13\n21\n", t)
+}

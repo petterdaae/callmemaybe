@@ -1,0 +1,12 @@
+row = | high int | {
+    a = 1
+    b = 1
+    loop a < high {
+        c = a + b
+        a = b
+        b = c
+        println c
+    }
+}
+
+_ = call row with 10
