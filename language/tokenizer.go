@@ -40,6 +40,7 @@ const (
 	TypeBool
 	TypeChar
 	TypeList
+	TypeFunc
 	Whitespace
 	PrintLn
 	Return
@@ -292,6 +293,8 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return Get, word
 	case "from":
 		return From, word
+	case "func":
+		return TypeFunc, word
 	}
 
 	return Identifier, word

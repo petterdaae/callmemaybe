@@ -180,13 +180,13 @@ func TestFunctionAssignWithType(t *testing.T) {
 }
 
 func TestSimpleFunctionCall(t *testing.T) {
-	str := "a = call func with 1, 2, 3"
+	str := "a = call f with 1, 2, 3"
 	expected := language.StmtSeq{
 		Statements: []language.Stmt{
 			language.StmtAssign{
 				Identifier: "a",
 				Expression: language.FunctionCall{
-					Exp: language.ExpIdentifier{Name: "func"},
+					Exp: language.ExpIdentifier{Name: "f"},
 					Arguments: []language.Exp{
 						language.ExpNum{Value: 1},
 						language.ExpNum{Value: 2},
@@ -200,13 +200,13 @@ func TestSimpleFunctionCall(t *testing.T) {
 }
 
 func TestSimpleFunctionCallWithoutArgs(t *testing.T) {
-	str := "a = call func"
+	str := "a = call f"
 	expected := language.StmtSeq{
 		Statements: []language.Stmt{
 			language.StmtAssign{
 				Identifier: "a",
 				Expression: language.FunctionCall{
-					Exp:       language.ExpIdentifier{Name: "func"},
+					Exp:       language.ExpIdentifier{Name: "f"},
 					Arguments: nil,
 				},
 			},

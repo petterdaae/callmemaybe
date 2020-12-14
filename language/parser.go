@@ -627,6 +627,49 @@ func (parser *Parser) parseType() (typesystem.Type, error) {
 			ListElementType:       &elementType,
 			ListSize:              size,
 		}, nil
+	case TypeFunc:
+		kind, _ = parser.readIgnoreWhiteSpace()
+		if kind != AngleBracketStart {
+			parser.unread()
+			return typesystem.Type{
+				RawType:               typesystem.Function,
+				FunctionArgumentTypes: nil,
+				FunctionReturnType:    &typesystem.Type{
+					RawType:               typesystem.Void,
+				},
+			}, nil
+		}
+		var types []typesystem.Type
+		for {
+			_type, err := parser.parseType()
+			if err != nil {
+				return typesystem.Type{}, fmt.Errorf("type inside function type: %w", err)
+			}
+			types = append(types, _type)
+			kind, _ = parser.readIgnoreWhiteSpace()
+			if kind == Comma {
+				continue
+			}
+			parser.unread()
+			break
+		}
+		kind, _ = parser.readIgnoreWhiteSpace()
+		if kind != AngleBracketEnd {
+			return typesystem.Type{}, fmt.Errorf("expected > at end of function tye")
+		}
+		size := len(types)
+		result := typesystem.Type{
+			RawType:               typesystem.Function,
+		}
+		for i := 0; i < size - 1; i++ {
+			current := types[i]
+			result.FunctionArgumentTypes = append(result.FunctionArgumentTypes, typesystem.FunctionArgument{
+				Name: "",
+				Type: current,
+			})
+		}
+		result.FunctionReturnType = &types[size-1]
+		return result, nil
 	default:
 		return typesystem.Type{}, fmt.Errorf("unsupported type")
 	}

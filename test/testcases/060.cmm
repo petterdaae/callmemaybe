@@ -1,0 +1,9 @@
+f = | g func<int, int>, x int | int {
+    return call g with x
+}
+
+g = | x int | int {
+    return x * 2
+}
+
+println call f with g, 2

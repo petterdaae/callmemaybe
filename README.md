@@ -51,16 +51,16 @@ A simple compiler.
 
 <identifier>  := (letter|_)[letter|[0-9]|_]*
 
-<type>        := <rawType> | "list" "<" <type> "," <num> "> 
+<type>        := <rawType> | "list" "<" <type> "," <num> "> | "func" | "func" "<" <type>+ ">"
 <rawType>     := "int" | "char" | "bool"
 ```
 
 ### TODO
-- Expand type system
-- Input
-- Loop
-- Free heap allocated memory when out of scope (?)
-- Module system (github?)
-- Make it possible to return functions and pass functions as arguments
-- Handle division-by-zero and out-of-bounds errors
-- Structs
+- 14.12 Loop
+- 14.12 Write tests
+- 15.12 Improve IO
+- 15.12 Free heap allocated memory when out of scope (?)
+- 15.12 Handle division-by-zero and out-of-bounds errors
+- 16.12 Structs
+- 16.12 Module system
+- 16.12 Write tests
