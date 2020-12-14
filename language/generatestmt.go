@@ -41,6 +41,7 @@ func (stmt StmtAssign) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 		mm.CurrentStackSize++
 		ao.Push(RAX)
 		mm.AddNameToCurrentStackElement(stmt.Identifier, kind)
+		return nil
 	}
 	return fmt.Errorf("expression in assign not storable on stack")
 }

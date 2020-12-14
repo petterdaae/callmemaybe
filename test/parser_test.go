@@ -115,7 +115,7 @@ func TestEmptyParentheses(t *testing.T) {
 }
 
 func TestFunctionAssign(t *testing.T) {
-	str := "f = <a int> => { return a }"
+	str := "f = | a int | { return a }"
 	expected := language.StmtSeq{
 		Statements: []language.Stmt{
 			language.StmtAssign{
@@ -148,7 +148,7 @@ func TestFunctionAssign(t *testing.T) {
 }
 
 func TestFunctionAssignWithType(t *testing.T) {
-	str := "f = <a int> => int { return a }"
+	str := "f = | a int | int { return a }"
 	intType := typesystem.NewInt()
 	expected := language.StmtSeq{
 		Statements: []language.Stmt{

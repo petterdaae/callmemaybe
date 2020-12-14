@@ -414,7 +414,9 @@ func (parser *Parser) parseCall() (Exp, error) {
 
 func (parser *Parser) parseFunction() (Exp, error) {
 	function := ExpFunction{
-		Type: typesystem.Type{},
+		Type: typesystem.Type{
+			RawType: typesystem.Function,
+		},
 	}
 	kind, _ := parser.readIgnoreWhiteSpace()
 	if kind != Pipe {
