@@ -1,0 +1,133 @@
+input = <list<char, 3>, 5>
+    [ 
+        "F10", 
+        "N3 ", 
+        "F7 ", 
+        "R90", 
+        "F11" 
+    ]
+
+c2s = | c char | int {
+    if c == '0' {
+        return 0
+    }
+    if c == '1' {
+        return 1
+    }
+    if c == '2' {
+        return 2
+    }
+    if c == '3' {
+        return 3
+    }
+    if c == '4' {
+        return 4
+    }
+    if c == '5' {
+        return 5
+    }
+    if c == '6' {
+        return 6
+    }
+    if c == '7' {
+        return 7
+    }
+    if c == '8' {
+        return 8
+    }
+    if c == '9' {
+        return 9
+    }
+    return -1
+}
+
+updateDirection = | currentDirection int, directionChange char, amount int | int {
+    if directionChange == 'R' {
+        currentDirection = (currentDirection + amount) % 4
+    }
+    if directionChange == 'L' {
+        currentDirection = (currentDirection - amount) % 4
+        if currentDirection < 0 {
+            currentDirection = 4 - currentDirection
+        }
+    }
+    return currentDirection
+}
+
+forward = | east int, north int, currentDirection int, amount int | list<int, 2> {
+    if currentDirection == 0 {
+        east = east + amount
+    }
+    if currentDirection == 1 {
+        north = north - amount
+    }
+    if currentDirection == 2 {
+        east = east - amount
+    }
+    if currentDirection == 3 {
+        north = north + amount
+    }
+    return <int, 2>[east, north]
+}
+
+east = 0
+north = 0
+
+currentDirection = 0
+
+
+i = 0
+loop i < 5 {
+    current = get i from input
+
+    direction = get 0 from current
+
+    d1 = call c2s with (get 1 from current)
+    d2 = call c2s with (get 2 from current)
+    amount = 0
+    if d2 > -1 {
+        amount = amount + d2
+        amount = amount + (d1 * 10)
+    }
+    if d2 < 0 {
+        amount = amount + d1
+    }
+
+    if direction == 'N' {
+        north = north + amount
+    }
+
+    if direction == 'S' {
+        north = north - amount
+    }
+
+    if direction == 'E' {
+        east = east + amount
+    }
+
+    if direction == 'W' {
+        east = east - amount
+    } 
+
+    if direction == 'F' {
+        res = call forward with east, north, currentDirection, amount
+        east = get 0 from res
+        north = get 1 from res
+    }
+
+    amount = amount / 90
+    amount = amount % 4
+
+    currentDirection = call updateDirection with currentDirection, direction, amount
+
+    i = i + 1
+}
+
+if east < 0 {
+    east = -east
+}
+if north < 0 {
+    north = -north
+}
+
+println east + north

@@ -1,0 +1,14 @@
+a = <list<char, 3>, 5>
+    [
+        "ABC",
+        "CDE",
+        "CDE",
+        "CDE",
+        "CDE"
+    ]
+
+first = get 0 from a
+one = get 0 from first
+
+println one
+

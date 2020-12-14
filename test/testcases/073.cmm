@@ -1,0 +1,10 @@
+a = <list<int, 2>, 2>
+    [
+        <int, 2>[1, 2],
+        <int, 2>[3, 4]
+    ]
+
+first = get 0 from a
+one = get 0 from first
+
+println one

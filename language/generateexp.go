@@ -120,6 +120,10 @@ func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorym
 		ao.Pop(RBX)
 	}
 
+	if kind.FunctionReturnType == nil {
+		return typesystem.NewInvalid(), fmt.Errorf("functionreturntype is nil")
+	}
+
 	return *kind.FunctionReturnType, nil
 }
 
@@ -161,6 +165,8 @@ func (expr ExpList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.
 	}
 
 	for i, element := range expr.Elements {
+		mm.CurrentStackSize++
+		ao.Push(RDX)
 		kind, err := element.Generate(ao, mm)
 		if err != nil {
 			return typesystem.NewInvalid(), fmt.Errorf("failed to generate expression of element in list: %w", err)
@@ -168,6 +174,8 @@ func (expr ExpList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.
 		if !kind.Equals(*expr.Type.ListElementType) {
 			return typesystem.NewInvalid(), fmt.Errorf("list element has the wrong type")
 		}
+		mm.CurrentStackSize--
+		ao.Pop(RDX)
 		ao.Mov(fmt.Sprintf("qword [%s+%d]", RDX, i*8), RAX)
 	}
 
@@ -197,6 +205,10 @@ func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memor
 	ao.Pop(RCX)
 	ao.Mov(RDX, RAX)
 	ao.Mov(RAX, fmt.Sprintf("[rdx+8*%s]", RCX))
+
+	if kind.ListElementType == nil {
+		return typesystem.Type{}, fmt.Errorf("listelementtype is nil")
+	}
 
 	return *kind.ListElementType, nil
 }

@@ -36,6 +36,7 @@ func (build *Build) Run() error {
 	nasm, err := utils.Compile(content)
 	if err != nil {
 		println("❌ Failed to compile")
+		println(err.Error())
 		return nil
 	}
 

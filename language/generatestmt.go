@@ -147,9 +147,9 @@ func (stmt StmtLoop) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel
 		return fmt.Errorf("loop body: %w", err)
 	}
 	for i := 0; i < mm.CurrentStackSize-initStackSize; i++ {
-		mm.CurrentStackSize--
 		ao.Pop(RBX)
 	}
+	mm.CurrentStackSize = initStackSize
 	ao.NewSection(conditionStart)
 	kind, err := stmt.Condition.Generate(ao, mm)
 	if err != nil {
