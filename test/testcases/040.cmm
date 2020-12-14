@@ -2,7 +2,7 @@ a = 5
 b = 6
 c = 7
 
-f = <x int> => int {
+f = | x int | int {
     return x - 10
 }
 

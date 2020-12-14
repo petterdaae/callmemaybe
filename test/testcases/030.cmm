@@ -1,5 +1,5 @@
-outer = <a int> => int {
-    inner = <a int> => int {
+outer = |a int| int {
+    inner = |a int| int {
         return a + 2
     }
     return call inner with a

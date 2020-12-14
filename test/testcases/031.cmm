@@ -1,9 +1,9 @@
-outer = <a int, b int> => int {
-    plus2 = <x int> => int {
+outer = |a int, b int| int {
+    plus2 = |x int| int {
         return x + 2
     }
 
-    plus3 = <x int> => int {
+    plus3 = |x int| int {
         return x + 3
     }
 

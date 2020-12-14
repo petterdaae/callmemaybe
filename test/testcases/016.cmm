@@ -1,6 +1,6 @@
-twice = <x int> => {
+twice = | x int | {
     println x
     println x
 }
 
-temp = call twice with 42
+_ = call twice with 42

@@ -1,6 +1,6 @@
-doubleAndPlus = <d int, p int> => {
+doubleAndPlus = | d int, p int | {
     x = d * 2 + p
     println x
 }
 
-a = call doubleAndPlus with 24, 2
+_ = call doubleAndPlus with 24, 2

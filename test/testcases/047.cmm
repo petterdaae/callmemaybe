@@ -1,4 +1,4 @@
-f = <me, times int> => int {
+f = |me, times int| int {
     if times == 0 {
         return 42
     }

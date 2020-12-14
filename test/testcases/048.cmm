@@ -1,4 +1,4 @@
-isPrime = <me, x int, current int> => bool {
+isPrime = |me, x int, current int| bool {
     if current < 3 {
         return true
     }

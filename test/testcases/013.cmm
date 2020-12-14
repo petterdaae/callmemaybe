@@ -1,10 +1,10 @@
 a = 2
 
-f = <> => {
+f = || {
     a = 3
     println a
 }
 
-b = call f
+_ = call f
 
 println a

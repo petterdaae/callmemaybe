@@ -1,6 +1,6 @@
-outer = <a int> => int {
-    innerOuter = <a int> => int {
-        inner = <a int> => int {
+outer = | a int | int {
+    innerOuter = | a int | int {
+        inner = | a int | int {
             return a + 2
         }
         a = (call inner with a) + 2

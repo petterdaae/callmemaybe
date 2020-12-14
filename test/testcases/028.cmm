@@ -1,12 +1,12 @@
-double = <x int> => int {
+double = | x int | int {
     return x * 2
 }
 
-add2 = <x int> => int {
+add2 = | x int | int {
     return x + 2
 }
 
-printIt = <x int> => {
+printIt = | x int | {
     println x
 }
 

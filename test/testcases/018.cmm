@@ -1,8 +1,8 @@
 a = 24
 
-double = <d int> => {
+double = | d int | {
     println d * 2
 }
 
-z = call double with a
+_ = call double with a
 

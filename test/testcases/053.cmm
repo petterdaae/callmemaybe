@@ -1,4 +1,4 @@
-almostAString = ['H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!'] : char : 11
+almostAString = <char, 11>['H', 'e', 'l', 'l', 'o', 'w', 'o', 'r', 'l', 'd', '!']
 
 o = get 4 from almostAString
 d = get 9 from almostAString

@@ -2,7 +2,7 @@ a = 1
 b = 2
 c = a + b
 
-f = <a int, b int, c int> => {
+f = | a int, b int, c int | {
     d = a + b + c
     println d
 }
@@ -11,4 +11,4 @@ a = 4
 b = 4
 c = 4
 
-test = call f with a, b, c
+_ = call f with a, b, c

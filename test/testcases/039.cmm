@@ -1,4 +1,4 @@
-bigger = <x int, y int> => bool {
+bigger = |x int, y int| bool {
     return x > y
 }
 

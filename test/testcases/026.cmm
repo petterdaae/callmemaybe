@@ -1,4 +1,4 @@
-f = <> => int {
+f = || int {
     return 10
 }
 

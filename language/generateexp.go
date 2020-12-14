@@ -38,6 +38,7 @@ func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 	mm.PushNewContext(false)
 	name := ao.PushProcedure(mm.CurrentStackSize, len(exp.Type.FunctionArgumentTypes))
 	initialStackSize := mm.CurrentStackSize
+
 	argNames := make(map[string]bool)
 	for _, arg := range exp.Type.FunctionArgumentTypes {
 		_, exists := argNames[arg.Name]
@@ -51,15 +52,21 @@ func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 	if len(argNames) != len(exp.Type.FunctionArgumentTypes) {
 		return typesystem.NewInvalid(), fmt.Errorf("mismatching number of arguments")
 	}
+
 	mm.CurrentStackSize++
+
 	ao.Mov(RAX, name)
 	mm.CurrentStackSize++
 	ao.Push(RAX)
+	mm.AddNameToCurrentStackElement(exp.Recurse, exp.Type)
+
 	err := exp.Body.Generate(ao, mm)
 	if err != nil {
 		return typesystem.NewInvalid(), fmt.Errorf("function body: %w", err)
 	}
+
 	mm.CurrentStackSize--
+
 	for i := 0; i < mm.CurrentStackSize-initialStackSize-len(exp.Type.FunctionArgumentTypes); i++ {
 		ao.Pop(RBX)
 	}
@@ -73,6 +80,7 @@ func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 
 func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	kind, err := stmt.Exp.Generate(ao, mm)
+
 	mm.CurrentStackSize++
 	ao.Push(RAX)
 
@@ -98,12 +106,12 @@ func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorym
 		mm.CurrentStackSize++
 		ao.Push(RAX)
 		argKind := kind.FunctionArgumentTypes[i].Type
-		if argKind.Equals(_kind) {
+		if !argKind.Equals(_kind) {
 			return typesystem.NewInvalid(), fmt.Errorf("mismatching argument types in call")
 		}
 	}
 
-	ao.Call(fmt.Sprintf("[rsp+%d]", (mm.CurrentStackSize-len(stmt.Arguments))*8))
+	ao.Call(fmt.Sprintf("[rsp+%d]", len(stmt.Arguments)*8))
 	mm.CurrentStackSize--
 	ao.Pop(RBX)
 
@@ -190,5 +198,5 @@ func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memor
 	ao.Mov(RDX, RAX)
 	ao.Mov(RAX, fmt.Sprintf("[rdx+8*%s]", RCX))
 
-	return kind, nil
+	return *kind.ListElementType, nil
 }

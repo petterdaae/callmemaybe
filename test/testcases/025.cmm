@@ -1,5 +1,5 @@
-f = <a int> => {
+f = |a int| {
     b = a + 2
 }
 
-a = call f with 1, 2, 3
+_ = call f with 1, 2, 3

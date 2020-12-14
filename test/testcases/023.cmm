@@ -2,9 +2,9 @@ a = 50 * 2
 b = 25 * 4
 c = 10 + 10 + 10
 
-chooseOne = <x int, y int> => {
+chooseOne = |x int, y int| {
     println y
 }
 
-a = call chooseOne with 0, a + b + c
+_ = call chooseOne with 0, a + b + c
 

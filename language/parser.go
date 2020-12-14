@@ -66,7 +66,7 @@ func (parser *Parser) ParseExp() (Exp, error) {
 		return parser.parseFunction()
 	}
 
-	if nextKind == BoxBracketStart {
+	if nextKind == AngleBracketStart {
 		return parser.parseList()
 	}
 
@@ -518,9 +518,9 @@ func (parser *Parser) parseList() (Exp, error) {
 	if kind != AngleBracketEnd {
 		return nil, fmt.Errorf("expected closing angle bracket")
 	}
-
+	kind, _ = parser.readIgnoreWhiteSpace()
 	if kind != BoxBracketStart {
-		return nil, fmt.Errorf("expected box bracket at start of list declaration")
+		return nil, fmt.Errorf("expected box bracket in list declaration")
 	}
 
 	list := ExpList{}

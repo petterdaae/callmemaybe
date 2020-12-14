@@ -1,4 +1,4 @@
-f = <flag bool> => bool {
+f = |flag bool| bool {
     return flag
 }
 
