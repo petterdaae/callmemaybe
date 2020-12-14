@@ -1,0 +1,8 @@
+makeHello = || func {
+    return || {
+        println "hello"
+    }
+}
+
+f = call makeHello
+_ = call f

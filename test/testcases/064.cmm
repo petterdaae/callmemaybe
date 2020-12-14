@@ -1,0 +1,5 @@
+_ = call call || func {
+    return || {
+        println "oy"
+    }
+}

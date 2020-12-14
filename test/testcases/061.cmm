@@ -1,0 +1,15 @@
+str1 = "Hello"
+str2 = "Hello"
+
+equals = | me, s1 list<char, 5>, s2 list<char, 5>, index int | bool {
+    if index == -1 {
+        return true
+    }
+    if (get index from s1) == (get index from s2) {
+        return call me with s1, s2, (index - 1)
+    }
+    return false
+}
+
+println call equals with "abcde", "abcdf", 4
+println call equals with str1, str2, 4
