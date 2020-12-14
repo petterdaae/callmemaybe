@@ -63,4 +63,3 @@ A simple compiler.
 - 16.12 Structs
 - 16.12 Module system
 - 16.12 Write tests
-- Returns have no proper type checking (only allow returns inside functions)

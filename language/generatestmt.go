@@ -97,6 +97,9 @@ func (stmt StmtReturn) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 		return fmt.Errorf("return expression: %w", err)
 	}
 	procedure := ao.CurrentProcedure()
+	if procedure == nil {
+		return fmt.Errorf("returns are only allowed inside functions")
+	}
 	for i := 0; i < mm.CurrentStackSize-procedure.StackSizeBeforeFunctionGeneration-1-procedure.NumberOfArgs; i++ {
 		ao.Pop(RBX)
 	}
