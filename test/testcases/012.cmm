@@ -1,9 +1,9 @@
-outer = <> => {
+outer = || {
     a = 2
-    inner = <> => {
+    inner = || {
         b = 3 + a
         println b
     }
-    temp1 = call inner
+    _ = call inner
 }
-temp2 = call outer
+_ = call outer

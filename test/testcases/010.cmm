@@ -1,6 +1,6 @@
 A = 42
-first = <> => {
+first = || {
     println A + 1
 }
 B = 37
-a = call first
+_ = call first

@@ -1,5 +1,5 @@
 x = 42
-f = <> => {
+f = || {
     println x + 1
 }
-b = call f
+_ = call f
