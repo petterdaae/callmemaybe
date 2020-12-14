@@ -17,11 +17,11 @@
             "name": "constant.language.boolean.false.ts"
         },
         {
-            "match": "return|call|with|if",
+            "match": "return|if|loop",
             "name": "keyword.control.flow.ts"
         },
         {
-            "match": "println",
+            "match": "println|call|with|get|from",
             "name": "entity.name.function.ts"
         },
         {
