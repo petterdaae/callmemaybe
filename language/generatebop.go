@@ -2,12 +2,12 @@ package language
 
 import (
 	"callmemaybe/language/assemblyoutput"
-	"callmemaybe/language/common"
 	"callmemaybe/language/memorymodel"
+	"callmemaybe/language/typesystem"
 	"fmt"
 )
 
-func (exp ExpGreater) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpGreater) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Cmp(RBX, RAX)
 		greater := ao.GenerateUniqueName()
@@ -22,13 +22,13 @@ func (exp ExpGreater) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymode
 		ao.Mov(RAX, "0")
 		ao.NewSection(done)
 	}
-	isValidKind := func(gr GenerateResult) bool {
-		return gr.Kind.IsComparable()
+	isValidKind := func(gr typesystem.Type) bool {
+		return gr.IsComparable()
 	}
-	return HelpGenerateStackBop(ao, mm, exp, "greater", operation, KindBool, isValidKind)
+	return HelpGenerateStackBop(ao, mm, exp, "greater", operation, typesystem.NewBool(), isValidKind)
 }
 
-func (exp ExpLess) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpLess) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Cmp(RBX, RAX)
 		less := ao.GenerateUniqueName()
@@ -43,13 +43,13 @@ func (exp ExpLess) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.M
 		ao.Mov(RAX, "0")
 		ao.NewSection(done)
 	}
-	isValidKind := func(gr GenerateResult) bool {
-		return gr.Kind.IsComparable()
+	isValidKind := func(gr typesystem.Type) bool {
+		return gr.IsComparable()
 	}
-	return HelpGenerateStackBop(ao, mm, exp, "less", operation, KindBool, isValidKind)
+	return HelpGenerateStackBop(ao, mm, exp, "less", operation, typesystem.NewBool(), isValidKind)
 }
 
-func (exp ExpEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Cmp(RBX, RAX)
 		equal := ao.GenerateUniqueName()
@@ -64,57 +64,57 @@ func (exp ExpEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel
 		ao.Mov(RAX, "0")
 		ao.NewSection(done)
 	}
-	isValidKind := func(gr GenerateResult) bool {
-		return gr.Kind.IsComparable()
+	isValidKind := func(gr typesystem.Type) bool {
+		return gr.IsComparable()
 	}
-	return HelpGenerateStackBop(ao, mm, exp, "equals", operation, KindBool, isValidKind)
+	return HelpGenerateStackBop(ao, mm, exp, "equals", operation, typesystem.NewBool(), isValidKind)
 }
 
-func (exp ExpPlus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpPlus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Add(RAX, RBX)
 	}
-	isValidKind := func(gr GenerateResult) bool {
-		return gr.Kind.IsAlgebraic()
+	isValidKind := func(gr typesystem.Type) bool {
+		return gr.IsAlgebraic()
 	}
-	return HelpGenerateStackBop(ao, mm, exp, "plus", operation, KindNumber, isValidKind)
+	return HelpGenerateStackBop(ao, mm, exp, "plus", operation, typesystem.NewInt(), isValidKind)
 }
 
-func (exp ExpMultiply) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpMultiply) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Imul(RAX, RBX)
 	}
-	isValidKind := func(gr GenerateResult) bool {
-		return gr.Kind.IsAlgebraic()
+	isValidKind := func(gr typesystem.Type) bool {
+		return gr.IsAlgebraic()
 	}
-	return HelpGenerateStackBop(ao, mm, exp, "multiply", operation, KindNumber, isValidKind)
+	return HelpGenerateStackBop(ao, mm, exp, "multiply", operation, typesystem.NewInt(), isValidKind)
 }
 
-func (exp ExpMinus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpMinus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Sub(RBX, RAX)
 		ao.Mov(RAX, RBX)
 	}
-	isValidKind := func(gr GenerateResult) bool {
-		return gr.Kind.IsAlgebraic()
+	isValidKind := func(gr typesystem.Type) bool {
+		return gr.IsAlgebraic()
 	}
-	return HelpGenerateStackBop(ao, mm, exp, "multiply", operation, KindNumber, isValidKind)
+	return HelpGenerateStackBop(ao, mm, exp, "multiply", operation, typesystem.NewInt(), isValidKind)
 }
 
-func (exp ExpDivide) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpDivide) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Mov(RDX, "0")
 		ao.Mov(RCX, RAX)
 		ao.Mov(RAX, RBX)
 		ao.Div(RCX)
 	}
-	isValidKind := func(gr GenerateResult) bool {
-		return gr.Kind.IsAlgebraic()
+	isValidKind := func(gr typesystem.Type) bool {
+		return gr.IsAlgebraic()
 	}
-	return HelpGenerateStackBop(ao, mm, exp, "divide", operation, KindNumber, isValidKind)
+	return HelpGenerateStackBop(ao, mm, exp, "divide", operation, typesystem.NewInt(), isValidKind)
 }
 
-func (exp ExpModulo) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpModulo) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Mov(RDX, "0")
 		ao.Mov(RCX, RAX)
@@ -122,10 +122,10 @@ func (exp ExpModulo) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel
 		ao.Div(RCX)
 		ao.Mov(RAX, RDX)
 	}
-	isValidKind := func(gr GenerateResult) bool {
-		return gr.Kind.IsAlgebraic()
+	isValidKind := func(gr typesystem.Type) bool {
+		return gr.IsAlgebraic()
 	}
-	return HelpGenerateStackBop(ao, mm, exp, "modulo", operation, KindNumber, isValidKind)
+	return HelpGenerateStackBop(ao, mm, exp, "modulo", operation, typesystem.NewInt(), isValidKind)
 }
 
 func HelpGenerateStackBop(
@@ -134,33 +134,33 @@ func HelpGenerateStackBop(
 	exp ExpBop,
 	name string,
 	operation func(ao *assemblyoutput.AssemblyOutput),
-	kind common.ContextElementKind,
-	isValidKind func(result GenerateResult) bool,
-) GenerateResult {
-	resultLeft := exp.LeftExp().Generate(ao, mm)
-	if resultLeft.IsError(){
-		return resultLeft.WrapError(fmt.Sprintf("failed to generate left expression of %s", name))
+	kind typesystem.Type,
+	isValidKind func(kind typesystem.Type) bool,
+) (typesystem.Type, error) {
+	kindLeft, err := exp.LeftExp().Generate(ao, mm)
+	if err != nil {
+		return typesystem.NewInvalid(), fmt.Errorf("failed to generate left expression of %s", name)
 	}
-	if !isValidKind(resultLeft) {
-		return ErrorResult(fmt.Errorf("invalidl kind at left side of %s expression", name))
+	if !isValidKind(kindLeft) {
+		return typesystem.NewInvalid(), fmt.Errorf("invalidl type at left side of %s expression", name)
 	}
 
 	mm.CurrentStackSize++
 	ao.Push(RAX)
 
-	resultRight := exp.RightExp().Generate(ao, mm)
-	if resultRight.IsError() {
-		return resultRight.WrapError(fmt.Sprintf("failed to generate right expression of %s", name))
+	kindRight, err := exp.RightExp().Generate(ao, mm)
+	if err != nil {
+		return typesystem.NewInvalid(), fmt.Errorf("failed to generate right expression of %s", name)
 	}
-	if !isValidKind(resultRight) {
-		return ErrorResult(fmt.Errorf("%s only supports stack kinds", name))
+	if !isValidKind(kindRight) {
+		return typesystem.NewInvalid(), fmt.Errorf("%s only supports stack kinds", name)
 	}
 
-	if resultLeft.Kind != resultRight.Kind {
-		return ErrorResult(fmt.Errorf("mismatching kinds in %s expression", name))
+	if !kindLeft.Equals(kindRight) {
+		return typesystem.NewInvalid(), fmt.Errorf("mismatching kinds in %s expression", name)
 	}
 	mm.CurrentStackSize--
 	ao.Pop(RBX)
 	operation(ao)
-	return CustomResult(kind, KindInvalid, "", nil, 0)
+	return kind, nil
 }

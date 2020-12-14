@@ -2,7 +2,7 @@ package test
 
 import (
 	"callmemaybe/language"
-	"callmemaybe/language/common"
+	"callmemaybe/language/typesystem"
 	"reflect"
 	"strings"
 	"testing"
@@ -21,7 +21,6 @@ func parseExpected(t *testing.T, program string, expected language.Exp) {
 		t.Error()
 	}
 }
-
 
 func parseExpectedStmt(t *testing.T, program string, expected language.Stmt) {
 	reader := strings.NewReader(program)
@@ -122,9 +121,6 @@ func TestFunctionAssign(t *testing.T) {
 			language.StmtAssign{
 				Identifier: "f",
 				Expression: language.ExpFunction{
-					Args: []common.Arg{
-						common.Arg{Identifier: "a", Type: common.ContextElementKindNumber},
-					},
 					Body: language.StmtSeq{
 						Statements: []language.Stmt{
 							language.StmtReturn{
@@ -134,7 +130,16 @@ func TestFunctionAssign(t *testing.T) {
 							},
 						},
 					},
-					ReturnType: common.ContextElementKindEmpty,
+					Type: typesystem.Type{
+						RawType: typesystem.Function,
+						FunctionArgumentTypes: []typesystem.FunctionArgument{typesystem.FunctionArgument{
+							Name: "a",
+							Type: typesystem.NewInt(),
+						}},
+						FunctionReturnType: &typesystem.Type{
+							RawType:               typesystem.Void,
+						},
+					},
 				},
 			},
 		},
@@ -144,14 +149,12 @@ func TestFunctionAssign(t *testing.T) {
 
 func TestFunctionAssignWithType(t *testing.T) {
 	str := "f = <a int> => int { return a }"
+	intType := typesystem.NewInt()
 	expected := language.StmtSeq{
 		Statements: []language.Stmt{
 			language.StmtAssign{
 				Identifier: "f",
 				Expression: language.ExpFunction{
-					Args: []common.Arg{
-						common.Arg{Identifier: "a", Type: common.ContextElementKindNumber},
-					},
 					Body: language.StmtSeq{
 						Statements: []language.Stmt{
 							language.StmtReturn{
@@ -161,7 +164,14 @@ func TestFunctionAssignWithType(t *testing.T) {
 							},
 						},
 					},
-					ReturnType: common.ContextElementKindNumber,
+					Type: typesystem.Type{
+						RawType: typesystem.Function,
+						FunctionArgumentTypes: []typesystem.FunctionArgument{typesystem.FunctionArgument{
+							Name: "a",
+							Type: typesystem.NewInt(),
+						}},
+						FunctionReturnType: &intType,
+					},
 				},
 			},
 		},
@@ -176,7 +186,7 @@ func TestSimpleFunctionCall(t *testing.T) {
 			language.StmtAssign{
 				Identifier: "a",
 				Expression: language.FunctionCall{
-					Name: "func",
+					Exp: language.ExpIdentifier{Name: "func"},
 					Arguments: []language.Exp{
 						language.ExpNum{Value: 1},
 						language.ExpNum{Value: 2},
@@ -196,7 +206,7 @@ func TestSimpleFunctionCallWithoutArgs(t *testing.T) {
 			language.StmtAssign{
 				Identifier: "a",
 				Expression: language.FunctionCall{
-					Name:      "func",
+					Exp:       language.ExpIdentifier{Name: "func"},
 					Arguments: nil,
 				},
 			},

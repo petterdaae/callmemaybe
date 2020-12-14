@@ -3,121 +3,119 @@ package language
 import (
 	"callmemaybe/language/assemblyoutput"
 	"callmemaybe/language/memorymodel"
+	"callmemaybe/language/typesystem"
 	"fmt"
 	"strconv"
 )
 
-func (exp ExpParentheses) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpParentheses) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	return exp.Inside.Generate(ao, mm)
 }
 
-func (exp ExpNum) Generate(ao *assemblyoutput.AssemblyOutput, _ *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpNum) Generate(ao *assemblyoutput.AssemblyOutput, _ *memorymodel.MemoryModel) (typesystem.Type, error) {
 	val := strconv.Itoa(exp.Value)
 	ao.Mov(RAX, val)
-	return NumberResult()
+	return typesystem.NewInt(), nil
 }
 
-func (exp ExpChar) Generate(ao *assemblyoutput.AssemblyOutput, _ *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpChar) Generate(ao *assemblyoutput.AssemblyOutput, _ *memorymodel.MemoryModel) (typesystem.Type, error) {
 	rune := exp.Value[0]
 	ao.Mov(RAX, fmt.Sprintf("%d", rune))
-	return CharResult()
+	return typesystem.NewChar(), nil
 }
 
-func (exp ExpIdentifier) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpIdentifier) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	stackElement := mm.GetStackElement(exp.Name)
 	if stackElement != nil {
 		address := fmt.Sprintf("[rsp+%d]", (mm.CurrentStackSize-stackElement.StackSizeAfterPush)*8)
 		ao.Mov(RAX, address)
-		return CustomResult(stackElement.Kind, stackElement.ListElementKind, "", nil, stackElement.ListSize)
+		return stackElement.Type, nil
 	}
-
-	procedureElement := mm.GetProcedureElement(exp.Name)
-	if procedureElement != nil {
-		return ProcedureResult(procedureElement.Name)
-	}
-
-	return ErrorResult(fmt.Errorf("failed to find '%s' in current context", exp.Name))
+	return typesystem.NewInvalid(), fmt.Errorf("missing from context: %s", exp.Name)
 }
 
-func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	mm.PushNewContext(false)
-	name := ao.PushProcedure(len(exp.Args), mm.CurrentStackSize, exp.ReturnType, exp.Args)
-
-	if exp.Recurse != "" {
-		mm.AddProcedureAlias(name, exp.Recurse, len(exp.Args), exp.ReturnType, exp.Args)
-	}
-
+	name := ao.PushProcedure(mm.CurrentStackSize, len(exp.Type.FunctionArgumentTypes))
 	initialStackSize := mm.CurrentStackSize
 	argNames := make(map[string]bool)
-
-	for _, arg := range exp.Args {
+	for _, arg := range exp.Type.FunctionArgumentTypes {
+		_, exists := argNames[arg.Name]
+		if exists {
+			return typesystem.NewInvalid(), fmt.Errorf("argument names should be unique")
+		}
 		mm.CurrentStackSize++
-		mm.AddNameToCurrentStackElement(arg.Identifier, arg.Type, KindInvalid, 0)
-		argNames[arg.Identifier] = true
+		mm.AddNameToCurrentStackElement(arg.Name, arg.Type)
+		argNames[arg.Name] = true
 	}
-
-	if len(argNames) != len(exp.Args) {
-		return ErrorResult(fmt.Errorf("argument names should be unique"))
+	if len(argNames) != len(exp.Type.FunctionArgumentTypes) {
+		return typesystem.NewInvalid(), fmt.Errorf("mismatching number of arguments")
 	}
-
 	mm.CurrentStackSize++
-
+	ao.Mov(RAX, name)
+	mm.CurrentStackSize++
+	ao.Push(RAX)
 	err := exp.Body.Generate(ao, mm)
 	if err != nil {
-		return ErrorResult(fmt.Errorf("failed to generate function body: %w", err))
+		return typesystem.NewInvalid(), fmt.Errorf("function body: %w", err)
 	}
-
 	mm.CurrentStackSize--
-
-	for i := 0; i < mm.CurrentStackSize-initialStackSize-len(exp.Args); i++ {
+	for i := 0; i < mm.CurrentStackSize-initialStackSize-len(exp.Type.FunctionArgumentTypes); i++ {
 		ao.Pop(RBX)
 	}
-
 	mm.CurrentStackSize = initialStackSize
 	ao.Ret()
 	mm.PopCurrentContext()
 	ao.PopProcedure()
-
-	return ProcedureResult(name)
+	ao.Mov(RAX, name)
+	return exp.Type, nil
 }
 
-func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
-	procedureElement := mm.GetProcedureElement(stmt.Name)
-	if procedureElement == nil {
-		return ErrorResult(fmt.Errorf("no procedure with name '%s'", stmt.Name))
+func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
+	kind, err := stmt.Exp.Generate(ao, mm)
+	mm.CurrentStackSize++
+	ao.Push(RAX)
+
+	if err != nil {
+		return typesystem.NewInvalid(), fmt.Errorf("call expression: %w", err)
+	}
+	if kind.RawType != typesystem.Function {
+		return typesystem.NewInvalid(), fmt.Errorf("can only call functions")
 	}
 
-	if procedureElement.FunctionNumberOfArgs != len(stmt.Arguments) {
-		return ErrorResult(fmt.Errorf("mismatching number of arguments"))
+	if len(kind.FunctionArgumentTypes) != len(stmt.Arguments) {
+		return typesystem.NewInvalid(), fmt.Errorf("mismathcing number of arguments in call")
 	}
 
-	for i := 0; i < procedureElement.FunctionNumberOfArgs; i++ {
-		result := stmt.Arguments[i].Generate(ao, mm)
-		if !result.Kind.IsPassable() {
-			return ErrorResult(fmt.Errorf("argument kind is not passable"))
+	for i := 0; i < len(stmt.Arguments); i++ {
+		_kind, err := stmt.Arguments[i].Generate(ao, mm)
+		if err != nil {
+			return typesystem.NewInvalid(), fmt.Errorf("argument in call: %w", err)
 		}
-		if result.IsError() {
-			return result.WrapError("failed to evaluate function argument")
+		if !_kind.IsPassable() {
+			return typesystem.NewInvalid(), fmt.Errorf("argument type must be passable")
 		}
 		mm.CurrentStackSize++
 		ao.Push(RAX)
-		argKind := procedureElement.FunctionArguments[i].Type
-		if argKind != result.Kind {
-			return ErrorResult(fmt.Errorf("mismatching argument types when calling function"))
+		argKind := kind.FunctionArgumentTypes[i].Type
+		if argKind.Equals(_kind) {
+			return typesystem.NewInvalid(), fmt.Errorf("mismatching argument types in call")
 		}
 	}
 
-	ao.Call(procedureElement.Name)
+	ao.Call(fmt.Sprintf("[rsp+%d]", (mm.CurrentStackSize-len(stmt.Arguments))*8))
+	mm.CurrentStackSize--
+	ao.Pop(RBX)
 
 	for i := 0; i < len(stmt.Arguments); i++ {
 		mm.CurrentStackSize--
 		ao.Pop(RBX)
 	}
 
-	return CustomResult(procedureElement.FunctionReturnKind, KindInvalid, "", nil, 0)
+	return *kind.FunctionReturnType, nil
 }
 
-func (expr ExpBool) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
+func (expr ExpBool) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	var val string
 	if expr.Value {
 		val = "1"
@@ -125,75 +123,72 @@ func (expr ExpBool) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.
 		val = "0"
 	}
 	ao.Mov(RAX, val)
-	return BoolResult()
+	return typesystem.NewBool(), nil
 }
 
-func (expr ExpNegative) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
-	result := expr.Inside.Generate(ao, mm)
-	if result.Error != nil {
-		return ErrorResult(fmt.Errorf("failed to generate expression inside negative: %w", result.Error))
+func (expr ExpNegative) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
+	kind, err := expr.Inside.Generate(ao, mm)
+	if err != nil {
+		return typesystem.NewInvalid(), fmt.Errorf("negative: %w", err)
 	}
-	if !result.Kind.IsAlgebraic() {
-		return ErrorResult(fmt.Errorf("negative expressions only support algebraic kinds"))
+	if !kind.IsAlgebraic() {
+		return typesystem.NewInvalid(), fmt.Errorf("negative expressions only support algebraic kinds")
 	}
 	ao.Mov(RBX, RAX)
 	ao.Mov(RAX, "0")
 	ao.Sub(RAX, RBX)
-	return NumberResult()
+	return typesystem.NewInt(), nil
 }
 
-func (expr ExpList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
-	if !expr.Type.IsStoredOnStack() {
-		return ErrorResult(fmt.Errorf("list currently only support ints, bools and chars"))
+func (expr ExpList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
+	if expr.Type.ListSize < 1 {
+		return typesystem.NewInvalid(), fmt.Errorf("the size of a list must be a positive number")
 	}
-	if expr.Size < 1 {
-		return ErrorResult(fmt.Errorf("the size of a list must be a positive number"))
-	}
-	ao.Mov(RDI, fmt.Sprintf("%d", 8*expr.Size))
+	ao.Mov(RDI, fmt.Sprintf("%d", 8*expr.Type.ListSize))
 	ao.Call("malloc")
 	ao.Mov(RDX, RAX)
 
-	if expr.Size > len(expr.Elements) {
-		return ErrorResult(fmt.Errorf("too many elements in list"))
+	if expr.Type.ListSize > len(expr.Elements) {
+		return typesystem.NewInvalid(), fmt.Errorf("too many elements in list")
 	}
 
 	for i, element := range expr.Elements {
-		result := element.Generate(ao, mm)
-		if result.Error != nil {
-			return ErrorResult(fmt.Errorf("failed to generate expression of element in list: %w", result.Error))
+		kind, err := element.Generate(ao, mm)
+		if err != nil {
+			return typesystem.NewInvalid(), fmt.Errorf("failed to generate expression of element in list: %w", err)
 		}
-		if result.Kind != expr.Type {
-			return ErrorResult(fmt.Errorf("list element has the wrong type"))
+		if !kind.Equals(*expr.Type.ListElementType) {
+			return typesystem.NewInvalid(), fmt.Errorf("list element has the wrong type")
 		}
 		ao.Mov(fmt.Sprintf("qword [%s+%d]", RDX, i*8), RAX)
 	}
 
 	ao.Mov(RAX, RDX)
 
-	return ListResult(expr.Type, expr.Size)
+	return expr.Type, nil
 }
 
-func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult {
-	result := expr.Index.Generate(ao, mm)
-	if result.Error != nil {
-		return ErrorResult(fmt.Errorf("failed to evaluate index"))
+func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
+	kind, err := expr.Index.Generate(ao, mm)
+	if err != nil {
+		return typesystem.NewInvalid(), fmt.Errorf("failed to evaluate index")
 	}
-	if result.Kind != KindNumber {
-		return ErrorResult(fmt.Errorf("only integers are valid indexes"))
+	if kind.RawType != typesystem.Int {
+		return typesystem.NewInvalid(), fmt.Errorf("only integers are valid indexes")
 	}
 	mm.CurrentStackSize++
 	ao.Push(RAX)
-	result = expr.List.Generate(ao, mm)
-	if result.Error != nil {
-		return ErrorResult(fmt.Errorf("failed to generate code for list in get expression: %w", result.Error))
+	kind, err = expr.List.Generate(ao, mm)
+	if err != nil {
+		return typesystem.NewInvalid(), fmt.Errorf("failed to generate code for list in get expression: %w", err)
 	}
-	if result.Kind != KindList {
-		return ErrorResult(fmt.Errorf("can only get from lists by index"))
+	if kind.RawType != typesystem.List {
+		return typesystem.NewInvalid(), fmt.Errorf("can only get from lists by index")
 	}
 	mm.CurrentStackSize--
 	ao.Pop(RCX)
 	ao.Mov(RDX, RAX)
 	ao.Mov(RAX, fmt.Sprintf("[rdx+8*%s]", RCX))
 
-	return CustomResult(result.ListElementKind, KindInvalid, "", nil, result.ListSize)
+	return kind, nil
 }

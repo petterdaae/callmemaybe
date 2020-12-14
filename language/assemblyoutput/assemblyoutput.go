@@ -108,11 +108,12 @@ func (ao *AssemblyOutput) addOperation(operation string) {
 	}
 }
 
-func (ao *AssemblyOutput) PushProcedure(initialStackSize int) string {
+func (ao *AssemblyOutput) PushProcedure(initialStackSize int, numberOfArguments int) string {
 	name := ao.GenerateUniqueName()
 	ao.procedureStack.Push(&procedure{
 		Name:                              name,
 		StackSizeBeforeFunctionGeneration: initialStackSize,
+		NumberOfArgs:                      numberOfArguments,
 	})
 	return name
 }

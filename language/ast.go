@@ -7,7 +7,7 @@ import (
 )
 
 type Exp interface {
-	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) GenerateResult
+	Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error)
 }
 
 type Stmt interface {
@@ -169,7 +169,7 @@ type ExpFunction struct {
 }
 
 type FunctionCall struct {
-	Name      string
+	Exp       Exp
 	Arguments []Exp
 }
 

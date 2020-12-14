@@ -382,13 +382,14 @@ func (parser *Parser) parseCall() (Exp, error) {
 		return nil, fmt.Errorf("expected call keyword at start of function call")
 	}
 
-	kind, identifier := parser.readIgnoreWhiteSpace()
-	if kind != Identifier {
-		return nil, fmt.Errorf("expected identifier after keyword call in function call")
+
+	expr, err := parser.ParseExp()
+	if err != nil {
+		return nil, fmt.Errorf("expression in call: %w", err)
 	}
 
 	call := FunctionCall{}
-	call.Name = identifier
+	call.Exp = expr
 
 	kind, _ = parser.readIgnoreWhiteSpace()
 	if kind == With {

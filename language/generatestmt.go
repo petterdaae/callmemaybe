@@ -2,18 +2,12 @@ package language
 
 import (
 	"callmemaybe/language/assemblyoutput"
-	"callmemaybe/language/common"
 	"callmemaybe/language/memorymodel"
+	"callmemaybe/language/typesystem"
 	"fmt"
 )
 
 const (
-	KindNumber         = common.ContextElementKindNumber
-	KindBool           = common.ContextElementKindBoolean
-	KindChar           = common.ContextElementKindChar
-	KindInvalid        = common.ContextElementKindInvalid
-	KindList           = common.ContextElementKindListReference
-	KindProcedure      = common.ContextElementKindProcedure
 	RAX                = assemblyoutput.RAX
 	RBX                = assemblyoutput.RBX
 	RDI                = assemblyoutput.RDI
@@ -29,63 +23,50 @@ func (stmt StmtSeq) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.
 	for i := range stmt.Statements {
 		err := stmt.Statements[i].Generate(ao, mm)
 		if err != nil {
-			return fmt.Errorf("failed to generate code for statement in sequence: %w", err)
+			return fmt.Errorf("statement in sequence: %w", err)
 		}
 	}
 	return nil
 }
 
 func (stmt StmtAssign) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
-	result := stmt.Expression.Generate(ao, mm)
-	if result.Error != nil {
-		return fmt.Errorf("failed to generate code for expression in assign statement: %w", result.Error)
+	kind, err := stmt.Expression.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("expression in assign: %w", err)
 	}
-
-	// Do not assign anything to placeholders
 	if stmt.Identifier == "_" {
 		return nil
 	}
-
-	if result.Kind == KindNumber || result.Kind == KindBool || result.Kind == KindChar || result.Kind == KindList {
+	if kind.IsStorableOnStack() {
 		mm.CurrentStackSize++
 		ao.Push(RAX)
-		mm.AddNameToCurrentStackElement(stmt.Identifier, result.Kind, result.ListElementKind, result.ListSize)
+		mm.AddNameToCurrentStackElement(stmt.Identifier, kind)
 	}
-
-	if result.Kind == KindProcedure {
-		procedure := ao.GetProcedureByName(result.ProcedureName)
-		mm.AddProcedureAlias(result.ProcedureName, stmt.Identifier, procedure.NumberOfArgs, procedure.ReturnKind, procedure.Args)
-	}
-
-	return nil
+	return fmt.Errorf("expression in assign not storable on stack")
 }
 
 func (stmt StmtPrintln) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
-	result := stmt.Expression.Generate(ao, mm)
-	if result.Error != nil {
-		return fmt.Errorf("failed to generate code for expression in println: %w", result.Error)
+	kind, err := stmt.Expression.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("expression in println: %w", err)
 	}
-
-	if result.Kind == KindChar {
+	if kind.RawType == typesystem.Char {
 		ao.Mov(RDI, PRINTCHARFORMAT)
 		ao.Mov(RSI, RAX)
 		ao.Xor(RAX, RAX)
 		ao.CallPrintf()
 		return nil
 	}
-
-	if result.Kind == KindNumber || result.Kind == KindBool {
+	if kind.RawType == typesystem.Int || kind.RawType == typesystem.Bool {
 		ao.Mov(RDI, PRINTFORMAT64)
 		ao.Mov(RSI, RAX)
 		ao.Xor(RAX, RAX)
 		ao.CallPrintf()
 		return nil
 	}
-
-	if result.Kind == KindList && result.ListElementKind == KindChar {
+	if kind.RawType == typesystem.List && kind.ListElementType.RawType == typesystem.Char {
 		ao.Mov(RDX, RAX)
-
-		for i := 0; i < result.ListSize; i++ {
+		for i := 0; i < kind.ListSize; i++ {
 			ao.Mov(RAX, fmt.Sprintf("[%s+%d]", RDX, i*8))
 			ao.Push(RDX)
 			ao.Mov(RDI, PRINTCHARNONEWLINE)
@@ -94,67 +75,52 @@ func (stmt StmtPrintln) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymo
 			ao.CallPrintf()
 			ao.Pop(RDX)
 		}
-
 		ao.Mov(RAX, "10")
 		ao.Mov(RDI, PRINTCHARNONEWLINE)
 		ao.Mov(RSI, RAX)
 		ao.Xor(RAX, RAX)
 		ao.CallPrintf()
-
 		return nil
 	}
-
-	return fmt.Errorf("println only supports numbers and booleans")
+	return fmt.Errorf("unsupported type in println expression")
 }
 
 func (stmt StmtReturn) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
-	result := stmt.Expression.Generate(ao, mm)
-	if result.Error != nil {
-		return fmt.Errorf("failed to evaluate expression when returning: %w", result.Error)
+	kind, err := stmt.Expression.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("return expression: %w", err)
 	}
-
 	procedure := ao.CurrentProcedure()
 	for i := 0; i < mm.CurrentStackSize-procedure.StackSizeBeforeFunctionGeneration-1-procedure.NumberOfArgs; i++ {
 		ao.Pop(RBX)
 	}
-
 	ao.Ret()
-
-	if result.Kind.IsStoredOnStack() {
-		return nil
+	if !kind.IsPassable() {
+		return fmt.Errorf("return type is not passable")
 	}
-
-	return fmt.Errorf("only bools and ints are supported return types")
+	return nil
 }
 
 func (stmt StmtIf) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
 	mm.PushNewContext(true)
-
-	result := stmt.Expression.Generate(ao, mm)
-	if result.Error != nil {
-		return fmt.Errorf("failed to generate condition of id: %w", result.Error)
+	kind, err := stmt.Expression.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("if condition: %w", err)
 	}
-	if result.Kind != KindBool {
-		return fmt.Errorf("if conditions can only be stack kinds")
+	if kind.RawType != typesystem.Bool {
+		return fmt.Errorf("if condition is not a bool")
 	}
-
 	bodyStart := ao.GenerateUniqueName()
 	bodyEnd := ao.GenerateUniqueName()
-
 	ao.Cmp(RAX, "1")
 	ao.Je(bodyStart)
 	ao.Jne(bodyEnd)
-
 	ao.NewSection(bodyStart)
-
-	err := stmt.Body.Generate(ao, mm)
+	err = stmt.Body.Generate(ao, mm)
 	if err != nil {
-		return fmt.Errorf("failed to generate if body: %w", err)
+		return fmt.Errorf("if body: %w", err)
 	}
-
 	ao.NewSection(bodyEnd)
-
 	mm.PopCurrentContext()
-
 	return nil
 }
