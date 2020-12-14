@@ -1,0 +1,9 @@
+i = 0
+loop i < 2 {
+    j = 0
+    loop j < 2 {
+        println j
+        j = j + 1
+    }
+    i = i + 1
+}

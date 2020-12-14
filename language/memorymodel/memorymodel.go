@@ -36,6 +36,18 @@ func (mm *MemoryModel) AddNameToCurrentStackElement(name string, _type typesyste
 	currentContext.members[name] = NewContextElement(_type, mm.CurrentStackSize, name)
 }
 
+func (mm *MemoryModel) Update(name string, _type typesystem.Type) {
+	currentContext := mm.ContextStack.Peek()
+	member, _ := currentContext.members[name]
+	currentContext.members[name] = NewContextElement(_type, member.StackSizeAfterPush, name)
+}
+
+func (mm *MemoryModel) Contains(name string) bool {
+	currentContext := mm.ContextStack.Peek()
+	_, ok := currentContext.members[name]
+	return ok
+}
+
 func (mm *MemoryModel) GetStackElement(name string) *ContextElement {
 	value, ok := mm.ContextStack.Peek().members[name]
 	if !ok {

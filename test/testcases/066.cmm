@@ -1,0 +1,17 @@
+input = <int, 6>[1721, 979, 366, 299, 675, 1456]
+
+i = 0
+loop i < 6 {
+    j = i + 1
+    loop j < 6 {
+        if i != j {
+            a = get i from input
+            b = get j from input
+            if a + b == 2020 {
+                println a * b
+            }
+        }
+        j = j + 1
+    }
+    i = i + 1
+}

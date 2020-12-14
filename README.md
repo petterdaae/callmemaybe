@@ -56,8 +56,7 @@ A simple compiler.
 ```
 
 ### TODO
-- 14.12 Loop
-- 14.12 Write tests
+- 14.12 Write more tests
 - 15.12 Improve IO
 - 15.12 Free heap allocated memory when out of scope (?)
 - 15.12 Handle division-by-zero and out-of-bounds errors

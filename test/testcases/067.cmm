@@ -1,0 +1,20 @@
+input = <int, 6>[1721, 979, 366, 299, 675, 1456]
+solve = | me, input list<int, 6>, i int, j int | int {
+    if i < 0 {
+        return -1
+    }
+    x = get i from input
+    y = get j from input
+    if x + y == 2020 {
+        return x * y
+    }
+    sol = call me with input, i - 1, j
+    if sol > 0 {
+        return sol
+    }
+    return call me with input, i, j - 1
+}
+
+solution = call solve with input, 5, 5
+
+println solution

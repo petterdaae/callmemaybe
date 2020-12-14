@@ -38,9 +38,14 @@ func (stmt StmtAssign) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 		return nil
 	}
 	if kind.IsStorableOnStack() {
-		mm.CurrentStackSize++
-		ao.Push(RAX)
-		mm.AddNameToCurrentStackElement(stmt.Identifier, kind)
+		if mm.Contains(stmt.Identifier) {
+			member := mm.GetStackElement(stmt.Identifier)
+			ao.Mov(fmt.Sprintf("[rsp+%d]", (mm.CurrentStackSize-member.StackSizeAfterPush)*8), RAX)
+		} else {
+			mm.CurrentStackSize++
+			ao.Push(RAX)
+			mm.AddNameToCurrentStackElement(stmt.Identifier, kind)
+		}
 		return nil
 	}
 	return fmt.Errorf("expression in assign not storable on stack")
@@ -104,6 +109,7 @@ func (stmt StmtReturn) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 
 func (stmt StmtIf) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
 	mm.PushNewContext(true)
+	initStacksize := mm.CurrentStackSize
 	kind, err := stmt.Expression.Generate(ao, mm)
 	if err != nil {
 		return fmt.Errorf("if condition: %w", err)
@@ -121,7 +127,39 @@ func (stmt StmtIf) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.M
 	if err != nil {
 		return fmt.Errorf("if body: %w", err)
 	}
+	for i := 0; i < mm.CurrentStackSize-initStacksize; i++ {
+		mm.CurrentStackSize--
+		ao.Pop(RBX)
+	}
 	ao.NewSection(bodyEnd)
+	mm.PopCurrentContext()
+	return nil
+}
+func (stmt StmtLoop) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
+	mm.PushNewContext(true)
+	initStackSize := mm.CurrentStackSize
+	bodyStart := ao.GenerateUniqueName()
+	conditionStart := ao.GenerateUniqueName()
+	ao.Jmp(conditionStart)
+	ao.NewSection(bodyStart)
+	err := stmt.Body.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("loop body: %w", err)
+	}
+	for i := 0; i < mm.CurrentStackSize-initStackSize; i++ {
+		mm.CurrentStackSize--
+		ao.Pop(RBX)
+	}
+	ao.NewSection(conditionStart)
+	kind, err := stmt.Condition.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("loop condition: %w", err)
+	}
+	if kind.RawType != typesystem.Bool {
+		return fmt.Errorf("loop condition is not bool")
+	}
+	ao.Cmp(RAX, "1")
+	ao.Je(bodyStart)
 	mm.PopCurrentContext()
 	return nil
 }

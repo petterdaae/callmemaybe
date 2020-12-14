@@ -127,6 +127,19 @@ func (exp ExpEquals) RightExp() Exp {
 	return exp.Right
 }
 
+type ExpNotEquals struct {
+	Left  Exp
+	Right Exp
+}
+
+func (exp ExpNotEquals) LeftExp() Exp {
+	return exp.Left
+}
+
+func (exp ExpNotEquals) RightExp() Exp {
+	return exp.Right
+}
+
 type ExpParentheses struct {
 	Inside Exp
 }
@@ -193,4 +206,9 @@ type StmtReturn struct {
 type StmtIf struct {
 	Expression Exp
 	Body       Stmt
+}
+
+type StmtLoop struct {
+	Condition Exp
+	Body Stmt
 }

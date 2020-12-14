@@ -70,6 +70,27 @@ func (exp ExpEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel
 	return HelpGenerateStackBop(ao, mm, exp, "equals", operation, typesystem.NewBool(), isValidKind)
 }
 
+func (exp ExpNotEquals) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
+	operation := func(ao *assemblyoutput.AssemblyOutput) {
+		ao.Cmp(RBX, RAX)
+		equal := ao.GenerateUniqueName()
+		notEqual := ao.GenerateUniqueName()
+		done := ao.GenerateUniqueName()
+		ao.Je(equal)
+		ao.Jne(notEqual)
+		ao.NewSection(equal)
+		ao.Mov(RAX, "0")
+		ao.Jmp(done)
+		ao.NewSection(notEqual)
+		ao.Mov(RAX, "1")
+		ao.NewSection(done)
+	}
+	isValidKind := func(gr typesystem.Type) bool {
+		return gr.IsComparable()
+	}
+	return HelpGenerateStackBop(ao, mm, exp, "equals", operation, typesystem.NewBool(), isValidKind)
+}
+
 func (exp ExpPlus) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
 	operation := func(ao *assemblyoutput.AssemblyOutput) {
 		ao.Add(RAX, RBX)

@@ -1,0 +1,5 @@
+loop false {
+    loop false {
+        a = 42
+    }
+}

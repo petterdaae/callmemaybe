@@ -198,6 +198,17 @@ func (parser *Parser) ParseCalculation() (Exp, error) {
 			}
 			continue
 		}
+		if nextKind == NotEqual {
+			right, err := parser.parseVal()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse right side of not equals expression")
+			}
+			left = ExpNotEquals{
+				Left:  left,
+				Right: right,
+			}
+			continue
+		}
 		parser.unread()
 		break
 	}
@@ -329,11 +340,11 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 			statements = append(statements, statement)
 			continue
 		}
-		if nextKind == Append {
+		if nextKind == Loop {
 			parser.unread()
-			statement, err := parser.parseAppendToList()
+			statement, err := parser.parseLoop()
 			if err != nil {
-				return nil, fmt.Errorf("failed to parse append statement: %w", err)
+				return nil, fmt.Errorf("failed to parse loop: %w", err)
 			}
 			statements = append(statements, statement)
 			continue
@@ -342,6 +353,38 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 		break
 	}
 	return StmtSeq{Statements: statements}, nil
+}
+
+func (parser *Parser) parseLoop() (Stmt, error) {
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != Loop {
+		return nil, fmt.Errorf("expected loop keyword")
+	}
+
+	exp, err := parser.ParseExp()
+	if err != nil {
+		return nil, fmt.Errorf("loop condition: %w", err)
+	}
+
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != CurlyBracketStart {
+		return nil, fmt.Errorf("expected { in loop")
+	}
+
+	body, err := parser.parseSeq()
+	if err != nil {
+		return nil, fmt.Errorf("loop body: %w", err)
+	}
+
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != CurlyBracketEnd {
+		return nil, fmt.Errorf("expected } in loop")
+	}
+
+	return StmtLoop{
+		Condition: exp,
+		Body:      body,
+	}, nil
 }
 
 func (parser *Parser) parseIf() (Stmt, error) {
@@ -578,11 +621,6 @@ func (parser *Parser) parseGetFromList() (Exp, error) {
 		List:  exp,
 		Index: numExp,
 	}, nil
-}
-
-func (parser *Parser) parseAppendToList() (Stmt, error) {
-	// TODO : implement
-	return nil, fmt.Errorf("not implemented")
 }
 
 func (parser *Parser) parseType() (typesystem.Type, error) {

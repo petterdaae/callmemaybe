@@ -20,8 +20,13 @@ const (
 	Question
 	Append
 	From
+	Loop
 	Colon
 	Pipe
+	NotEqual
+	Or
+	And
+	Not
 	To
 	String
 	RoundBracketStart
@@ -157,6 +162,12 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return Colon, string(character)
 	case '|':
 		return Pipe, string(character)
+	case '!':
+		next := tokenizer.read()
+		if next == '=' {
+			return NotEqual, "!="
+		}
+		return Not, "!"
 	}
 	
 	return Error, ""
@@ -295,6 +306,8 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return From, word
 	case "func":
 		return TypeFunc, word
+	case "loop":
+		return Loop, word
 	}
 
 	return Identifier, word
