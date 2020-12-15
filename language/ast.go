@@ -217,3 +217,13 @@ type StmtLoop struct {
 type StmtStructDeclaration struct {
 	Type typesystem.Type
 }
+
+type StructExp struct {
+	Name string
+	Members []StructMember
+}
+
+type StructMember struct {
+	Name string
+	Exp Exp
+}

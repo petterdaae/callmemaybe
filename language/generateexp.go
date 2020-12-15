@@ -213,3 +213,8 @@ func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memor
 
 	return *kind.ListElementType, nil
 }
+
+func (expr StructExp) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
+	// TODO : implement
+	return typesystem.NewInvalid(), fmt.Errorf("not implemented")
+}

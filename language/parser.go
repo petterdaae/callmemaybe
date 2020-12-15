@@ -74,6 +74,10 @@ func (parser *Parser) ParseExp() (Exp, error) {
 		return parser.parseString()
 	}
 
+	if nextKind == At {
+		return parser.parseStructInit()
+	}
+
 	return parser.ParseCalculation()
 }
 
@@ -362,6 +366,42 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 		break
 	}
 	return StmtSeq{Statements: statements}, nil
+}
+
+func (parser *Parser) parseStructInit() (Exp, error) {
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != At {
+		return nil, fmt.Errorf("expected @")
+	}
+	kind, name := parser.readIgnoreWhiteSpace()
+	if kind != Identifier {
+		return nil, fmt.Errorf("expected identifier")
+	}
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != CurlyBracketStart {
+		return nil, fmt.Errorf("expected {")
+	}
+	structExp := StructExp{
+		Name:    name,
+	}
+	for {
+		kind, memberName := parser.readIgnoreWhiteSpace()
+		if kind == CurlyBracketEnd {
+			break
+		}
+		if kind != Identifier {
+			return nil, fmt.Errorf("expected identifier")
+		}
+		exp, err := parser.ParseExp()
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse expression in struct member")
+		}
+		structExp.Members = append(structExp.Members, StructMember{
+			Name: memberName,
+			Exp:  exp,
+		})
+	}
+	return structExp, nil
 }
 
 func (parser *Parser) parseLoop() (Stmt, error) {
