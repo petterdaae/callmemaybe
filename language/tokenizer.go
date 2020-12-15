@@ -26,6 +26,7 @@ const (
 	NotEqual
 	Or
 	And
+	At
 	Not
 	To
 	String
@@ -168,6 +169,8 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 			return NotEqual, "!="
 		}
 		return Not, "!"
+	case '@':
+		return At, string(character)
 	}
 	
 	return Error, ""
