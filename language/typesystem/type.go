@@ -10,19 +10,22 @@ const (
 	Bool
 	List
 	Function
+	Struct
 )
 
-var passable = []RawType{Int, Char, Bool, List, Function}
+var passable = []RawType{Int, Char, Bool, List, Function, Struct}
 var comparable = []RawType{Int, Char, Bool}
 
 type Type struct {
 	RawType               RawType
 	ListElementType       *Type
-	FunctionArgumentTypes []FunctionArgument
+	FunctionArgumentTypes []NamedType
 	FunctionReturnType    *Type
+	StructName            string
+	StructMembers         []NamedType
 }
 
-type FunctionArgument struct {
+type NamedType struct {
 	Name string
 	Type Type
 }

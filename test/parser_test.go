@@ -132,7 +132,7 @@ func TestFunctionAssign(t *testing.T) {
 					},
 					Type: typesystem.Type{
 						RawType: typesystem.Function,
-						FunctionArgumentTypes: []typesystem.FunctionArgument{typesystem.FunctionArgument{
+						FunctionArgumentTypes: []typesystem.NamedType{typesystem.NamedType{
 							Name: "a",
 							Type: typesystem.NewInt(),
 						}},
@@ -166,7 +166,7 @@ func TestFunctionAssignWithType(t *testing.T) {
 					},
 					Type: typesystem.Type{
 						RawType: typesystem.Function,
-						FunctionArgumentTypes: []typesystem.FunctionArgument{typesystem.FunctionArgument{
+						FunctionArgumentTypes: []typesystem.NamedType{typesystem.NamedType{
 							Name: "a",
 							Type: typesystem.NewInt(),
 						}},

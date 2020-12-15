@@ -493,7 +493,7 @@ func (parser *Parser) parseFunction() (Exp, error) {
 		if !argType.IsPassable() {
 			return nil, fmt.Errorf("expected passable type when parsing function arguments")
 		}
-		function.Type.FunctionArgumentTypes = append(function.Type.FunctionArgumentTypes, typesystem.FunctionArgument{
+		function.Type.FunctionArgumentTypes = append(function.Type.FunctionArgumentTypes, typesystem.NamedType{
 			Name: identifier,
 			Type: argType,
 		})
@@ -692,13 +692,44 @@ func (parser *Parser) parseType() (typesystem.Type, error) {
 		}
 		for i := 0; i < size - 1; i++ {
 			current := types[i]
-			result.FunctionArgumentTypes = append(result.FunctionArgumentTypes, typesystem.FunctionArgument{
+			result.FunctionArgumentTypes = append(result.FunctionArgumentTypes, typesystem.NamedType{
 				Name: "",
 				Type: current,
 			})
 		}
 		result.FunctionReturnType = &types[size-1]
 		return result, nil
+	case At:
+		kind, name := parser.readIgnoreWhiteSpace()
+		if kind != Identifier {
+			return typesystem.NewInvalid(), fmt.Errorf("expected identifier")
+		}
+		kind, _ = parser.readIgnoreWhiteSpace()
+		if kind != CurlyBracketStart {
+			return typesystem.NewInvalid(), fmt.Errorf("expected curly bracket")
+		}
+		structType := typesystem.Type{
+			RawType:               typesystem.Struct,
+			StructName:            name,
+		}
+		for {
+			kind, memberName := parser.readIgnoreWhiteSpace()
+			if kind == CurlyBracketEnd {
+				break
+			}
+			if kind != Identifier {
+				return typesystem.NewInvalid(), fmt.Errorf("expected identifier")
+			}
+			_type, err := parser.parseType()
+			if err != nil {
+				return typesystem.NewInvalid(), fmt.Errorf("struct type: %w", err)
+			}
+			structType.StructMembers = append(structType.StructMembers, typesystem.NamedType{
+				Name: memberName,
+				Type: _type,
+			})
+		}
+		return structType, nil
 	default:
 		return typesystem.Type{}, fmt.Errorf("unsupported type")
 	}
