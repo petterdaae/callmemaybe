@@ -218,3 +218,8 @@ func (expr StructExp) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymode
 	// TODO : implement
 	return typesystem.NewInvalid(), fmt.Errorf("not implemented")
 }
+
+func (expr ExpReadFromStruct) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
+	// TODO : implement
+	return typesystem.NewInvalid(), fmt.Errorf("not implemented")
+}

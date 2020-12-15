@@ -171,15 +171,20 @@ type ExpGetFromList struct {
 	Index Exp
 }
 
+type ExpReadFromStruct struct {
+	Field  string
+	Struct Exp
+}
+
 type StmtAppendToList struct {
 	List       Exp
 	NewElement Exp
 }
 
 type ExpFunction struct {
-	Recurse    string
-	Body       Stmt
-	Type       typesystem.Type
+	Recurse string
+	Body    Stmt
+	Type    typesystem.Type
 }
 
 type FunctionCall struct {
@@ -211,7 +216,7 @@ type StmtIf struct {
 
 type StmtLoop struct {
 	Condition Exp
-	Body Stmt
+	Body      Stmt
 }
 
 type StmtStructDeclaration struct {
@@ -219,11 +224,11 @@ type StmtStructDeclaration struct {
 }
 
 type StructExp struct {
-	Name string
+	Name    string
 	Members []StructMember
 }
 
 type StructMember struct {
 	Name string
-	Exp Exp
+	Exp  Exp
 }

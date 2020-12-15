@@ -35,7 +35,7 @@ A simple compiler.
 <val>             := <uop> <num>
 <val>             := <char>
 <val>             := "get" <exp> "from" <expr>
-<val>             := "get" <identifier> "from" <expr>
+<val>             := "read" <identifier> "from" <expr>
 
 <bop>             := "+" | "*" | "<" | ">" | "==" | "-" | "/" | "%"
 <uop>             := "-"

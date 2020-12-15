@@ -29,6 +29,7 @@ const (
 	At
 	Struct
 	Not
+	Read
 	To
 	String
 	RoundBracketStart
@@ -314,6 +315,8 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return Loop, word
 	case "struct":
 		return Struct, word
+	case "read":
+		return Read, word
 	}
 
 	return Identifier, word
