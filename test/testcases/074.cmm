@@ -1,4 +1,4 @@
-a = <list<char, 2>, 2>
+a = <list<char>, 2>
     [
         <char, 2>['a', 'b'],
         <char, 2>['c', 'd']

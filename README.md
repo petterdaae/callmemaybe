@@ -51,8 +51,10 @@ A simple compiler.
 
 <identifier>  := (letter|_)[letter|[0-9]|_]*
 
-<type>        := <rawType> | "list" "<" <type> "," <num> "> | "func" | "func" "<" <type>+ ">"
-<rawType>     := "int" | "char" | "bool"
+<type>        := "int" | "char" | "bool"
+<type>        := "list" "<" <type> ">" 
+<type>        := "func" 
+<type>        := "func" "<" <type>+ ">"
 ```
 
 ### TODO

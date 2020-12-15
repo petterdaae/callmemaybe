@@ -89,8 +89,8 @@ func (parser *Parser) parseString() (Exp, error) {
 			ListElementType: &typesystem.Type{
 				RawType: typesystem.Char,
 			},
-			ListSize: len(value),
 		},
+		Size: len(value),
 	}
 
 	for i := range value {
@@ -594,8 +594,9 @@ func (parser *Parser) parseList() (Exp, error) {
 	list.Type = typesystem.Type{
 		RawType:         typesystem.List,
 		ListElementType: &_type,
-		ListSize:        number,
 	}
+
+	list.Size = number
 
 	return list, nil
 }
@@ -648,22 +649,12 @@ func (parser *Parser) parseType() (typesystem.Type, error) {
 			return typesystem.Type{}, fmt.Errorf("failed to parse list element type: %w", err)
 		}
 		kind, _ = parser.readIgnoreWhiteSpace()
-		if kind != Comma {
-			return typesystem.Type{}, fmt.Errorf("expected comma when parsing list type")
-		}
-		kind, val := parser.readIgnoreWhiteSpace()
-		if kind != Number {
-			return typesystem.Type{}, fmt.Errorf("expected number when parsing list type")
-		}
-		size, _ := strconv.Atoi(val)
-		kind, _ = parser.readIgnoreWhiteSpace()
 		if kind != AngleBracketEnd {
 			return typesystem.Type{}, fmt.Errorf("expected closing angle bracket when parsing list type")
 		}
 		return typesystem.Type{
 			RawType:               typesystem.List,
 			ListElementType:       &elementType,
-			ListSize:              size,
 		}, nil
 	case TypeFunc:
 		kind, _ = parser.readIgnoreWhiteSpace()

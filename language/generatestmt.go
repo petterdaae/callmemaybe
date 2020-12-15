@@ -14,9 +14,6 @@ const (
 	RSI                = assemblyoutput.RSI
 	RDX                = assemblyoutput.RDX
 	RCX                = assemblyoutput.RCX
-	PRINTFORMAT64      = assemblyoutput.PRINTFORMAT64
-	PRINTCHARFORMAT    = assemblyoutput.PRINTCHARFORMAT
-	PRINTCHARNONEWLINE = assemblyoutput.PRINTCHARNONEWLINEFORMAT
 )
 
 func (stmt StmtSeq) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
@@ -57,35 +54,21 @@ func (stmt StmtPrintln) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymo
 		return fmt.Errorf("expression in println: %w", err)
 	}
 	if kind.RawType == typesystem.Char {
-		ao.Mov(RDI, PRINTCHARFORMAT)
-		ao.Mov(RSI, RAX)
-		ao.Xor(RAX, RAX)
-		ao.CallPrintf()
+		ao.Mov(RBX, assemblyoutput.CharNewlineFormat)
+		ao.Call(assemblyoutput.PrintRegisterWithFormat)
 		return nil
 	}
 	if kind.RawType == typesystem.Int || kind.RawType == typesystem.Bool {
-		ao.Mov(RDI, PRINTFORMAT64)
-		ao.Mov(RSI, RAX)
-		ao.Xor(RAX, RAX)
-		ao.CallPrintf()
+		ao.Mov(RBX, assemblyoutput.DigitNewlineFormat)
+		ao.Call(assemblyoutput.PrintRegisterWithFormat)
 		return nil
 	}
 	if kind.RawType == typesystem.List && kind.ListElementType.RawType == typesystem.Char {
-		ao.Mov(RDX, RAX)
-		for i := 0; i < kind.ListSize; i++ {
-			ao.Mov(RAX, fmt.Sprintf("[%s+%d]", RDX, i*8))
-			ao.Push(RDX)
-			ao.Mov(RDI, PRINTCHARNONEWLINE)
-			ao.Mov(RSI, RAX)
-			ao.Xor(RAX, RAX)
-			ao.CallPrintf()
-			ao.Pop(RDX)
-		}
+		ao.Mov(RBX, assemblyoutput.CharFormat)
+		ao.Call(assemblyoutput.PrintListWithFormat)
 		ao.Mov(RAX, "10")
-		ao.Mov(RDI, PRINTCHARNONEWLINE)
-		ao.Mov(RSI, RAX)
-		ao.Xor(RAX, RAX)
-		ao.CallPrintf()
+		ao.Mov(RBX, assemblyoutput.CharFormat)
+		ao.Call(assemblyoutput.PrintRegisterWithFormat)
 		return nil
 	}
 	return fmt.Errorf("unsupported type in println expression")

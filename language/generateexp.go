@@ -153,17 +153,18 @@ func (expr ExpNegative) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymo
 }
 
 func (expr ExpList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
-	if expr.Type.ListSize < 1 {
+	if expr.Size < 1 {
 		return typesystem.NewInvalid(), fmt.Errorf("the size of a list must be a positive number")
 	}
-	ao.Mov(RDI, fmt.Sprintf("%d", 8*expr.Type.ListSize))
+	ao.Mov(RDI, fmt.Sprintf("%d", 8*(expr.Size+1)))
 	ao.Call("malloc")
 	ao.Mov(RDX, RAX)
 
-	if expr.Type.ListSize > len(expr.Elements) {
+	if expr.Size < len(expr.Elements) {
 		return typesystem.NewInvalid(), fmt.Errorf("too many elements in list")
 	}
 
+	ao.Mov(fmt.Sprintf("qword [%s]", RDX), fmt.Sprintf("%d", expr.Size))
 	for i, element := range expr.Elements {
 		mm.CurrentStackSize++
 		ao.Push(RDX)
@@ -176,7 +177,7 @@ func (expr ExpList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.
 		}
 		mm.CurrentStackSize--
 		ao.Pop(RDX)
-		ao.Mov(fmt.Sprintf("qword [%s+%d]", RDX, i*8), RAX)
+		ao.Mov(fmt.Sprintf("qword [%s+%d]", RDX, (i+1)*8), RAX)
 	}
 
 	ao.Mov(RAX, RDX)
@@ -204,7 +205,7 @@ func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memor
 	mm.CurrentStackSize--
 	ao.Pop(RCX)
 	ao.Mov(RDX, RAX)
-	ao.Mov(RAX, fmt.Sprintf("[rdx+8*%s]", RCX))
+	ao.Mov(RAX, fmt.Sprintf("[rdx+8*%s+8]", RCX))
 
 	if kind.ListElementType == nil {
 		return typesystem.Type{}, fmt.Errorf("listelementtype is nil")

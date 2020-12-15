@@ -7,7 +7,10 @@ const (
 	RSI = "rsi"
 	RDX = "rdx"
 	RCX = "rcx"
-	PRINTFORMAT64 = "format"
-	PRINTCHARFORMAT = "formatchar"
-	PRINTCHARNONEWLINEFORMAT = "formatcharnonewline"
+
+	DigitNewlineFormat      = "digitNewlineFormat"
+	CharNewlineFormat       = "charNewlineFormat"
+	CharFormat              = "charFormat"
+	PrintListWithFormat     = "printListWithFormat"
+	PrintRegisterWithFormat = "printRegisterWithFormat"
 )

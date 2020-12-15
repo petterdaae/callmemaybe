@@ -1,7 +1,7 @@
 str1 = "Hello"
 str2 = "Hello"
 
-equals = | me, s1 list<char, 5>, s2 list<char, 5>, index int | bool {
+equals = | me, s1 list<char>, s2 list<char>, index int | bool {
     if index == -1 {
         return true
     }

@@ -1,4 +1,4 @@
-a = <list<char, 3>, 5>
+a = <list<char>, 5>
     [
         "ABC",
         "CDE",

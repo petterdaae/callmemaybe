@@ -139,9 +139,9 @@ func (ao *AssemblyOutput) Start() {
 	ao.addOperation("extern free")
 	ao.addOperation("global main")
 	ao.addOperation("section .date")
-	ao.addOperation("format: db '%d', 10, 0")
-	ao.addOperation("formatchar: db '%c', 10, 0")
-	ao.addOperation("formatcharnonewline: db '%c', 0")
+	ao.addOperation("digitNewlineFormat: db '%d', 10, 0")
+	ao.addOperation("charNewlineFormat: db '%c', 10, 0")
+	ao.addOperation("charFormat: db '%c', 0")
 	ao.addOperation("section .text")
 	ao.addOperation("main:")
 	ao.addOperation("push rbx")
@@ -154,4 +154,39 @@ func (ao *AssemblyOutput) End(stackSize int) {
 	}
 	ao.addOperation("mov rax, 0")
 	ao.addOperation("ret")
+
+	// Procedure for printing all registers in a list
+	// RAX: list address, RBX: format
+	ao.NewSection("printListWithFormat")
+	ao.Mov(RDX, RAX)
+	ao.Mov(RCX, "0")
+
+	ao.NewSection("printListWithFormatLoopStart")
+	ao.Add(RCX, "1")
+	ao.Mov(RAX, fmt.Sprintf("[%s+%s*8]", RDX, RCX))
+	ao.Call("printRegisterWithFormat")
+
+	ao.Cmp(RCX, fmt.Sprintf("[%s]", RDX))
+	ao.Je("printListWithFormatLoopEnd")
+	ao.Jne("printListWithFormatLoopStart")
+
+	ao.NewSection("printListWithFormatLoopEnd")
+	ao.Ret()
+
+	// Procedure for printing a register
+	// RAX: register to print, RBX: format
+	ao.NewSection("printRegisterWithFormat")
+	ao.Push(RAX)
+	ao.Push(RBX)
+	ao.Push(RCX)
+	ao.Push(RDX)
+	ao.Mov(RDI, RBX)
+	ao.Mov(RSI, RAX)
+	ao.Xor(RAX, RAX)
+	ao.CallPrintf()
+	ao.Pop(RDX)
+	ao.Pop(RCX)
+	ao.Pop(RBX)
+	ao.Pop(RAX)
+	ao.Ret()
 }

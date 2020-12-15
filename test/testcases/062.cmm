@@ -1,4 +1,4 @@
-printInts = | me, ints list<int, 5>, startIndex int | bool {
+printInts = | me, ints list<int>, startIndex int | bool {
     if startIndex == 5 {
         return true
     }

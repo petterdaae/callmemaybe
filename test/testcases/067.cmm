@@ -1,5 +1,5 @@
 input = <int, 6>[1721, 979, 366, 299, 675, 1456]
-solve = | me, input list<int, 6>, i int, j int | int {
+solve = | me, input list<int>, i int, j int | int {
     if i < 0 {
         return -1
     }

@@ -163,6 +163,7 @@ type ExpIdentifier struct {
 type ExpList struct {
 	Elements []Exp
 	Type     typesystem.Type
+	Size     int
 }
 
 type ExpGetFromList struct {

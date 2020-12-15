@@ -18,7 +18,6 @@ var comparable = []RawType{Int, Char, Bool}
 type Type struct {
 	RawType               RawType
 	ListElementType       *Type
-	ListSize              int
 	FunctionArgumentTypes []FunctionArgument
 	FunctionReturnType    *Type
 }
@@ -50,9 +49,6 @@ func (t Type) Equals(o Type) bool {
 	}
 
 	if t.RawType == List {
-		if t.ListSize != o.ListSize {
-			return false
-		}
 		if !(*t.ListElementType).Equals(*o.ListElementType) {
 			return false
 		}

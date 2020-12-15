@@ -1,4 +1,4 @@
-input = <list<char, 3>, 5>
+input = <list<char>, 5>
     [ 
         "F10", 
         "N3 ", 
@@ -54,7 +54,7 @@ updateDirection = | currentDirection int, directionChange char, amount int | int
     return currentDirection
 }
 
-forward = | east int, north int, currentDirection int, amount int | list<int, 2> {
+forward = | east int, north int, currentDirection int, amount int | list<int> {
     if currentDirection == 0 {
         east = east + amount
     }
