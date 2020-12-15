@@ -56,10 +56,12 @@ A simple compiler.
 ```
 
 ### TODO
+- 15.12 Reimplement lists
+- 15.12 Structs  
+- 15.12 Module system
 - 15.12 Write some tests
-- 15.12 More IO
-- 15.12 Free heap allocated memory when out of scope (?)
-- 15.12 Handle division-by-zero and out-of-bounds errors
+- 16.12 More IO
+- 16.12 Free heap allocated memory when out of scope (?)
+- 16.12 Handle division-by-zero and out-of-bounds errors
 - 16.12 Structs
-- 16.12 Module system
 - 16.12 Write tests
