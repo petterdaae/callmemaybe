@@ -213,3 +213,7 @@ type StmtLoop struct {
 	Condition Exp
 	Body Stmt
 }
+
+type StmtStructDeclaration struct {
+	Type typesystem.Type
+}

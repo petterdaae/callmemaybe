@@ -349,6 +349,15 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 			statements = append(statements, statement)
 			continue
 		}
+		if nextKind == Struct {
+			parser.unread()
+			statement, err := parser.parseStructDeclaration()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse struct declaration: %w", err)
+			}
+			statements = append(statements, statement)
+			continue
+		}
 		parser.unread()
 		break
 	}
@@ -624,6 +633,45 @@ func (parser *Parser) parseGetFromList() (Exp, error) {
 	}, nil
 }
 
+func (parser *Parser) parseStructDeclaration() (Stmt, error) {
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != Struct {
+		return nil, fmt.Errorf("expected struct keyword")
+	}
+	kind, name := parser.readIgnoreWhiteSpace()
+	if kind != Identifier {
+		return nil, fmt.Errorf("expected identifier")
+	}
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != CurlyBracketStart {
+		return nil, fmt.Errorf("expected curly bracket")
+	}
+	structType := typesystem.Type{
+		RawType:               typesystem.Struct,
+		StructName:            name,
+	}
+	for {
+		kind, memberName := parser.readIgnoreWhiteSpace()
+		if kind == CurlyBracketEnd {
+			break
+		}
+		if kind != Identifier {
+			return nil, fmt.Errorf("expected identifier")
+		}
+		_type, err := parser.parseType()
+		if err != nil {
+			return nil, fmt.Errorf("struct type: %w", err)
+		}
+		structType.StructMembers = append(structType.StructMembers, typesystem.NamedType{
+			Name: memberName,
+			Type: _type,
+		})
+	}
+	return StmtStructDeclaration{
+		Type: structType,
+	}, nil
+}
+
 func (parser *Parser) parseType() (typesystem.Type, error) {
 	kind, _ := parser.readIgnoreWhiteSpace()
 	switch kind {
@@ -704,32 +752,10 @@ func (parser *Parser) parseType() (typesystem.Type, error) {
 		if kind != Identifier {
 			return typesystem.NewInvalid(), fmt.Errorf("expected identifier")
 		}
-		kind, _ = parser.readIgnoreWhiteSpace()
-		if kind != CurlyBracketStart {
-			return typesystem.NewInvalid(), fmt.Errorf("expected curly bracket")
-		}
-		structType := typesystem.Type{
+		return typesystem.Type{
 			RawType:               typesystem.Struct,
 			StructName:            name,
-		}
-		for {
-			kind, memberName := parser.readIgnoreWhiteSpace()
-			if kind == CurlyBracketEnd {
-				break
-			}
-			if kind != Identifier {
-				return typesystem.NewInvalid(), fmt.Errorf("expected identifier")
-			}
-			_type, err := parser.parseType()
-			if err != nil {
-				return typesystem.NewInvalid(), fmt.Errorf("struct type: %w", err)
-			}
-			structType.StructMembers = append(structType.StructMembers, typesystem.NamedType{
-				Name: memberName,
-				Type: _type,
-			})
-		}
-		return structType, nil
+		}, nil
 	default:
 		return typesystem.Type{}, fmt.Errorf("unsupported type")
 	}

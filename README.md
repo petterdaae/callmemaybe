@@ -10,6 +10,7 @@ A simple compiler.
 <stmt>            := <call>
 <stmt>            := <return>
 <stmt>            := <if>
+<stmt>            := <struct>
 
 <assign>          := <identifier> "=" <exp>
 <println>         := "println" <exp>

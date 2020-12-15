@@ -149,3 +149,8 @@ func (stmt StmtLoop) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel
 	mm.PopCurrentContext()
 	return nil
 }
+
+func (stmt StmtStructDeclaration) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
+	// TODO : implement
+	return fmt.Errorf("not implemented")
+}

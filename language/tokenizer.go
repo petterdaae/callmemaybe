@@ -27,6 +27,7 @@ const (
 	Or
 	And
 	At
+	Struct
 	Not
 	To
 	String
@@ -311,6 +312,8 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return TypeFunc, word
 	case "loop":
 		return Loop, word
+	case "struct":
+		return Struct, word
 	}
 
 	return Identifier, word
