@@ -151,6 +151,6 @@ func (stmt StmtLoop) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel
 }
 
 func (stmt StmtStructDeclaration) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
-	// TODO : implement
-	return fmt.Errorf("not implemented")
+	mm.NewStructType(stmt.Type.StructName, stmt.Type)
+	return nil
 }

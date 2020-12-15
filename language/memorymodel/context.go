@@ -6,6 +6,7 @@ import (
 
 type Context struct {
 	members map[string]*ContextElement
+	structTypes map[string]typesystem.Type
 }
 
 type ContextElement struct {
@@ -17,6 +18,7 @@ type ContextElement struct {
 func EmptyContext() *Context {
 	return &Context{
 		members: make(map[string]*ContextElement),
+		structTypes: make(map[string]typesystem.Type),
 	}
 }
 

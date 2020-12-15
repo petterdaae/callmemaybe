@@ -7,7 +7,3 @@ point = @Point{
     x: 10
     y: 20
 }
-
-x = read x from point
-println x
-y = read y from point

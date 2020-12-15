@@ -75,6 +75,12 @@ func (t Type) Equals(o Type) bool {
 		}
 	}
 
+	if t.RawType == Struct {
+		if t.StructName != o.StructName {
+			return false
+		}
+	}
+
 	return true
 }
 

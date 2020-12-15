@@ -24,6 +24,9 @@ func (mm *MemoryModel) PushNewContext(copyCurrentContext bool) {
 			newContext.members[k] = v
 		}
 	}
+	for k, v := range current.structTypes {
+		newContext.structTypes[k] = v
+	}
 	mm.ContextStack.Push(newContext)
 }
 
@@ -54,4 +57,15 @@ func (mm *MemoryModel) GetStackElement(name string) *ContextElement {
 		return nil
 	}
 	return value
+}
+
+func (mm *MemoryModel) NewStructType(name string, _type typesystem.Type) {
+	currentContext := mm.ContextStack.Peek()
+	currentContext.structTypes[name] = _type
+}
+
+func (mm *MemoryModel) GetStructType(name string) (typesystem.Type, bool) {
+	currentContext := mm.ContextStack.Peek()
+	value, ok := currentContext.structTypes[name]
+	return value, ok
 }

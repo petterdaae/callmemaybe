@@ -124,6 +124,14 @@ func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorym
 		return typesystem.NewInvalid(), fmt.Errorf("functionreturntype is nil")
 	}
 
+	if kind.FunctionReturnType.RawType == typesystem.Struct {
+		val, ok := mm.GetStructType(kind.FunctionReturnType.StructName)
+		if !ok {
+			return typesystem.NewInvalid(), fmt.Errorf("invalid struct type")
+		}
+		return val, nil
+	}
+
 	return *kind.FunctionReturnType, nil
 }
 
@@ -215,11 +223,69 @@ func (expr ExpGetFromList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memor
 }
 
 func (expr StructExp) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
-	// TODO : implement
-	return typesystem.NewInvalid(), fmt.Errorf("not implemented")
+	typeFromMemoryModel, ok := mm.GetStructType(expr.Name)
+	if !ok {
+		return typesystem.NewInvalid(), fmt.Errorf("struct type does not exist")
+	}
+	_type := typesystem.Type{
+		RawType:               typesystem.Struct,
+		StructName:            expr.Name,
+	}
+	ao.Mov(RDI, fmt.Sprintf("%d", 8*len(expr.Members)))
+	ao.Call("malloc")
+	ao.Mov(RDX, RAX)
+	i := 0
+	for _, member := range expr.Members {
+		actual := typeFromMemoryModel.StructMembers[i]
+		if actual.Name != member.Name {
+			return typesystem.NewInvalid(), fmt.Errorf("invalid struct field name")
+		}
+		ao.Push(RDX)
+		kind, err := member.Exp.Generate(ao, mm)
+		ao.Pop(RDX)
+		if !kind.Equals(actual.Type) {
+			return typesystem.NewInvalid(), fmt.Errorf("invalid field type")
+		}
+		if err != nil {
+			return typesystem.NewInvalid(), fmt.Errorf("expression in struct init: %w", err)
+		}
+		ao.Mov(fmt.Sprintf("qword [%s+%d]", RDX, i*8), RAX)
+		_type.StructMembers = append(_type.StructMembers, typesystem.NamedType{
+			Name: member.Name,
+			Type: kind,
+		})
+		i += 1
+	}
+
+	if len(expr.Members) != len(typeFromMemoryModel.StructMembers) {
+		return typesystem.NewInvalid(), fmt.Errorf("mismatching number of arguments in field declaration")
+	}
+
+	mm.CurrentStackSize++
+	ao.Mov(RAX, RDX)
+	ao.Push(RAX)
+
+	return _type, nil
 }
 
 func (expr ExpReadFromStruct) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
-	// TODO : implement
-	return typesystem.NewInvalid(), fmt.Errorf("not implemented")
+	kind, err := expr.Struct.Generate(ao, mm)
+	ao.Mov(RDX, RAX)
+	if err != nil {
+		return typesystem.NewInvalid(), fmt.Errorf("struct in read from struct: %w", err)
+	}
+	if kind.RawType != typesystem.Struct {
+		return typesystem.NewInvalid(), fmt.Errorf("can only read from structs")
+	}
+
+	i := 0
+	for _, member := range kind.StructMembers {
+		if member.Name == expr.Field {
+			ao.Mov(RAX, fmt.Sprintf("[%s+%d]", RDX, i*8))
+			return member.Type, nil
+		}
+		i++
+	}
+
+	return typesystem.NewInvalid(), fmt.Errorf("invalid field")
 }
