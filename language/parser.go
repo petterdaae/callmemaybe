@@ -385,6 +385,15 @@ func (parser *Parser) parseSeq() (Stmt, error) {
 			statements = append(statements, statement)
 			continue
 		}
+		if nextKind == Question {
+			parser.unread()
+			statement, err := parser.parseUpdateStmt()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse update: %w", err)
+			}
+			statements = append(statements, statement)
+			continue
+		}
 		parser.unread()
 		break
 	}
@@ -682,6 +691,84 @@ func (parser *Parser) parseList() (Exp, error) {
 }
 
 func (parser *Parser) parseGetFromList() (Exp, error) {
+	return parser.parseReference()
+}
+
+func (parser *Parser) parseStructDeclaration() (Stmt, error) {
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != Struct {
+		return nil, fmt.Errorf("expected struct keyword")
+	}
+	kind, name := parser.readIgnoreWhiteSpace()
+	if kind != Identifier {
+		return nil, fmt.Errorf("expected identifier")
+	}
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != CurlyBracketStart {
+		return nil, fmt.Errorf("expected curly bracket")
+	}
+	structType := typesystem.Type{
+		RawType:               typesystem.Struct,
+		StructName:            name,
+	}
+	for {
+		kind, memberName := parser.readIgnoreWhiteSpace()
+		if kind == CurlyBracketEnd {
+			break
+		}
+		if kind != Identifier {
+			return nil, fmt.Errorf("expected identifier")
+		}
+		_type, err := parser.parseType()
+		if err != nil {
+			return nil, fmt.Errorf("struct type: %w", err)
+		}
+		structType.StructMembers = append(structType.StructMembers, typesystem.NamedType{
+			Name: memberName,
+			Type: _type,
+		})
+	}
+	return StmtStructDeclaration{
+		Type: structType,
+	}, nil
+}
+
+func (parser *Parser) parseUpdateStmt() (Stmt, error) {
+	reference, err := parser.parseReference()
+	if err != nil {
+		return nil, fmt.Errorf("reference: %w", err)
+	}
+
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != Assign {
+		return nil, fmt.Errorf("expected =")
+	}
+
+	newValue, err := parser.ParseExp()
+	if err != nil {
+		return nil, fmt.Errorf("new value: %w", err)
+	}
+
+	if val, ok := reference.(ExpReadFromStruct); ok {
+		return StmtUpdateStruct{
+			Struct:   val.Struct,
+			Member:   val.Field,
+			NewValue: newValue,
+		}, nil
+	}
+
+	if val, ok := reference.(ExpGetFromList); ok {
+		return StmtUpdateList{
+			List:     val.List,
+			Index:    val.Index,
+			NewValue: newValue,
+		}, nil
+	}
+
+	return nil, fmt.Errorf("invalid reference")
+}
+
+func (parser *Parser) parseReference() (Exp, error) {
 	kind, _ := parser.readIgnoreWhiteSpace()
 	if kind != Question {
 		return nil, fmt.Errorf("expected ? ")
@@ -734,45 +821,6 @@ func (parser *Parser) parseGetFromList() (Exp, error) {
 	}
 
 	return current, nil
-}
-
-func (parser *Parser) parseStructDeclaration() (Stmt, error) {
-	kind, _ := parser.readIgnoreWhiteSpace()
-	if kind != Struct {
-		return nil, fmt.Errorf("expected struct keyword")
-	}
-	kind, name := parser.readIgnoreWhiteSpace()
-	if kind != Identifier {
-		return nil, fmt.Errorf("expected identifier")
-	}
-	kind, _ = parser.readIgnoreWhiteSpace()
-	if kind != CurlyBracketStart {
-		return nil, fmt.Errorf("expected curly bracket")
-	}
-	structType := typesystem.Type{
-		RawType:               typesystem.Struct,
-		StructName:            name,
-	}
-	for {
-		kind, memberName := parser.readIgnoreWhiteSpace()
-		if kind == CurlyBracketEnd {
-			break
-		}
-		if kind != Identifier {
-			return nil, fmt.Errorf("expected identifier")
-		}
-		_type, err := parser.parseType()
-		if err != nil {
-			return nil, fmt.Errorf("struct type: %w", err)
-		}
-		structType.StructMembers = append(structType.StructMembers, typesystem.NamedType{
-			Name: memberName,
-			Type: _type,
-		})
-	}
-	return StmtStructDeclaration{
-		Type: structType,
-	}, nil
 }
 
 func (parser *Parser) parseType() (typesystem.Type, error) {

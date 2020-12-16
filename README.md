@@ -71,8 +71,8 @@ A simple compiler.
 ```
 
 ### TODO
+- 16.12 Update lists and structs
 - 16.12 Module system
-- 16.12 Input
 - 16.12 Free heap allocated memory when out of scope (?)
 - 16.12 Handle division-by-zero and out-of-bounds errors
-- 16.12 Write tests
+- 16.12 Write more tests

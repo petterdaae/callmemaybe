@@ -176,9 +176,16 @@ type ExpReadFromStruct struct {
 	Struct Exp
 }
 
-type StmtAppendToList struct {
-	List       Exp
-	NewElement Exp
+type StmtUpdateList struct {
+	List Exp
+	Index Exp
+	NewValue Exp
+}
+
+type StmtUpdateStruct struct {
+	Struct Exp
+	Member string
+	NewValue Exp
 }
 
 type ExpFunction struct {
