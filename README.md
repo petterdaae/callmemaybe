@@ -24,7 +24,6 @@ A simple compiler.
 
 <expr>            := <calculation>
 <expr>            := <function>
-<expr>            := <call>
 <expr>            := <list>
 <expr>            := <string>
 <expr>            := <structExp>
@@ -36,6 +35,7 @@ A simple compiler.
 <val>             := <identifier>
 <val>             := <bool>
 <val>             := <uop> <num>
+<val>             := <call>
 <val>             := <char>
 <val>             := "?" <expr> "[" <expr> "]" ( "[" <expr> "]" )*
 <val>             := "?" <expr>  "." <identifier> ( "." <identifier> )*

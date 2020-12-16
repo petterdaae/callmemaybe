@@ -7,7 +7,7 @@ outer = |a int, b int| int {
         return x + 3
     }
 
-    return (#plus2(a)) * (#plus3(b))
+    return #plus2(a) * #plus3(b)
 }
 
 println #outer(2, 2)

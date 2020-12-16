@@ -81,10 +81,6 @@ func (parser *Parser) ParseExp() (Exp, error) {
 	nextKind, _ := parser.readIgnoreWhiteSpace()
 	parser.unread()
 
-	if nextKind == Hash {
-		return parser.parseCall()
-	}
-
 	if nextKind == Pipe {
 		return parser.parseFunction()
 	}
@@ -299,6 +295,10 @@ func (parser *Parser) parseVal() (Exp, error) {
 	if nextKind == Get {
 		parser.unread()
 		return parser.parseGetFromList()
+	}
+	if nextKind == Hash {
+		parser.unread()
+		return parser.parseCall()
 	}
 	return nil, fmt.Errorf("unexpected token while parsing val")
 }
