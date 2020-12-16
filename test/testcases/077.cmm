@@ -3,6 +3,6 @@ loop i < 3 {
     printit = | a int | {
         println a
     }
-    _ = call printit with i
+    _ = #printit(i)
     i = i + 1
 }

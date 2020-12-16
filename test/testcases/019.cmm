@@ -2,4 +2,4 @@ twoArgs = | a int, b int | {
     println a + b
 }
 
-_ = call twoArgs with 2, 3
+_ = #twoArgs(2, 3)

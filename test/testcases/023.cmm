@@ -6,5 +6,5 @@ chooseOne = |x int, y int| {
     println y
 }
 
-_ = call chooseOne with 0, a + b + c
+_ = #chooseOne(0, a + b + c)
 

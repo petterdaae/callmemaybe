@@ -2,9 +2,9 @@ outer = |a int| int {
     inner = |a int| int {
         return a + 2
     }
-    return call inner with a
+    return #inner(a)
 }
 
-a = call outer with 5
+a = #outer(5)
 
 println a

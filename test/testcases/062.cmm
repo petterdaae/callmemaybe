@@ -4,8 +4,8 @@ printInts = | me, ints list<int>, startIndex int | bool {
     }
     current = get startIndex from ints
     println current
-    return call me with ints, startIndex + 1
+    return #me (ints, startIndex + 1)
 }
 
 ints = <int, 5>[1, 2, 3, 4, 5]
-_ = call printInts with ints, 0
+_ = #printInts(ints, 0)

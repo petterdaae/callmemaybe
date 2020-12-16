@@ -2,4 +2,4 @@ f = |flag bool| bool {
     return flag
 }
 
-println call f with true
+println #f(true)

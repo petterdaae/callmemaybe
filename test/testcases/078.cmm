@@ -9,4 +9,4 @@ row = | high int | {
     }
 }
 
-_ = call row with 10
+_ = #row(10)

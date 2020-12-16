@@ -11,14 +11,14 @@ f = || {
             println a
         }
 
-        _ = call h
+        _ = #h
         println a
     }
 
-    _ = call g
+    _ = #g
     println a
 }
 
-_ = call f
+_ = #f
 
 println a

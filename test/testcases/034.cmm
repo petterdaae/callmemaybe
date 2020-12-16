@@ -2,5 +2,5 @@ what = || bool {
     return true
 }
 
-a = call what
+a = #what
 println a

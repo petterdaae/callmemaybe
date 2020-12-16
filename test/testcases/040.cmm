@@ -6,6 +6,6 @@ f = | x int | int {
     return x - 10
 }
 
-println call f with a
-println call f with b
-println call f with c
+println #f(a)
+println #f(b)
+println #f(c)

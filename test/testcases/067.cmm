@@ -8,13 +8,13 @@ solve = | me, input list<int>, i int, j int | int {
     if x + y == 2020 {
         return x * y
     }
-    sol = call me with input, i - 1, j
+    sol = #me(input, i - 1, j)
     if sol > 0 {
         return sol
     }
-    return call me with input, i, j - 1
+    return #me(input, i, j - 1)
 }
 
-solution = call solve with input, 5, 5
+solution = #solve(input, 5, 5)
 
 println solution

@@ -82,8 +82,8 @@ loop i < 5 {
 
     direction = get 0 from current
 
-    d1 = call c2s with (get 1 from current)
-    d2 = call c2s with (get 2 from current)
+    d1 = #c2s(get 1 from current)
+    d2 = #c2s(get 2 from current)
     amount = 0
     if d2 > -1 {
         amount = amount + d2
@@ -110,7 +110,7 @@ loop i < 5 {
     } 
 
     if direction == 'F' {
-        res = call forward with east, north, currentDirection, amount
+        res = #forward(east, north, currentDirection, amount)
         east = get 0 from res
         north = get 1 from res
     }
@@ -118,7 +118,7 @@ loop i < 5 {
     amount = amount / 90
     amount = amount % 4
 
-    currentDirection = call updateDirection with currentDirection, direction, amount
+    currentDirection = #updateDirection(currentDirection, direction, amount)
 
     i = i + 1
 }

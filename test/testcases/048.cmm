@@ -9,11 +9,11 @@ isPrime = |me, x int, current int| bool {
         return false
     }
 
-    return call me with x, current - 1
+    return #me (x, current - 1)
 }
 
-println call isPrime with 3, 2
-println call isPrime with 7, 6
-println call isPrime with 8, 7
-println call isPrime with 1001, 1000
-println call isPrime with 1193, 1192
+println #isPrime (3, 2)
+println #isPrime (7, 6)
+println #isPrime (8, 7)
+println #isPrime (1001, 1000)
+println #isPrime (1193, 1192)

@@ -10,7 +10,7 @@ construct = | name list<char>, age int | @Person {
     }
 }
 
-person = call construct with "Petter", 22
+person = #construct("Petter", 22)
 
 increaseAge = | person @Person | @Person {
     currentAge = read age from person
@@ -21,6 +21,6 @@ increaseAge = | person @Person | @Person {
     }
 }
 
-newPerson = call increaseAge with person
+newPerson = #increaseAge(person)
 age = read age from newPerson
 println age

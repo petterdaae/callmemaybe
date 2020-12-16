@@ -3,4 +3,4 @@ first = || {
     println A + 1
 }
 B = 37
-_ = call first
+_ = #first

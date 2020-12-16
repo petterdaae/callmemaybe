@@ -3,4 +3,4 @@ doubleAndPlus = | d int, p int | {
     println x
 }
 
-_ = call doubleAndPlus with 24, 2
+_ = #doubleAndPlus(24, 2)

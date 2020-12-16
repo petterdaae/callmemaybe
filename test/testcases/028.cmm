@@ -10,7 +10,7 @@ printIt = | x int | {
     println x
 }
 
-a = call double with 10
-b = call add2 with 10
+a = #double(10)
+b = #add2(10)
 
-_ = call printIt with a + b
+_ = #printIt(a + b)

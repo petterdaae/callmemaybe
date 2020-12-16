@@ -4,5 +4,5 @@ double = | d int | {
     println d * 2
 }
 
-_ = call double with a
+_ = #double(a)
 

@@ -3,4 +3,4 @@ twice = | x int | {
     println x
 }
 
-_ = call twice with 42
+_ = #twice(42)

@@ -3,12 +3,12 @@ outer = | a int | int {
         inner = | a int | int {
             return a + 2
         }
-        a = (call inner with a) + 2
+        a = (#inner(a)) + 2
         return a
     }
-    a = (call innerOuter with a) + 2
+    a = (#innerOuter(a)) + 2
     return a
 }
 
-a = call outer with 10
+a = #outer(10)
 println a

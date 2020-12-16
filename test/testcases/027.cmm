@@ -2,7 +2,7 @@ sum = | a int, b int, c int | int {
     return a + b + c
 }
 
-a = call sum with 1, 2, 3
+a = #sum(1, 2, 3)
 
 
 println a

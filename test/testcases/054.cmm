@@ -2,4 +2,4 @@ f = <a int, a int> => int {
     return a
 }
 
-println call f with 1, 2
+println #f(1, 2)

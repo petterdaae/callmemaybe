@@ -3,8 +3,8 @@ f = |me, times int| int {
         return 42
     }
     println times
-    return call me with times - 1
+    return #me(times - 1)
 }
 
-result = call f with 10 / 2
+result = #f(10 / 2)
 println result

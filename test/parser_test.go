@@ -180,7 +180,7 @@ func TestFunctionAssignWithType(t *testing.T) {
 }
 
 func TestSimpleFunctionCall(t *testing.T) {
-	str := "a = call f with 1, 2, 3"
+	str := "a = #f(1, 2, 3)"
 	expected := language.StmtSeq{
 		Statements: []language.Stmt{
 			language.StmtAssign{
@@ -200,7 +200,7 @@ func TestSimpleFunctionCall(t *testing.T) {
 }
 
 func TestSimpleFunctionCallWithoutArgs(t *testing.T) {
-	str := "a = call f"
+	str := "a = #f"
 	expected := language.StmtSeq{
 		Statements: []language.Stmt{
 			language.StmtAssign{

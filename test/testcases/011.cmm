@@ -2,6 +2,6 @@ outer = || {
     inner = || {
         println 5
     }
-    _ = call inner
+    _ = #inner
 }
-_ = call outer
+_ = #outer

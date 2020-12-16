@@ -81,7 +81,7 @@ func (parser *Parser) ParseExp() (Exp, error) {
 	nextKind, _ := parser.readIgnoreWhiteSpace()
 	parser.unread()
 
-	if nextKind == Call {
+	if nextKind == Hash {
 		return parser.parseCall()
 	}
 
@@ -501,10 +501,9 @@ func (parser *Parser) parseIf() (Stmt, error) {
 
 func (parser *Parser) parseCall() (Exp, error) {
 	kind, _ := parser.readIgnoreWhiteSpace()
-	if kind != Call {
-		return nil, fmt.Errorf("expected call keyword at start of function call")
+	if kind != Hash {
+		return nil, fmt.Errorf("expected # in call")
 	}
-
 
 	expr, err := parser.ParseExp()
 	if err != nil {
@@ -515,7 +514,7 @@ func (parser *Parser) parseCall() (Exp, error) {
 	call.Exp = expr
 
 	kind, _ = parser.readIgnoreWhiteSpace()
-	if kind == With {
+	if kind == RoundBracketStart {
 		for {
 			expr, err := parser.ParseExp()
 			if err != nil {
@@ -527,6 +526,11 @@ func (parser *Parser) parseCall() (Exp, error) {
 				parser.unread()
 				break
 			}
+
+		}
+		kind, _ = parser.readIgnoreWhiteSpace()
+		if kind != RoundBracketEnd {
+			return nil, fmt.Errorf("expected ) in call")
 		}
 	} else {
 		parser.unread()

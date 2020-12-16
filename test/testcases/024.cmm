@@ -4,5 +4,5 @@ chooseOne = |x int, y int| {
     println a
 }
 
-_ = call chooseOne with 0, 0
+_ = #chooseOne(0, 0)
 

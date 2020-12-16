@@ -7,7 +7,7 @@ outer = |a int, b int| int {
         return x + 3
     }
 
-    return (call plus2 with a) * (call plus3 with b)
+    return (#plus2(a)) * (#plus3(b))
 }
 
-println call outer with 2, 2
+println #outer(2, 2)

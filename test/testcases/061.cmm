@@ -6,10 +6,10 @@ equals = | me, s1 list<char>, s2 list<char>, index int | bool {
         return true
     }
     if (get index from s1) == (get index from s2) {
-        return call me with s1, s2, (index - 1)
+        return #me(s1, s2, (index - 1))
     }
     return false
 }
 
-println call equals with "abcde", "abcdf", 4
-println call equals with str1, str2, 4
+println #equals ("abcde", "abcdf", 4)
+println #equals (str1, str2, 4)

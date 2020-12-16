@@ -4,6 +4,6 @@ outer = || {
         b = 3 + a
         println b
     }
-    _ = call inner
+    _ = #inner
 }
-_ = call outer
+_ = #outer

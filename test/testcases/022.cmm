@@ -11,4 +11,4 @@ a = 4
 b = 4
 c = 4
 
-_ = call f with a, b, c
+_ = #f(a, b, c)

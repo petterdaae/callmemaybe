@@ -8,7 +8,7 @@ construct = | x int | @Point {
     }
 }
 
-point = call construct with 42
+point = #construct(42)
 x = read x from point
 
 println x

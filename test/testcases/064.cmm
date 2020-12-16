@@ -1,4 +1,4 @@
-_ = call call || func {
+_ = ##|| func {
     return || {
         println "oy"
     }

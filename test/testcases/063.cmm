@@ -4,5 +4,5 @@ makeHello = || func {
     }
 }
 
-f = call makeHello
-_ = call f
+f = #makeHello
+_ = #f
