@@ -1,0 +1,5 @@
+printit = | out string | {
+    println out
+}
+
+_ = #printit("Petter!")

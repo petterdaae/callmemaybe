@@ -779,6 +779,13 @@ func (parser *Parser) parseType() (typesystem.Type, error) {
 			RawType:               typesystem.List,
 			ListElementType:       &elementType,
 		}, nil
+	case TypeString:
+		return typesystem.Type{
+			RawType:               typesystem.List,
+			ListElementType:       &typesystem.Type{
+				RawType:               typesystem.Char,
+			},
+		}, nil
 	case TypeFunc:
 		kind, _ = parser.readIgnoreWhiteSpace()
 		if kind != AngleBracketStart {
