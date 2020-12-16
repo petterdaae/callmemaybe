@@ -1,0 +1,9 @@
+double = | x int | int {
+    return x * 2
+}
+
+apply = | f func<int, int>, x int | int {
+    return #f(x)
+}
+
+println #apply(double, 2)
