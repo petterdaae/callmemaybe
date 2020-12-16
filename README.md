@@ -14,10 +14,10 @@ The assembly code is assembled with [NASM](https://www.nasm.us/) and linked with
 
 ## Installation
 - Use ubuntu (other linux distributions will probably work as well)
-- Install the nasm, gcc, git and go
+- Install nasm, gcc, git and go
 - Clone this repository and run `go build -o cmm`
 - Install the [vscode plugin](https://marketplace.visualstudio.com/items?itemName=petterdaae.callmemaybe)
-- `./cmm build <source>` will output an executable names `out` for the code in the `<source>` file
+- `./cmm build <source>` will output an executable named `out` for the code in the `<source>` file
 
 ## Examples
 
