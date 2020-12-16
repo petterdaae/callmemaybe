@@ -121,6 +121,7 @@ func (stmt StmtIf) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.M
 	mm.PopCurrentContext()
 	return nil
 }
+
 func (stmt StmtLoop) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
 	mm.PushNewContext(true)
 	initStackSize := mm.CurrentStackSize
@@ -156,8 +157,43 @@ func (stmt StmtStructDeclaration) Generate(ao *assemblyoutput.AssemblyOutput, mm
 }
 
 func (stmt StmtUpdateList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
-	// TODO : implement
-	return fmt.Errorf("not implemented")
+	listKind, err := stmt.List.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("failed to generate list in update stmt")
+	}
+	if listKind.RawType != typesystem.List {
+		return fmt.Errorf("expected list kind")
+	}
+	mm.CurrentStackSize++
+	ao.Push(RAX)
+
+	newValueKind, err := stmt.NewValue.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("failed to generate new value in update stmt")
+	}
+	if !newValueKind.Equals(*listKind.ListElementType) {
+		return fmt.Errorf("new value type does not match list element type")
+	}
+	mm.CurrentStackSize++
+	ao.Push(RAX)
+
+	indexKind, err := stmt.Index.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("faied to generate index in update stmt")
+	}
+	if indexKind.RawType != typesystem.Int {
+		return fmt.Errorf("index in update stmt was not int")
+	}
+	mm.CurrentStackSize++
+	ao.Push(RAX)
+
+	mm.CurrentStackSize -= 3
+	ao.Pop(RAX)
+	ao.Pop(RBX)
+	ao.Pop(RCX)
+
+	ao.Mov(fmt.Sprintf("qword [%s*8+%s+8]", RAX, RCX), RBX)
+	return nil
 }
 
 func (stmt StmtUpdateStruct) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {

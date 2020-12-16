@@ -1,0 +1,13 @@
+struct Person {
+    name string
+}
+
+person = @Person {
+    name: "petter"
+}
+
+println ?person.name
+
+?person.name[0] = 'P'
+
+println ?person.name

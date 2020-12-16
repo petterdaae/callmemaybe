@@ -1,0 +1,4 @@
+numbers = <int, 3>[1, 2, 3]
+println ?numbers[2]
+?numbers[2] = 42
+println ?numbers[2]
