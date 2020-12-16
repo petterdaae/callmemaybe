@@ -1,0 +1,19 @@
+struct Hmm {
+    a char
+    b char
+    c char
+}
+
+hmm = @Hmm {
+    a: 'a'
+    b: 'b'
+    c: 'c'
+}
+
+
+a = read a from hmm
+b = read b from hmm
+c = read c from hmm
+println a
+println b
+println c

@@ -1,16 +1,14 @@
 struct Point {
     x int
-    y int
 }
 
-construct = | x int, y int | @Point {
+construct = | x int | @Point {
     return @Point {
         x: x
-        y: y
     }
 }
 
-point = call construct with 1, 2
+point = call construct with 42
+x = read x from point
 
-a = read y from point
-println a
+println x

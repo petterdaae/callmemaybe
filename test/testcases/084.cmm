@@ -1,0 +1,26 @@
+struct Person {
+    name list<char>
+    age int
+}
+
+construct = | name list<char>, age int | @Person {
+    return @Person{
+        name: name
+        age: age
+    }
+}
+
+person = call construct with "Petter", 22
+
+increaseAge = | person @Person | @Person {
+    currentAge = read age from person
+    currentName = read name from person
+    return @Person {
+        name: currentName
+        age: currentAge + 1
+    }
+}
+
+newPerson = call increaseAge with person
+age = read age from newPerson
+println age

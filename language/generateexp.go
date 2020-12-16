@@ -45,6 +45,13 @@ func (exp ExpFunction) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 		if exists {
 			return typesystem.NewInvalid(), fmt.Errorf("argument names should be unique")
 		}
+		if arg.Type.RawType == typesystem.Struct {
+			var ok bool
+			arg.Type, ok = mm.GetStructType(arg.Type.StructName)
+			if !ok {
+				return typesystem.NewInvalid(), fmt.Errorf("type does not exist")
+			}
+		}
 		mm.CurrentStackSize++
 		mm.AddNameToCurrentStackElement(arg.Name, arg.Type)
 		argNames[arg.Name] = true
@@ -103,6 +110,7 @@ func (stmt FunctionCall) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorym
 		if !_kind.IsPassable() {
 			return typesystem.NewInvalid(), fmt.Errorf("argument type must be passable")
 		}
+
 		mm.CurrentStackSize++
 		ao.Push(RAX)
 		argKind := kind.FunctionArgumentTypes[i].Type
@@ -240,8 +248,10 @@ func (expr StructExp) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymode
 		if actual.Name != member.Name {
 			return typesystem.NewInvalid(), fmt.Errorf("invalid struct field name")
 		}
+		mm.CurrentStackSize++
 		ao.Push(RDX)
 		kind, err := member.Exp.Generate(ao, mm)
+		mm.CurrentStackSize--
 		ao.Pop(RDX)
 		if !kind.Equals(actual.Type) {
 			return typesystem.NewInvalid(), fmt.Errorf("invalid field type")
