@@ -35,6 +35,7 @@
 <val>             := <call>
 <val>             := <char>
 <val>             := <reference>
+<val>             := "length" "(" <expr> ")"
 
 <bop>             := "+" | "*" | "<" | ">" | "==" | "-" | "/" | "%"
 <uop>             := "-"

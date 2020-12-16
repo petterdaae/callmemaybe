@@ -299,3 +299,15 @@ func (expr ExpReadFromStruct) Generate(ao *assemblyoutput.AssemblyOutput, mm *me
 
 	return typesystem.NewInvalid(), fmt.Errorf("invalid field")
 }
+
+func (expr ExpLength) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
+	kind, err := expr.List.Generate(ao, mm)
+	if err != nil {
+		return typesystem.NewInvalid(), fmt.Errorf("expression in length: %w", err)
+	}
+	if kind.RawType != typesystem.List {
+		return typesystem.Type{}, fmt.Errorf("can only get len of lists")
+	}
+	ao.Mov(RAX, fmt.Sprintf("[%s]", RAX))
+	return typesystem.NewInt(), nil
+}

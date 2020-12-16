@@ -22,48 +22,33 @@ type Nasm struct {
 }
 
 func (build *Build) Run() error {
-	println("🔨 Building your executable with callmemaybe 1.0\n")
-
 	nasmTemp := "out.nasm"
 	oTemp := "out.o"
-
 	content, err := utils.ReadFile(build.File)
 	if err != nil {
 		return err
 	}
-
-	println("    Compiling ...")
 	nasm, err := utils.Compile(content)
 	if err != nil {
-		println("❌ Failed to compile")
 		println(err.Error())
 		return nil
 	}
-
 	err = utils.WriteFile(nasmTemp, nasm)
 	if err != nil {
 		return err
 	}
-
-	println("    Assembling ...")
 	_, err = exec.Command("nasm", "-f", "elf64", nasmTemp).CombinedOutput()
 	if err != nil {
-		println("❌ Assembling failed")
+		println(err.Error())
 		return nil
 	}
-
-	println("    Linking ...")
 	_, err = exec.Command("gcc", "-no-pie", "-o", "out", oTemp, "-lc").CombinedOutput()
 	if err != nil {
-		println("❌ Linking failed")
+		println(err.Error())
 		return nil
 	}
-
 	os.Remove(nasmTemp)
 	os.Remove(oTemp)
-
-	println("\n🏆 Successful")
-
 	return nil
 }
 

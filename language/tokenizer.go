@@ -26,6 +26,7 @@ const (
 	Colon
 	Pipe
 	NotEqual
+	Length
 	Or
 	And
 	At
@@ -326,6 +327,8 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return Read, word
 	case "string":
 		return TypeString, word
+	case "len":
+		return Length, word
 	}
 
 	return Identifier, word

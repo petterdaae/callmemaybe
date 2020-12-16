@@ -188,6 +188,10 @@ type StmtUpdateStruct struct {
 	NewValue Exp
 }
 
+type ExpLength struct {
+	List Exp
+}
+
 type ExpFunction struct {
 	Recurse string
 	Body    Stmt

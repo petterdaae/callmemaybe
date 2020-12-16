@@ -296,7 +296,32 @@ func (parser *Parser) parseVal() (Exp, error) {
 		parser.unread()
 		return parser.parseCall()
 	}
+	if nextKind == Length {
+		parser.unread()
+		return parser.parseLength()
+	}
 	return nil, fmt.Errorf("unexpected token while parsing val")
+}
+
+func (parser *Parser) parseLength() (Exp, error) {
+	kind, _ := parser.readIgnoreWhiteSpace()
+	if kind != Length {
+		return nil, fmt.Errorf("expected length keyword")
+	}
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != RoundBracketStart {
+		return nil, fmt.Errorf("expected (")
+	}
+	exp, err := parser.ParseExp()
+	if err != nil {
+		return nil, fmt.Errorf("exp in lenght: %w", err)
+	}
+
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != RoundBracketEnd {
+		return nil, fmt.Errorf("expected )")
+	}
+	return ExpLength{List: exp}, nil
 }
 
 func (parser *Parser) parseAssign() (Stmt, error) {
