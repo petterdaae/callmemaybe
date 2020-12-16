@@ -20,7 +20,7 @@ A simple compiler.
 <loop>            := "loop" <expr> "{" <seq> "}"
 <if>              := "if" <expr> "{" <seq> "}" 
 
-<call>            := "!" <expr> "(" (<expr> ",")* <expr> ] ")"
+<call>            := "#" <expr> "(" (<expr> ",")* <expr> ] ")"
 
 <expr>            := <calculation>
 <expr>            := <function>

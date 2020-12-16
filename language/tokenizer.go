@@ -19,7 +19,9 @@ const (
 	Assign
 	Question
 	Append
+	Hash
 	From
+	Dot
 	Loop
 	Colon
 	Pipe
@@ -47,6 +49,7 @@ const (
 	TypeInt
 	TypeBool
 	TypeChar
+	TypeString
 	TypeList
 	TypeFunc
 	Whitespace
@@ -173,6 +176,10 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return Not, "!"
 	case '@':
 		return At, string(character)
+	case '.':
+		return Dot, string(character)
+	case '#':
+		return Hash, string(character)
 	}
 	
 	return Error, ""
@@ -317,6 +324,8 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return Struct, word
 	case "read":
 		return Read, word
+	case "string":
+		return TypeString, word
 	}
 
 	return Identifier, word
