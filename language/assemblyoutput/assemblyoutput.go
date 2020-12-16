@@ -161,6 +161,9 @@ func (ao *AssemblyOutput) End(stackSize int) {
 	ao.Mov(RDX, RAX)
 	ao.Mov(RCX, "0")
 
+	ao.Cmp(fmt.Sprintf("qword [%s]", RDX), "0")
+	ao.Je("printListWithFormatLoopEnd")
+
 	ao.NewSection("printListWithFormatLoopStart")
 	ao.Add(RCX, "1")
 	ao.Mov(RAX, fmt.Sprintf("[%s+%s*8]", RDX, RCX))

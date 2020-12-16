@@ -1,0 +1,13 @@
+struct Person {
+    first string
+    last string
+}
+
+me = @Person {
+    first: "Petter"
+    last: ""
+}
+
+println ?me.last
+?me.last = "Daae"
+println ?me.last

@@ -360,3 +360,23 @@ func TestCase88(t *testing.T) {
 func TestCase89(t *testing.T) {
 	utils.AssertProgramOutput("testcases/089.cmm", "petter\nPetter\n", t)
 }
+
+func TestCase90(t *testing.T) {
+	utils.AssertProgramOutput("testcases/090.cmm", "\nDaae\n", t)
+}
+
+func TestCase91(t *testing.T) {
+	utils.AssertProgramOutput("testcases/091.cmm", "1\n2\n", t)
+}
+
+func TestCase92(t *testing.T) {
+	utils.AssertProgramOutput("testcases/092.cmm", "", t)
+}
+
+func TestCase93(t *testing.T) {
+	utils.AssertProgramOutput("testcases/093.cmm", "\n", t)
+}
+
+func TestCase94(t *testing.T) {
+	utils.AssertProgramOutput("testcases/094.cmm", "\n", t)
+}

@@ -169,7 +169,7 @@ func (expr ExpNegative) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymo
 }
 
 func (expr ExpList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) (typesystem.Type, error) {
-	if expr.Size < 1 {
+	if expr.Size < 0 {
 		return typesystem.NewInvalid(), fmt.Errorf("the size of a list must be a positive number")
 	}
 	ao.Mov(RDI, fmt.Sprintf("%d", 8*(expr.Size+1)))

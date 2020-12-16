@@ -197,7 +197,46 @@ func (stmt StmtUpdateList) Generate(ao *assemblyoutput.AssemblyOutput, mm *memor
 }
 
 func (stmt StmtUpdateStruct) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymodel.MemoryModel) error {
-	// TODO : implement
-	return fmt.Errorf("not implemented")
+	structKind, err := stmt.Struct.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("failed to generate struct in update stmt")
+	}
+	if structKind.RawType != typesystem.Struct {
+		return fmt.Errorf("expected struct kind")
+	}
+	mm.CurrentStackSize++
+	ao.Push(RAX)
+
+	newValueKind, err := stmt.NewValue.Generate(ao, mm)
+	if err != nil {
+		return fmt.Errorf("failed to generate new value in update stmt")
+	}
+	mm.CurrentStackSize++
+	ao.Push(RAX)
+
+	i := 0
+	found := false
+	for _, field := range structKind.StructMembers {
+		if field.Name == stmt.Member {
+			if !newValueKind.Equals(field.Type) {
+				return fmt.Errorf("wrong type in update struct stmt")
+			}
+			found = true
+			break
+		}
+		i++
+	}
+
+	if !found {
+		return fmt.Errorf("%s is not a member of this struct", stmt.Member)
+	}
+
+	mm.CurrentStackSize -= 2
+	ao.Pop(RAX)
+	ao.Pop(RBX)
+
+	ao.Mov(fmt.Sprintf("[%s+%d]", RBX, i*8), RAX)
+
+	return nil
 }
 

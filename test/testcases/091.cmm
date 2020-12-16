@@ -1,0 +1,11 @@
+struct Num {
+    x int
+}
+
+a = @Num {
+    x: 1
+}
+
+println ?a.x
+?a.x = 2
+println ?a.x
