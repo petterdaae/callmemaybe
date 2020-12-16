@@ -21,11 +21,11 @@
             "name": "keyword.control.flow.ts"
         },
         {
-            "match": "println|call|with|get|from",
+            "match": "println|struct",
             "name": "entity.name.function.ts"
         },
         {
-            "match": "bool|int|char|list|func",
+            "match": "bool|int|char|list|func|string",
             "name": "support.type.primitive.ts"
         },
         {

@@ -2,7 +2,7 @@
     "name": "callmemaybe",
     "displayName": "Call Me Maybe",
     "description": "Syntax highlighting for the Call Me Maybe language",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "publisher": "petterdaae",
     "engines": {
         "vscode": "^1.52.0"

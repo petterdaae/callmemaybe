@@ -8,3 +8,6 @@
 
 ## 0.0.3
 - Add more keywords
+
+## 0.0.4
+- Add and remove some keywords

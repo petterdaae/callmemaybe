@@ -1,0 +1,47 @@
+input = <int, 20>[
+    35,
+    20,
+    15,
+    25,
+    47,
+    40,
+    62,
+    55,
+    65,
+    95,
+    102,
+    117,
+    150,
+    182,
+    127,
+    219,
+    299,
+    277,
+    309,
+    576
+]
+
+preamble = 5
+
+i = preamble
+
+loop i < 20 {
+    x = i - 1
+    range = i - preamble - 1
+    valid = false
+    loop x > range {
+        y = x - 1
+        loop y > range {
+            if ?input[x] + ?input[y] == ?input[i] {
+                valid = true
+            }
+            y = y - 1
+        }
+        x = x - 1
+    }
+
+    if valid == false {
+        println ?input[i]
+    }
+    i = i + 1
+}
