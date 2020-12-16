@@ -13,11 +13,14 @@ A simple compiler.
 <stmt>            := <struct>
 
 <assign>          := <identifier> "=" <exp>
+<assignStruct>    := <identifier> "." <identifier> ( "." <identifier> )* "=" <exp>
+<assignList>      := <identifier> "[" <exp> "]" ( "[" <exp> "]" )* "=" <exp>
 <println>         := "println" <exp>
 <return>          := "return" <exp>
 <loop>            := "loop" <expr> "{" <seq> "}"
 <if>              := "if" <expr> "{" <seq> "}" 
-<call>            := "call" <identifier> [ "with" (<expr> ",")* <expr> ]
+
+<call>            := "!" <expr> "(" (<expr> ",")* <expr> ] ")"
 
 <expr>            := <calculation>
 <expr>            := <function>
@@ -34,8 +37,8 @@ A simple compiler.
 <val>             := <bool>
 <val>             := <uop> <num>
 <val>             := <char>
-<val>             := "get" <exp> "from" <expr>
-<val>             := "read" <identifier> "from" <expr>
+<val>             := "?" <expr> "[" <expr> "]" ( "[" <expr> "]" )*
+<val>             := "?" <expr>  "." <identifier> ( "." <identifier> )*
 
 <bop>             := "+" | "*" | "<" | ">" | "==" | "-" | "/" | "%"
 <uop>             := "-"
@@ -55,7 +58,7 @@ A simple compiler.
 <identifier>      := (letter|_)[letter|[0-9]|_]*
 
 <type>            := "@" <identifier>
-<type>            := "int" | "char" | "bool"
+<type>            := "int" | "char" | "bool" | "string"
 <type>            := "list" "<" <type> ">" 
 <type>            := "func" 
 <type>            := "func" "<" <type>+ ">"
@@ -68,10 +71,8 @@ A simple compiler.
 ```
 
 ### TODO
-- 15.12 Structs  
-- 15.12 Module system
-- 15.12 Write some tests
-- 16.12 More IO
+- 16.12 Module system
+- 16.12 Input
 - 16.12 Free heap allocated memory when out of scope (?)
 - 16.12 Handle division-by-zero and out-of-bounds errors
 - 16.12 Write tests
