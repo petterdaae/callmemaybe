@@ -4,7 +4,7 @@ a = <list<int>, 2>
         <int, 2>[3, 4]
     ]
 
-first = get 0 from a
-one = get 0 from first
+first = ?a[0]
+one = ?first[0]
 
 println one

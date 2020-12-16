@@ -2,7 +2,7 @@ printInts = | me, ints list<int>, startIndex int | bool {
     if startIndex == 5 {
         return true
     }
-    current = get startIndex from ints
+    current = ?ints[startIndex]
     println current
     return #me (ints, startIndex + 1)
 }

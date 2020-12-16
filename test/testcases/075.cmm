@@ -7,8 +7,8 @@ a = <list<char>, 5>
         "CDE"
     ]
 
-first = get 0 from a
-one = get 0 from first
+first = ?a[0]
+one = ?first[0]
 
 println one
 

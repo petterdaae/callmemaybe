@@ -1,3 +1,3 @@
 lame = "\\\\\\\\"
 
-println get 2 from lame
+println ?lame[2]

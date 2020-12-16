@@ -5,8 +5,8 @@ a = <list<int>, 2> [
 
 i = 0
 loop i < 2 {
-    b = get i from a
-    c = get 0 from b
+    b = ?a[i]
+    c = ?b[0]
     println c
     i = i + 1
 }

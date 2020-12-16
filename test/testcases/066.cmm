@@ -5,8 +5,8 @@ loop i < 6 {
     j = i + 1
     loop j < 6 {
         if i != j {
-            a = get i from input
-            b = get j from input
+            a = ?input[i]
+            b = ?input[j]
             if a + b == 2020 {
                 println a * b
             }

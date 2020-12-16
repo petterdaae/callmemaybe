@@ -78,12 +78,12 @@ currentDirection = 0
 
 i = 0
 loop i < 5 {
-    current = get i from input
+    current = ?input[i]
 
-    direction = get 0 from current
+    direction = ?current[0]
 
-    d1 = #c2s(get 1 from current)
-    d2 = #c2s(get 2 from current)
+    d1 = #c2s(?current[1])
+    d2 = #c2s(?current[2])
     amount = 0
     if d2 > -1 {
         amount = amount + d2
@@ -111,8 +111,8 @@ loop i < 5 {
 
     if direction == 'F' {
         res = #forward(east, north, currentDirection, amount)
-        east = get 0 from res
-        north = get 1 from res
+        east = ?res[0]
+        north = ?res[1]
     }
 
     amount = amount / 90

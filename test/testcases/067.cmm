@@ -3,8 +3,8 @@ solve = | me, input list<int>, i int, j int | int {
     if i < 0 {
         return -1
     }
-    x = get i from input
-    y = get j from input
+    x = ?input[i]
+    y = ?input[j]
     if x + y == 2020 {
         return x * y
     }

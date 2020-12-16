@@ -4,8 +4,8 @@ a = <list<char>, 2>
         <char, 2>['c', 'd']
     ]
 
-first = get 0 from a
-one = get 0 from first
+first = ?a[0]
+one = ?first[0]
 
 println one
 

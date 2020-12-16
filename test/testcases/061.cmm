@@ -5,7 +5,7 @@ equals = | me, s1 list<char>, s2 list<char>, index int | bool {
     if index == -1 {
         return true
     }
-    if (get index from s1) == (get index from s2) {
+    if ?s1[index] == ?s2[index] {
         return #me(s1, s2, (index - 1))
     }
     return false

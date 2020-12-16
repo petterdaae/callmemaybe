@@ -292,7 +292,7 @@ func (parser *Parser) parseVal() (Exp, error) {
 			Value: nextToken,
 		}, nil
 	}
-	if nextKind == Get {
+	if nextKind == Question {
 		parser.unread()
 		return parser.parseGetFromList()
 	}
@@ -687,21 +687,26 @@ func (parser *Parser) parseList() (Exp, error) {
 
 func (parser *Parser) parseGetFromList() (Exp, error) {
 	kind, _ := parser.readIgnoreWhiteSpace()
-	if kind != Get {
-		return nil, fmt.Errorf("expected get when parsing get from list")
+	if kind != Question {
+		return nil, fmt.Errorf("expected ? ")
+	}
+	exp, err := parser.ParseExp()
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse expression in get from list: %w", err)
+	}
+	kind, _ = parser.readIgnoreWhiteSpace()
+	if kind != BoxBracketStart {
+		return nil, fmt.Errorf("expected [")
 	}
 	numExp, err := parser.ParseExp()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse index expression in get from list")
 	}
 	kind, _ = parser.readIgnoreWhiteSpace()
-	if kind != From {
-		return nil, fmt.Errorf("expected from keyword when parsing get from list")
+	if kind != BoxBracketEnd {
+		return nil, fmt.Errorf("expected ]")
 	}
-	exp, err := parser.ParseExp()
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse expression in get from list: %w", err)
-	}
+
 	return ExpGetFromList{
 		List:  exp,
 		Index: numExp,
