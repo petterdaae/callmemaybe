@@ -9,6 +9,6 @@ construct = | x int | @Point {
 }
 
 point = #construct(42)
-x = read x from point
+x = ?point.x
 
 println x

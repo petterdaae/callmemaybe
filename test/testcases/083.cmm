@@ -11,9 +11,9 @@ hmm = @Hmm {
 }
 
 
-a = read a from hmm
-b = read b from hmm
-c = read c from hmm
+a = ?hmm.a
+b = ?hmm.b
+c = ?hmm.c
 println a
 println b
 println c

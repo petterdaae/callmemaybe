@@ -97,10 +97,6 @@ func (parser *Parser) ParseExp() (Exp, error) {
 		return parser.parseStructInit()
 	}
 
-	if nextKind == Read {
-		return parser.parseReadFromStruct()
-	}
-
 	return parser.ParseCalculation()
 }
 
@@ -694,23 +690,50 @@ func (parser *Parser) parseGetFromList() (Exp, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse expression in get from list: %w", err)
 	}
-	kind, _ = parser.readIgnoreWhiteSpace()
-	if kind != BoxBracketStart {
-		return nil, fmt.Errorf("expected [")
-	}
-	numExp, err := parser.ParseExp()
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse index expression in get from list")
-	}
-	kind, _ = parser.readIgnoreWhiteSpace()
-	if kind != BoxBracketEnd {
-		return nil, fmt.Errorf("expected ]")
+
+	current := exp
+
+	hasOne := false
+
+	for {
+		kind, _ = parser.readIgnoreWhiteSpace()
+		if kind == BoxBracketStart {
+			hasOne = true
+			numExp, err := parser.ParseExp()
+			if err != nil {
+				return nil, fmt.Errorf("failed to parse index expression in get from list")
+			}
+			kind, _ = parser.readIgnoreWhiteSpace()
+			if kind != BoxBracketEnd {
+				return nil, fmt.Errorf("expected ]")
+			}
+			current = ExpGetFromList{
+				List:  current,
+				Index: numExp,
+			}
+			continue
+		}
+		if kind == Dot {
+			hasOne = true
+			kind, identifier := parser.readIgnoreWhiteSpace()
+			if kind != Identifier {
+				return nil, fmt.Errorf("expected identifier")
+			}
+			current = ExpReadFromStruct{
+				Field:  identifier,
+				Struct: current,
+			}
+			continue
+		}
+		parser.unread()
+		break
 	}
 
-	return ExpGetFromList{
-		List:  exp,
-		Index: numExp,
-	}, nil
+	if !hasOne {
+		return nil, fmt.Errorf("expected . or [")
+	}
+
+	return current, nil
 }
 
 func (parser *Parser) parseStructDeclaration() (Stmt, error) {

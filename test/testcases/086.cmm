@@ -1,0 +1,13 @@
+struct Person {
+    name string
+    favoriteFoods list<string>
+}
+
+petter = @Person {
+    name: "Petter Daae"
+    favoriteFoods: <string, 3>["Pizza", "Taco", "Beef Burgers"]
+}
+
+taco = ?petter.favoriteFoods[1]
+println taco
+

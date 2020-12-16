@@ -6,6 +6,6 @@ point = @Wrapper{
     x: 10
 }
 
-a = read x from point
+a = ?point.x
 
 println a
