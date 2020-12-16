@@ -12,8 +12,7 @@ A simple compiler.
 <stmt>            := <if>
 <stmt>            := <struct>
 
-<assign>          := <identifier> "=" <exp>
-<assignStruct>    := <identifier> "." <identifier> ( "." <identifier> )* "=" <exp>
+<update>          := <reference> "=" <exp>
 <assignList>      := <identifier> "[" <exp> "]" ( "[" <exp> "]" )* "=" <exp>
 <println>         := "println" <exp>
 <return>          := "return" <exp>
@@ -37,8 +36,7 @@ A simple compiler.
 <val>             := <uop> <num>
 <val>             := <call>
 <val>             := <char>
-<val>             := "?" <expr> "[" <expr> "]" ( "[" <expr> "]" )*
-<val>             := "?" <expr>  "." <identifier> ( "." <identifier> )*
+<val>             := <reference>
 
 <bop>             := "+" | "*" | "<" | ">" | "==" | "-" | "/" | "%"
 <uop>             := "-"
@@ -68,11 +66,11 @@ A simple compiler.
 
 <structExp>       := "@" <identifier> "{" <structExpMember>* "}"
 <structExpMember> := <identifier> ":" <exp>
+
+<reference>       := "?" <expr> ( "." <identifier> | "[" <expr> "]" )+
 ```
 
 ### TODO
-- 16.12 Update lists and structs
 - 16.12 Module system
 - 16.12 Free heap allocated memory when out of scope (?)
 - 16.12 Handle division-by-zero and out-of-bounds errors
-- 16.12 Write more tests
