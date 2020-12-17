@@ -82,6 +82,10 @@ func (tokenizer *Tokenizer) unread() {
 	tokenizer.reader.UnreadRune()
 }
 
+func validIdentifierChar(r rune) bool {
+	return (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || r == '_'
+}
+
 func (tokenizer *Tokenizer) NextToken() (Token, string) {
 	character := tokenizer.read()
 
@@ -95,7 +99,7 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return tokenizer.number()
 	}
 
-	if unicode.IsLetter(character) {
+	if validIdentifierChar(character) {
 		tokenizer.unread()
 		return tokenizer.identifier()
 	}
@@ -189,7 +193,7 @@ func (tokenizer *Tokenizer) string() (Token, string) {
 
 		if character == '\\' {
 			character = tokenizer.read()
-			if character != '\'' && character != '\\' {
+			if character != '"' && character != '\\' {
 				return Error, ""
 			}
 		}
@@ -264,7 +268,7 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 
 	for {
 		character := tokenizer.read()
-		if !unicode.IsLetter(character) && !unicode.IsDigit(character){
+		if !validIdentifierChar(character) && !unicode.IsDigit(character){
 			tokenizer.unread()
 			break
 		}

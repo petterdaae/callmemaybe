@@ -22,16 +22,16 @@
                      
 <num>             := [0-9]+
 <bool>            := "true" | "false"
-<char>            := TODO
+<char>            := regex('([^'\\]|\\\\|\\')')
 <function>        := "|" (("me"|<identifier><type>)(","<identifier><type>)*)? "|" <type>? "{" <seq> "}"
 <call>            := "#"<exp>("("(<exp> ",")*<exp>")")?
 <list>            := "<"<type>","<num>">" "[" (<exp> (","<exp>)*)? "]"
-<string>          := TODO
+<string>          := regex("([^"\\]|\\\\|\\")")
 <structValue>     := "@" <identifier> "{" (<identifier> ":" <type>)* "}"
 <length>          := "length" "(" <exp> ")"
 
 <reference>       := "?" <exp> ( "." <identifier> | "[" <exp> "]" )+
-<identifier>      := TODO
+<identifier>      := regex([a-zA-Z_][a-zA-Z_0-9]*)
 
 <type>            := "@" <identifier>
 <type>            := "int" | "char" | "bool" | "string" | "func"
