@@ -54,29 +54,6 @@ func (parser *Parser) readIgnoreWhiteSpace() (Token, string) {
 	return kind, token
 }
 
-func (parser *Parser) ParseExp() (Exp, error) {
-	nextKind, _ := parser.readIgnoreWhiteSpace()
-	parser.unread()
-
-	if nextKind == Pipe {
-		return parser.parseFunction()
-	}
-
-	if nextKind == AngleBracketStart {
-		return parser.parseList()
-	}
-
-	if nextKind == String {
-		return parser.parseString()
-	}
-
-	if nextKind == At {
-		return parser.parseStructInit()
-	}
-
-	return parser.ParseCalculation()
-}
-
 func (parser *Parser) parseString() (Exp, error) {
 	kind, value := parser.readIgnoreWhiteSpace()
 	if kind != String {
@@ -103,7 +80,7 @@ func (parser *Parser) parseString() (Exp, error) {
 	return list, nil
 }
 
-func (parser *Parser) ParseCalculation() (Exp, error) {
+func (parser *Parser) ParseExp() (Exp, error) {
 	left, err := parser.parseVal()
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse first val in exp: %w", err)
@@ -276,6 +253,22 @@ func (parser *Parser) parseVal() (Exp, error) {
 	if nextKind == Length {
 		parser.unread()
 		return parser.parseLength()
+	}
+	if nextKind == Pipe {
+		parser.unread()
+		return parser.parseFunction()
+	}
+	if nextKind == AngleBracketStart {
+		parser.unread()
+		return parser.parseList()
+	}
+	if nextKind == String {
+		parser.unread()
+		return parser.parseString()
+	}
+	if nextKind == At {
+		parser.unread()
+		return parser.parseStructInit()
 	}
 	return nil, fmt.Errorf("unexpected token while parsing val")
 }
