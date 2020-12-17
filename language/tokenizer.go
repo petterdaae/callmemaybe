@@ -249,7 +249,12 @@ func (tokenizer *Tokenizer) whitespace() (Token, string) {
 
 func (tokenizer *Tokenizer) number() (Token, string) {
 	var buffer bytes.Buffer
-	buffer.WriteRune(tokenizer.read())
+	first := tokenizer.read()
+	buffer.WriteRune(first)
+
+	if first == '0' {
+		return Number, "0"
+	}
 
 	for {
 		character := tokenizer.read()

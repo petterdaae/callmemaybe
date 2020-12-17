@@ -20,7 +20,7 @@
 <bop>             := "+" | "*" | "<" | ">" | "==" | "-" | "/" | "%" | "!="
 <uop>             := "-"
                      
-<num>             := [0-9]+
+<num>             := regex(0|([1-9][0-9]*))
 <bool>            := "true" | "false"
 <char>            := regex('([^'\\]|\\\\|\\')')
 <function>        := "|" (("me"|<identifier><type>)(","<identifier><type>)*)? "|" <type>? "{" <seq> "}"
