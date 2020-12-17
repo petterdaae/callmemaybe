@@ -10,7 +10,7 @@ import (
 
 type Arguments struct {
 	Build Build `cmd:"build"`
-	Nasm  X86   `cmd:"x86"`
+	X86   X86   `cmd:"x86"`
 }
 
 type Build struct {

@@ -1,0 +1,15 @@
+struct A{
+    a int
+}
+
+struct B{
+    a @A
+}
+
+a = @B{
+    a: @A{
+        a: 1
+    }
+}
+
+println ?a.a.a

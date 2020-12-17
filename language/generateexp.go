@@ -271,9 +271,7 @@ func (expr StructExp) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymode
 		return typesystem.NewInvalid(), fmt.Errorf("mismatching number of arguments in field declaration")
 	}
 
-	mm.CurrentStackSize++
 	ao.Mov(RAX, RDX)
-	ao.Push(RAX)
 
 	return _type, nil
 }
