@@ -26,14 +26,14 @@ func Compile(program string) (string, error) {
 	}
 	assembly := ""
 	for i := range ao.MainOperations {
-		assembly += "\t" + ao.MainOperations[i] + "\n"
+		assembly += ao.MainOperations[i] + "\n"
 	}
 
 	for i := range ao.EvaluatedProcedures {
 		proc := ao.EvaluatedProcedures[i]
 		assembly += proc.Name + ":\n"
 		for j := range proc.Operations {
-			assembly += "\t" + proc.Operations[j] + "\n"
+			assembly += proc.Operations[j] + "\n"
 		}
 
 	}

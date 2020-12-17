@@ -10,14 +10,14 @@ import (
 
 type Arguments struct {
 	Build Build `cmd:"build"`
-	Nasm Nasm `cmd:"nasm"`
+	Nasm  X86   `cmd:"x86"`
 }
 
 type Build struct {
 	File string `arg:"" type:"path"`
 }
 
-type Nasm struct {
+type X86 struct {
 	File string `arg:"" type:"path"`
 }
 
@@ -52,7 +52,7 @@ func (build *Build) Run() error {
 	return nil
 }
 
-func (args *Nasm) Run() error {
+func (args *X86) Run() error {
 	content, err := utils.ReadFile(args.File)
 	if err != nil {
 		return err

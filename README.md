@@ -11,6 +11,9 @@ The assembly code is assembled with [NASM](https://www.nasm.us/) and linked with
 - Characters, ints, booleans, structs, strings and arrays
 - Basic arithmetic and logic
 - Loop and if
+- Recursion
+- Characters, ints and booleans are stored on the stack and use 64 bit each
+- Structs and lists are stored on the heap (note: structs and heaps are never deallocated from the heap)
 
 ## Installation
 - Use ubuntu (other linux distributions will probably work as well)
