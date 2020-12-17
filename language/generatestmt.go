@@ -37,6 +37,7 @@ func (stmt StmtAssign) Generate(ao *assemblyoutput.AssemblyOutput, mm *memorymod
 	if kind.IsStorableOnStack() {
 		if mm.Contains(stmt.Identifier) {
 			member := mm.GetStackElement(stmt.Identifier)
+			member.Type = kind
 			ao.Mov(fmt.Sprintf("[rsp+%d]", (mm.CurrentStackSize-member.StackSizeAfterPush)*8), RAX)
 		} else {
 			mm.CurrentStackSize++
