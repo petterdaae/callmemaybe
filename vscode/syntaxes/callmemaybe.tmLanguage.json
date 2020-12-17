@@ -1,31 +1,31 @@
 {
     "patterns": [
         {
-            "match": "'(([^\\\\'])|(\\\\')|(\\\\\\\\))'",
+            "match": "'(([^\\'])|(\\')|(\\\\\\\\))'",
             "name": "string.quoted.single.ts"
         },
         {
-            "match": "\\\"(([^\\\\'])|(\\\\')|(\\\\\\\\))*\\\"",
+            "match": "\"(([^\\\"])|(\\\")|(\\\\\\\\))*\"",
             "name": "string.quoted.double.ts"
         },
         {
-            "match": "true",
+            "match": "(true)(?![a-zA-Z_])",
             "name": "constant.language.boolean.true.ts"
         },
         {
-            "match": "false",
+            "match": "(false)(?![a-zA-Z_])",
             "name": "constant.language.boolean.false.ts"
         },
         {
-            "match": "return|if|loop",
+            "match": "(return|if|loop)(?![a-zA-Z_])",
             "name": "keyword.control.flow.ts"
         },
         {
-            "match": "println|struct",
+            "match": "(println|struct|len)(?![a-zA-Z_])",
             "name": "entity.name.function.ts"
         },
         {
-            "match": "bool|int|char|list|func|string",
+            "match": "(bool|int|char|list|func|string)(?![a-zA-Z_])",
             "name": "support.type.primitive.ts"
         },
         {
@@ -37,7 +37,8 @@
             "name": "constant.numeric.decimal.ts"
         },
         {
-            "include": "#expression"
+            "match": "@[a-zA-Z_][a-zA-Z0-9_]*",
+            "name": "support.type.primitive.ts"
         }
     ],
     "scopeName": "source.cmm"

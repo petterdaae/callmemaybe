@@ -11,3 +11,6 @@
 
 ## 0.0.4
 - Add and remove some keywords
+
+## 1.0.0
+- Fix some bugs and add highligthing to len and struct types
