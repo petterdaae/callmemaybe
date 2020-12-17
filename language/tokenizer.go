@@ -14,26 +14,19 @@ const (
 	Minus
 	Modulo
 	Divide
-	Get
 	Multiply
 	Assign
 	Question
-	Append
 	Hash
-	From
 	Dot
 	Loop
 	Colon
 	Pipe
 	NotEqual
 	Length
-	Or
-	And
 	At
 	Struct
 	Not
-	Read
-	To
 	String
 	RoundBracketStart
 	RoundBracketEnd
@@ -44,9 +37,6 @@ const (
 	AngleBracketStart
 	AngleBracketEnd
 	Comma
-	Arrow
-	Call
-	With
 	TypeInt
 	TypeBool
 	TypeChar
@@ -133,9 +123,6 @@ func (tokenizer *Tokenizer) NextToken() (Token, string) {
 		return RoundBracketEnd, string(character)
 	case '=':
 		next := tokenizer.read()
-		if next == '>' {
-			return Arrow, "=>"
-		}
 		if next == '=' {
 			return Equals, "=="
 		}
@@ -289,10 +276,6 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 	switch word {
 	case "println":
 		return PrintLn, word
-	case "call":
-		return Call, word
-	case "with":
-		return With, word
 	case "int":
 		return TypeInt, word
 	case "char":
@@ -309,22 +292,12 @@ func (tokenizer *Tokenizer) identifier() (Token, string) {
 		return False, word
 	case "bool":
 		return TypeBool, word
-	case "append":
-		return Append, word
-	case "to":
-		return To, word
-	case "get":
-		return Get, word
-	case "from":
-		return From, word
 	case "func":
 		return TypeFunc, word
 	case "loop":
 		return Loop, word
 	case "struct":
 		return Struct, word
-	case "read":
-		return Read, word
 	case "string":
 		return TypeString, word
 	case "len":

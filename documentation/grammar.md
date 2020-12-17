@@ -24,13 +24,13 @@
 <bool>            := "true" | "false"
 <char>            := TODO
 <function>        := "|" (("me"|<identifier><type>)(","<identifier><type>)*)? "|" <type>? "{" <seq> "}"
-<call>            := "#"<expr>("("(<expr> ",")*<expr>")")?
-<list>            := "<"<type>","<num>">" "[" (<expr> (","<expr>)*)? "]"
+<call>            := "#"<exp>("("(<exp> ",")*<exp>")")?
+<list>            := "<"<type>","<num>">" "[" (<exp> (","<exp>)*)? "]"
 <string>          := TODO
 <structValue>     := "@" <identifier> "{" (<identifier> ":" <type>)* "}"
 <length>          := "length" "(" <exp> ")"
 
-<reference>       := "?" <expr> ( "." <identifier> | "[" <expr> "]" )+
+<reference>       := "?" <exp> ( "." <identifier> | "[" <exp> "]" )+
 <identifier>      := TODO
 
 <type>            := "@" <identifier>

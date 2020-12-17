@@ -40,22 +40,6 @@ func TestPrintln(t *testing.T) {
 	}
 }
 
-func TestArrow(t *testing.T) {
-	tokenizer := language.NewTokenizer(strings.NewReader("=>"))
-	first, _ := tokenizer.NextToken()
-	if first != language.Arrow {
-		t.Error()
-	}
-}
-
-func TestArrowWithSpace(t *testing.T) {
-	tokenizer := language.NewTokenizer(strings.NewReader("= >"))
-	first, _ := tokenizer.NextToken()
-	if first == language.Arrow || first != language.Assign {
-		t.Error()
-	}
-}
-
 func TestCharacterSimple(t *testing.T) {
 	tokenizer := language.NewTokenizer(strings.NewReader("'a'"))
 	first, value := tokenizer.NextToken()

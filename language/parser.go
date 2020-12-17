@@ -54,29 +54,6 @@ func (parser *Parser) readIgnoreWhiteSpace() (Token, string) {
 	return kind, token
 }
 
-func (parser *Parser) parseReadFromStruct() (Exp, error) {
-	kind, _ := parser.readIgnoreWhiteSpace()
-	if kind != Read {
-		return nil, fmt.Errorf("expected read")
-	}
-	kind, field := parser.readIgnoreWhiteSpace()
-	if kind != Identifier {
-		return nil, fmt.Errorf("expected identifier")
-	}
-	kind, _ = parser.readIgnoreWhiteSpace()
-	if kind != From {
-		return nil, fmt.Errorf("expected from")
-	}
-	exp, err := parser.ParseExp()
-	if err != nil {
-		return nil, fmt.Errorf("expression in read from struct: %w", err)
-	}
-	return ExpReadFromStruct{
-		Field:  field,
-		Struct: exp,
-	}, nil
-}
-
 func (parser *Parser) ParseExp() (Exp, error) {
 	nextKind, _ := parser.readIgnoreWhiteSpace()
 	parser.unread()
