@@ -3,68 +3,38 @@
 ```
 <seq>             := <stmt>*
 
-<stmt>            := <assign>
-<stmt>            := <println>
-<stmt>            := <call>
-<stmt>            := <return>
-<stmt>            := <if>
-<stmt>            := <struct>
+<stmt>            := <assign> | <println> | <return> | <if> | <loop> | <structType> | <update>
 
-<update>          := <reference> "=" <exp>
-<assignList>      := <identifier> "[" <exp> "]" ( "[" <exp> "]" )* "=" <exp>
+<assign>          := <identifier> "=" <exp>
 <println>         := "println" <exp>
 <return>          := "return" <exp>
-<loop>            := "loop" <expr> "{" <seq> "}"
 <if>              := "if" <expr> "{" <seq> "}" 
+<loop>            := "loop" <expr> "{" <seq> "}"
+<structType>      := "struct" <identifier> "{" (<identifier> <type>)* "}"
+<update>          := <reference> "=" <exp>
 
-<call>            := "#" <expr> "(" (<expr> ",")* <expr> ] ")"
-
-<expr>            := <calculation>
-<expr>            := <function>
-<expr>            := <list>
-<expr>            := <string>
-<expr>            := <structExp>
-
-<calculation>     := <val> (<bop> <val>)*
-
-<val>             := "(" <calulation> ")"
-<val>             := <num>
-<val>             := <identifier>
-<val>             := <bool>
-<val>             := <uop> <num>
-<val>             := <call>
-<val>             := <char>
-<val>             := <reference>
-<val>             := "length" "(" <expr> ")"
-
-<bop>             := "+" | "*" | "<" | ">" | "==" | "-" | "/" | "%"
+<exp>             := <val> (<bop> <val>)
+<val>             := <num> | <bool> | <char> | <function> | <call> | <list> | <string> | 
+                     <structValue> | <reference> | "length" "(" <exp> ")" | <uop> <exp> |
+                     <identifier> | "(" <exp> ")"
+<bop>             := "+" | "*" | "<" | ">" | "==" | "-" | "/" | "%" | "!="
 <uop>             := "-"
+                     
 <num>             := [0-9]+
 <bool>            := "true" | "false"
-<char>            := [^\'] | "\" "'" | "\" "\"
-<string>          := "\"" <stringChar>* "\""
-<rawChar>         := "\"" | "\\" | [^"\]
-
-<function>        := <argList> <type>? "{" <seq> "}"
-<argList>         := "|" "me"? "|" | "|" "me,"? (<arg> ",")* <arg> "|"
-<arg>             := <identifier> <type>
-
-<list>            := "<" <type> "," <num> ">" "[" (<expr> ",") <expr> "]"
-<list>            := "<" <type> ">" "[" "]"
-
-<identifier>      := (letter|_)[letter|[0-9]|_]*
-
-<type>            := "@" <identifier>
-<type>            := "int" | "char" | "bool" | "string"
-<type>            := "list" "<" <type> ">" 
-<type>            := "func" 
-<type>            := "func" "<" <type>+ ">"
-
-<struct>          := "struct" <identifier> "{" <structMember>* "}"
-<structMember>    := <identifier> <type>
-
-<structExp>       := "@" <identifier> "{" <structExpMember>* "}"
-<structExpMember> := <identifier> ":" <exp>
+<char>            := TODO
+<function>        := "|" (("me"|<identifier><type>)(","<identifier><type>)*)? "|" <type>? "{" <seq> "}"
+<call>            := "#"<expr>("("(<expr> ",")*<expr>")")?
+<list>            := "<"<type>","<num>">" "[" (<expr> (","<expr>)*)? "]"
+<string>          := TODO
+<structValue>     := "@" <identifier> "{" (<identifier> ":" <type>)* "}"
+<length>          := "length" "(" <exp> ")"
 
 <reference>       := "?" <expr> ( "." <identifier> | "[" <expr> "]" )+
+<identifier>      := TODO
+
+<type>            := "@" <identifier>
+<type>            := "int" | "char" | "bool" | "string" | "func"
+<type>            := "list" "<" <type> ">" 
+<type>            := "func" "<" <type>+ ">"
 ```
